@@ -1,0 +1,136 @@
+{
+  "NetworkName": "testnet",
+  "EnableLogMetrics": false,
+  "EnableLogging": true,
+  "NodeConfigFile": "../cardano-node/config.json",
+  "PrometheusPort": 8080,
+  "RequiresNetworkMagic": "RequiresMagic",
+  "minSeverity": "Info",
+  "rotation": {
+    "rpLogLimitBytes": 5000000,
+    "rpKeepFilesNum": 10,
+    "rpMaxAgeHours": 24
+  },
+  "setupBackends": [
+    "AggregationBK",
+    "KatipBK"
+  ],
+  "defaultBackends": [
+    "KatipBK"
+  ],
+  "setupScribes": [
+    {
+      "scKind": "StdoutSK",
+      "scName": "stdout",
+      "scFormat": "ScText",
+      "scRotation": null
+    }
+  ],
+  "defaultScribes": [
+    [
+      "StdoutSK",
+      "stdout"
+    ]
+  ],
+  "options": {
+    "cfokey": {
+      "value": "Release-1.0.0"
+    },
+    "mapSubtrace": {
+      "benchmark": {
+        "contents": [
+          "GhcRtsStats",
+          "MonotonicClock"
+        ],
+        "subtrace": "ObservableTrace"
+      },
+      "#ekgview": {
+        "contents": [
+          [
+            {
+              "tag": "Contains",
+              "contents": "cardano.epoch-validation.benchmark"
+            },
+            [
+              {
+                "tag": "Contains",
+                "contents": ".monoclock.basic."
+              }
+            ]
+          ],
+          [
+            {
+              "tag": "Contains",
+              "contents": "cardano.epoch-validation.benchmark"
+            },
+            [
+              {
+                "tag": "Contains",
+                "contents": "diff.RTS.cpuNs.timed."
+              }
+            ]
+          ],
+          [
+            {
+              "tag": "StartsWith",
+              "contents": "#ekgview.#aggregation.cardano.epoch-validation.benchmark"
+            },
+            [
+              {
+                "tag": "Contains",
+                "contents": "diff.RTS.gcNum.timed."
+              }
+            ]
+          ]
+        ],
+        "subtrace": "FilterTrace"
+      },
+      "cardano.epoch-validation.utxo-stats": {
+        "subtrace": "NoTrace"
+      },
+      "#messagecounters.aggregation": {
+        "subtrace": "NoTrace"
+      },
+      "#messagecounters.ekgview": {
+        "subtrace": "NoTrace"
+      },
+      "#messagecounters.switchboard": {
+        "subtrace": "NoTrace"
+      },
+      "#messagecounters.katip": {
+        "subtrace": "NoTrace"
+      },
+      "#messagecounters.monitoring": {
+        "subtrace": "NoTrace"
+      },
+      "cardano.#messagecounters.aggregation": {
+        "subtrace": "NoTrace"
+      },
+      "cardano.#messagecounters.ekgview": {
+        "subtrace": "NoTrace"
+      },
+      "cardano.#messagecounters.switchboard": {
+        "subtrace": "NoTrace"
+      },
+      "cardano.#messagecounters.katip": {
+        "subtrace": "NoTrace"
+      },
+      "cardano.#messagecounters.monitoring": {
+        "subtrace": "NoTrace"
+      }
+    },
+    "mapBackends": {
+      "cardano.epoch-validation.benchmark": [
+        "AggregationBK"
+      ],
+      "#aggregation.cardano.epoch-validation.benchmark": [
+        "EKGViewBK"
+      ]
+    },
+    "mapSeverity": {
+      "db-sync-node.Subscription": "Error",
+      "db-sync-node.Mux": "Error",
+      "db-sync-node": "Info"
+    }
+  }
+}

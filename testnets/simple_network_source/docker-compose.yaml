@@ -1,0 +1,191 @@
+---
+
+x-base: &base
+  image: ${testnet}:latest
+  restart: unless-stopped
+  logging:
+    driver: "loki"
+    options:
+      mode: non-blocking
+      loki-url: "http://127.0.0.1:3100/loki/api/v1/push"
+      loki-retries: "5"
+  build:
+    context: "../../"
+    dockerfile: "cardano-node/Dockerfile.source"
+    args:
+      CARDANO_NODE_REF: "10.4.1"
+
+x-env: &env
+  POOL_ID: "0" # Placeholder required for override
+  SYSTEM_START: ${SYSTEM_START:-}
+
+services:
+  p1:
+    <<: *base
+    container_name: p1
+    hostname: p1.example
+    volumes:
+      - p1:/opt/cardano-node/data
+    environment:
+      <<: *env
+      POOL_ID: "1"
+
+  p2:
+    <<: *base
+    container_name: p2
+    hostname: p2.example
+    volumes:
+      - p2:/opt/cardano-node/data
+    environment:
+      <<: *env
+      POOL_ID: "2"
+      PEER_SHARING: "false"
+
+  p3:
+    <<: *base
+    container_name: p3
+    hostname: p3.example
+    volumes:
+      - p3:/opt/cardano-node/data
+    environment:
+      <<: *env
+      POOL_ID: "3"
+
+  # DNS Server
+  ns:
+    image: coredns/coredns
+    container_name: ns
+    hostname: ns.example
+    restart: unless-stopped
+    command: -conf /etc/coredns/corefile
+    volumes:
+      - ./coredns:/etc/coredns # Mount custom corefile
+
+  sidecar:
+    image: ${testnet}_sidecar:latest
+    container_name: sidecar
+    hostname: sidecar.example
+    restart: unless-stopped
+    build:
+      context: "../../"
+      dockerfile: "sidecar/Dockerfile"
+    environment:
+      POOLS: "3"
+
+  # Client 1
+  # Used by cardano-db-sync
+  c1:
+    <<: *base
+    container_name: c1
+    hostname: c1.example
+    volumes:
+      - c1:/opt/cardano-node
+    environment:
+      POOL_ID: "1"
+      TYPE: "client"
+      SYSTEM_START: ${SYSTEM_START:-}
+
+  # PostgreSQL Database
+  db:
+    image: postgresql:latest
+    container_name: db
+    hostname: db.example
+    restart: unless-stopped
+    volumes:
+      - db:/opt/postgresql
+    build:
+      context: "../../"
+      dockerfile: "postgresql/Dockerfile"
+
+  dbsync:
+    image: cardano-db-sync:latest
+    container_name: dbsync
+    hostname: dbsync.example
+    restart: unless-stopped
+    volumes:
+      - dbsync:/opt/cardano-db-sync
+      - c1:/opt/cardano-node
+    environment:
+      DB_HOST: "db.example"
+    build:
+      context: "../../"
+      dockerfile: "cardano-db-sync/Dockerfile.binary"
+    depends_on:
+      db:
+        condition: service_started
+
+  blockfrost:
+    image: blockfrost:latest
+    container_name: blockfrost
+    hostname: blockfrost.example
+    restart: unless-stopped
+    volumes:
+      - c1:/opt/cardano-node
+    environment:
+      DB_HOST: "db.example"
+    build:
+      context: "../../"
+      dockerfile: "blockfrost/Dockerfile"
+    depends_on:
+      dbsync:
+        condition: service_started
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    hostname: prometheus.example
+    restart: unless-stopped
+    volumes:
+      - prometheus:/prometheus
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    depends_on:
+      blackbox:
+        condition: service_started
+
+  blackbox:
+    image: quay.io/prometheus/blackbox-exporter:latest
+    container_name: blackbox
+    hostname: blackbox.example
+    restart: unless-stopped
+    command: --config.file=/etc/blackbox_exporter/blackbox.yml
+    volumes:
+      - ../../blackbox:/etc/blackbox_exporter/
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+
+  loki:
+    image: grafana/loki:latest
+    container_name: loki
+    hostname: loki.example
+    restart: unless-stopped
+    command: -config.file=/etc/loki/local-config.yaml
+    ports:
+      - "3100:3100"
+    volumes:
+      - loki:/loki
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    hostname: grafana.example
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana:/var/lib/grafana
+      - ../../grafana/provisioning:/etc/grafana/provisioning
+    environment:
+      GF_SECURITY_ADMIN_USER: cardano
+      GF_SECURITY_ADMIN_PASSWORD: cardano
+
+volumes:
+  p1:
+  p2:
+  p3:
+  c1:
+  db:
+  dbsync:
+  prometheus:
+  loki:
+  grafana:

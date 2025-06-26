@@ -1,0 +1,320 @@
+apiVersion: 1
+groups:
+    - orgId: 1
+      name: 1m check
+      folder: Cardano
+      interval: 1m
+      rules:
+        - uid: eeq3uky9q8pa8b
+          title: Logged Errors
+          condition: C
+          data:
+            - refId: A
+              queryType: range
+              relativeTimeRange:
+                from: 900
+                to: 0
+              datasourceUid: loki_uid
+              model:
+                datasource:
+                    type: loki
+                    uid: loki_uid
+                direction: backward
+                editorMode: code
+                expr: sum by (error) (count_over_time({container_name=~"p[0-9]+(bp|r[0-9])?"} | json | sev="Error" | line_format "{{.data.error}}"[5m]))
+                instant: true
+                intervalMs: 1000
+                legendFormat: Errors per 5min
+                maxDataPoints: 43200
+                queryType: range
+                range: false
+                refId: A
+            - refId: B
+              datasourceUid: __expr__
+              model:
+                conditions:
+                    - evaluator:
+                        params: []
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params:
+                            - B
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                datasource:
+                    type: __expr__
+                    uid: __expr__
+                expression: A
+                intervalMs: 1000
+                maxDataPoints: 43200
+                reducer: last
+                refId: B
+                type: reduce
+            - refId: C
+              datasourceUid: __expr__
+              model:
+                conditions:
+                    - evaluator:
+                        params:
+                            - 1
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params:
+                            - C
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                datasource:
+                    type: __expr__
+                    uid: __expr__
+                expression: B
+                intervalMs: 1000
+                maxDataPoints: 43200
+                refId: C
+                type: threshold
+          dashboardUid: da93ce09-7b06-49e0-812e-2872192a9bcf
+          panelId: 30
+          noDataState: NoData
+          execErrState: Error
+          for: 1m
+          keepFiringFor: 1m
+          annotations:
+            __dashboardUid__: da93ce09-7b06-49e0-812e-2872192a9bcf
+            __panelId__: "30"
+          isPaused: false
+          notification_settings:
+            receiver: grafana-default-email
+        - uid: feq3uoiuj30g0c
+          title: Three Second Block CDF
+          condition: C
+          data:
+            - refId: A
+              relativeTimeRange:
+                from: 900
+                to: 0
+              datasourceUid: prometheus_uid
+              model:
+                adhocFilters: []
+                datasource:
+                    type: prometheus
+                    uid: prometheus_uid
+                editorMode: code
+                expr: cardano_node_metrics_blockfetchclient_blockdelay_cdfThree
+                instant: true
+                interval: ""
+                intervalMs: 15000
+                legendFormat: '{{instance}}'
+                maxDataPoints: 43200
+                range: false
+                refId: A
+            - refId: C
+              datasourceUid: __expr__
+              model:
+                conditions:
+                    - evaluator:
+                        params:
+                            - 0.95
+                        type: lt
+                      operator:
+                        type: and
+                      query:
+                        params:
+                            - C
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                datasource:
+                    type: __expr__
+                    uid: __expr__
+                expression: A
+                intervalMs: 1000
+                maxDataPoints: 43200
+                refId: C
+                type: threshold
+          dashboardUid: da93ce09-7b06-49e0-812e-2872192a9bcf
+          panelId: 27
+          noDataState: NoData
+          execErrState: Error
+          for: 1m
+          keepFiringFor: 1m
+          annotations:
+            __dashboardUid__: da93ce09-7b06-49e0-812e-2872192a9bcf
+            __panelId__: "27"
+          isPaused: false
+          notification_settings:
+            receiver: grafana-default-email
+        - uid: deq3urd9yowe8f
+          title: Five Second Block CDF
+          condition: C
+          data:
+            - refId: A
+              relativeTimeRange:
+                from: 900
+                to: 0
+              datasourceUid: prometheus_uid
+              model:
+                adhocFilters: []
+                datasource:
+                    type: prometheus
+                    uid: prometheus_uid
+                editorMode: code
+                expr: cardano_node_metrics_blockfetchclient_blockdelay_cdfFive
+                instant: true
+                interval: ""
+                intervalMs: 15000
+                legendFormat: '{{instance}}'
+                maxDataPoints: 43200
+                range: false
+                refId: A
+            - refId: C
+              datasourceUid: __expr__
+              model:
+                conditions:
+                    - evaluator:
+                        params:
+                            - 0.95
+                        type: lt
+                      operator:
+                        type: and
+                      query:
+                        params:
+                            - C
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                datasource:
+                    type: __expr__
+                    uid: __expr__
+                expression: A
+                intervalMs: 1000
+                maxDataPoints: 43200
+                refId: C
+                type: threshold
+          dashboardUid: da93ce09-7b06-49e0-812e-2872192a9bcf
+          panelId: 28
+          noDataState: NoData
+          execErrState: Error
+          for: 1m
+          keepFiringFor: 1m
+          annotations:
+            __dashboardUid__: da93ce09-7b06-49e0-812e-2872192a9bcf
+            __panelId__: "28"
+          isPaused: false
+          notification_settings:
+            receiver: grafana-default-email
+        - uid: feq3v5wwweu4ga
+          title: Consensus
+          condition: C
+          data:
+            - refId: A
+              relativeTimeRange:
+                from: 900
+                to: 0
+              datasourceUid: sidecar_uid
+              model:
+                datasource:
+                    type: grafana-postgresql-datasource
+                    uid: sidecar_uid
+                editorMode: code
+                format: table
+                instant: false
+                intervalMs: 60000
+                maxDataPoints: 43200
+                range: true
+                rawQuery: true
+                rawSql: |-
+                    WITH latest_tips AS (
+                            SELECT DISTINCT ON (pool_id) *
+                                FROM node_tips
+                                    ORDER BY pool_id, updated_at DESC
+                                    )
+                                    SELECT
+                                        updated_at AS time, -- Grafana requires a timestamp for alerts
+                                            CASE
+                                                WHEN COUNT(*) FILTER (WHERE hash IS NULL) > 0 THEN 1
+                                                        WHEN COUNT(DISTINCT hash) = 1 THEN 0
+                                    ELSE 2
+                                        END AS status
+                                    FROM latest_tips
+                                    GROUP BY updated_at;
+                refId: A
+                sql:
+                    columns:
+                        - parameters: []
+                          type: function
+                    groupBy:
+                        - property:
+                            type: string
+                          type: groupBy
+                    limit: 50
+            - refId: B
+              datasourceUid: __expr__
+              model:
+                conditions:
+                    - evaluator:
+                        params: []
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params:
+                            - B
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                datasource:
+                    type: __expr__
+                    uid: __expr__
+                expression: A
+                intervalMs: 1000
+                maxDataPoints: 43200
+                reducer: last
+                refId: B
+                type: reduce
+            - refId: C
+              datasourceUid: __expr__
+              model:
+                conditions:
+                    - evaluator:
+                        params:
+                            - 0
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params:
+                            - C
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                datasource:
+                    type: __expr__
+                    uid: __expr__
+                expression: B
+                intervalMs: 1000
+                maxDataPoints: 43200
+                refId: C
+                type: threshold
+          dashboardUid: da93ce09-7b06-49e0-812e-2872192a9bcf
+          panelId: 8
+          noDataState: NoData
+          execErrState: Error
+          for: 1m
+          keepFiringFor: 1m
+          annotations:
+            __dashboardUid__: da93ce09-7b06-49e0-812e-2872192a9bcf
+            __panelId__: "8"
+          isPaused: false
+          notification_settings:
+            receiver: grafana-default-email

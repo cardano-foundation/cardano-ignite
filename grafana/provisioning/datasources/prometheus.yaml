@@ -1,0 +1,8 @@
+apiVersion: 1
+datasources:
+  - name: Prometheus
+    uid: prometheus_uid
+    type: prometheus
+    url: http://prometheus.example:9090  # Use DNS name resolved by EU DNS
+    access: proxy
+    isDefault: true

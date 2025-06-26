@@ -1,0 +1,11 @@
+# Ignore vim files:
+*~
+*.swp
+*.swo
+
+# Ignore cardano-ignite temporary files
+.testnet.yaml
+testnets/*/graph_nodes.sql
+testnets/*/coredns
+testnets/*/prometheus
+testnets/*/.env.tmp

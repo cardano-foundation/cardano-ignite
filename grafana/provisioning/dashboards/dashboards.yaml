@@ -1,0 +1,15 @@
+# ./grafana/provisioning/dashboards/dashboard.yaml
+apiVersion: 1
+
+providers:
+  - name: 'Cardano Dashboard'
+    orgId: 1
+    folder: ''
+    folderUid: ''
+    type: file
+    disableDeletion: false
+    editable: true
+    options:
+      path: /etc/grafana/provisioning/dashboards
+    # Set as home dashboard (optional)
+    # homeDashboardUid: cardano-dashboard
