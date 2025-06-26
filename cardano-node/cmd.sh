@@ -251,7 +251,7 @@ relay_config_topology_json() {
         return 1
     fi
     peer_address="${base_address}.example"
-    sibling_address="${sibling_address}.example"
+    sibling_address="${sibling_base_address}.example"
 
     # Generate the JSON topology file
     cat <<EOF > "${CONFIG_PATH}/topology.json"
