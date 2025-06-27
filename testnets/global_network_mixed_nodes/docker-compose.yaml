@@ -721,11 +721,11 @@ services:
     build:
       context: "../../"
       dockerfile: "sidecar/Dockerfile"
+    volumes:
+      - synth:/opt/synth:ro
     environment:
       TOPOLOGY: "fancy"
       POOLS: "6"
-    volumes:
-      - synth:/opt/synth:ro
     cap_add:
       - NET_ADMIN
     networks:
@@ -744,13 +744,81 @@ services:
     restart: no
     environment:
       SYSTEM_START: ${SYSTEM_START:-}
-      PRE_EPOCHS: ${PRE_EPOCHS:-0}
+      PRE_EPOCHS: ${PRE_EPOCHS:-4}
+      MAX_POOLS: ${MAX_POOLS:-6}
     volumes:
       - synth:/opt/cardano-node/data
     build:
       context: "../../"
       dockerfile: "db-synthesizer/Dockerfile"
     profiles: [build, core, mgmt]
+
+  # Amaru client
+  a1:
+    image: amaru_${testnet}:latest
+    container_name: a1
+    hostname: a1.example
+    volumes:
+      - a1:/opt/
+      - synth:/opt/synth:ro
+    restart: unless-stopped
+    cap_add:
+      - NET_ADMIN
+    logging:
+      driver: "loki"
+      options:
+        mode: non-blocking
+        loki-url: "http://127.0.0.1:3100/loki/api/v1/push"
+        loki-retries: "5"
+    build:
+      context: "../../"
+      dockerfile: "amaru/Dockerfile.source"
+    environment:
+      POOL_ID: "1"
+      TYPE: "client"
+      RELAY_ID: "1"
+      SYSTEM_START: ${SYSTEM_START:-}
+      REGION: EU
+      PEER_HOST: p2r1.example
+    dns:
+      - 172.16.3.2
+    networks:
+      eu_net:
+        ipv4_address: 172.16.3.10
+    profiles: [build, optional, eu]
+
+  a2:
+    image: amaru_${testnet}:latest
+    container_name: a2
+    hostname: a2.example
+    volumes:
+      - a2:/opt/
+      - synth:/opt/synth:ro
+    restart: unless-stopped
+    cap_add:
+      - NET_ADMIN
+    logging:
+      driver: "loki"
+      options:
+        mode: non-blocking
+        loki-url: "http://127.0.0.1:3100/loki/api/v1/push"
+        loki-retries: "5"
+    build:
+      context: "../../"
+      dockerfile: "amaru/Dockerfile.source"
+    environment:
+      POOL_ID: "2"
+      TYPE: "client"
+      RELAY_ID: "2"
+      SYSTEM_START: ${SYSTEM_START:-}
+      REGION: AS
+      PEER_HOST: a1.example
+    dns:
+      - 172.16.4.2
+    networks:
+      as_net:
+        ipv4_address: 172.16.4.10
+    profiles: [build, optional, as]
 
   # Client 1
   # Used by cardano-db-sync
@@ -764,7 +832,7 @@ services:
     environment:
       POOL_ID: "1"
       TYPE: "client"
-      UTXOHD: "true"
+      UTXOHD: "false"
       SYSTEM_START: ${SYSTEM_START:-}
     networks:
       eu_net:
@@ -785,7 +853,7 @@ services:
       TPS: "1"
       TX_GEN_MODE: "plain"
       #TX_GEN_MODE: "plutus"
-      UTXOHD: "true"
+      UTXOHD: "false"
       SYSTEM_START: ${SYSTEM_START:-}
     networks:
       na_net:
@@ -943,6 +1011,43 @@ services:
       - 172.16.7.2
     profiles: [build, core, mgmt]
 
+  jaeger:
+    image: jaegertracing/jaeger:2.4.0
+    container_name: jaeger
+    hostname: jaeger.example
+    restart: unless-stopped
+    volumes:
+      - ../../jaeger/jaeger-ui.json:/etc/jaeger/jaeger-ui.json
+      - ../../jaeger/jaeger.yml:/etc/jaeger/config.yml
+    command: ["--config", "/etc/jaeger/config.yml"]
+    networks:
+      mgmt_net:
+        ipv4_address: 172.16.7.12
+    dns:
+      - 172.16.7.2
+    profiles: [build, core, mgmt]
+
+  otlp:
+    image: otel/opentelemetry-collector-contrib:latest
+    container_name: otlp
+    hostname: otlp.example
+    volumes:
+      - ../../opentelemetry/otlp-collector.yml:/etc/otlp-collector.yml
+    command: ["--config", "/etc/otlp-collector.yml"]
+    networks:
+      eu_net:
+        ipv4_address: 172.16.3.23
+      na_net:
+        ipv4_address: 172.16.1.23
+      as_net:
+        ipv4_address: 172.16.4.23
+      mgmt_net:
+        ipv4_address: 172.16.7.23
+    dns:
+      - 172.16.7.2
+    profiles: [build, core, mgmt]
+
+
   yaci:
     image: yaci-store:latest
     container_name: yaci
@@ -991,6 +1096,8 @@ volumes:
   p6r1:
   p6r2:
   p6r3:
+  a1:
+  a2:
   c1:
   c2:
   db:

@@ -194,6 +194,8 @@ services:
     restart: unless-stopped
     environment:
       POOLS: "12"
+    volumes:
+      - synth:/opt/synth:ro
     build:
       context: "../../"
       dockerfile: "sidecar/Dockerfile"

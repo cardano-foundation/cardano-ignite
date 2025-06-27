@@ -71,6 +71,14 @@ for target in "${targets[@]}"; do
 done
 
 cat <<EOF
+  - job_name: 'amaru'
+    static_configs:
+      - targets:
+        - jaeger.example:8889
+        - otlp.example:8889
+EOF
+
+cat <<EOF
   - job_name: 'http_ip4_basic'
     metrics_path: /probe
     params:

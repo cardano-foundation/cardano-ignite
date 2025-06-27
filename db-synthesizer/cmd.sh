@@ -12,6 +12,7 @@ SYSTEM_START="${SYSTEM_START:-$(date -d "@$(( ( $(date +%s) / 180 ) * 180 ))" +%
 BYRON_GENESIS_JSON="${BYRON_GENESIS_JSON:-/opt/cardano-node/pools/1/configs/byron-genesis.json}"
 SHELLEY_GENESIS_JSON="${SHELLEY_GENESIS_JSON:-/opt/cardano-node/pools/1/configs/shelley-genesis.json}"
 PRE_EPOCHS="${PRE_EPOCHS:-0}"
+MAX_POOLS="${MAX_POOLS:-}"
 
 # Implement sponge-like command without the need for binary nor TMPDIR environment variable
 write_file() {
@@ -63,7 +64,13 @@ generate_pre_epochs() {
 
     echo "Creating bulk credentials"
     # Loop through each pool directory
+    count=0
     for keys_dir in /opt/cardano-node/pools/*/keys/; do
+        # Early exit if we've reached the max number of pools
+        if [[ -n "${MAX_POOLS}" && "$count" -ge "${MAX_POOLS}" ]]; then
+            break
+        fi
+
         opcert="$keys_dir/opcert.cert"
         vrf="$keys_dir/vrf.skey"
         kes="$keys_dir/kes.skey"
@@ -74,12 +81,14 @@ generate_pre_epochs() {
             continue
         fi
 
-        # Create a JSON array: [ opcert_content, vrf_content, kes_content ]
+        # Append a JSON array: [ opcert_content, vrf_content, kes_content ]
         jq -n \
             --slurpfile opcert "$opcert" \
             --slurpfile vrf "$vrf" \
             --slurpfile kes "$kes" \
             '[ $opcert[0], $vrf[0], $kes[0] ]' >> "$tmpdir/arrays.json"
+
+        count=$((count + 1))
     done
 
     # Combine all inner arrays into a single top-level JSON array
@@ -91,7 +100,7 @@ generate_pre_epochs() {
 
     echo "Generating synthetic chain data for ${PRE_EPOCHS} epochs"
     cd "${DATA_PATH}"
-    db-synthesizer --config /opt/cardano-node/pools/1/configs/config.json --db "${DATA_PATH}"/db --bulk-credentials-file /tmp/bulk.json -e "${PRE_EPOCHS}"
+    db-synthesizer --config /opt/cardano-node/pools/1/configs/config.json --db "${DATA_PATH}"/db --bulk-credentials-file "${output_file}" -e "${PRE_EPOCHS}"
 
     echo 42 > "${DATA_PATH}"/db/protocolMagicId
     echo "${SYSTEM_START_UNIX_ADJUSTED}" >"${DATA_PATH}/start_time.unix_epoch"

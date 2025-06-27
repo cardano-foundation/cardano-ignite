@@ -57,6 +57,11 @@
                   "index": 2,
                   "text": "Diverged"
                 },
+                "Generating Synthetic Chain": {
+                  "color": "blue",
+                  "index": 3,
+                  "text": "Generating Synthetic Chain"
+                },
                 "Healthy": {
                   "color": "light-green",
                   "index": 0,
@@ -115,7 +120,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "WITH latest_tips AS (\n    SELECT DISTINCT ON (pool_id) *\n    FROM node_tips \n    ORDER BY pool_id, updated_at DESC\n)\nSELECT CASE\n    WHEN COUNT(*) FILTER (WHERE hash IS NULL) > 0 THEN 'Degraded'\n    WHEN COUNT(DISTINCT hash) = 1 AND SUM(CASE WHEN hash IS NULL THEN 1 ELSE 0 END) = 0 \n        THEN 'Healthy'\n    ELSE 'Diverged' \nEND AS status\nFROM latest_tips;",
+          "rawSql": "WITH latest_tips AS (\n    SELECT DISTINCT ON (pool_id) *\n    FROM node_tips \n    ORDER BY pool_id, updated_at DESC\n)\nSELECT CASE\n    WHEN COUNT(*) FILTER (WHERE pool_id = 'starting') > 0 THEN 'Generating Synthetic Chain'\n    WHEN COUNT(*) FILTER (WHERE hash IS NULL) > 0 THEN 'Degraded'\n    WHEN COUNT(DISTINCT hash) = 1 AND SUM(CASE WHEN hash IS NULL THEN 1 ELSE 0 END) = 0 \n        THEN 'Healthy'\n    ELSE 'Diverged' \nEND AS status\nFROM latest_tips;",
           "refId": "A",
           "sql": {
             "columns": [
@@ -2176,7 +2181,7 @@
               "editorMode": "code",
               "format": "table",
               "rawQuery": true,
-              "rawSql": "SELECT \n  id,\n  title,\n  subtitle,\n  mainstat,\n  secondarystat,\n  color,\n  icon from ci_nodes where id like 'p_bp' or id like 'p_' or id like 'p_r_' or id like 'p__'",
+              "rawSql": "SELECT \n  id,\n  title,\n  subtitle,\n  mainstat,\n  secondarystat,\n  color,\n  icon FROM ci_nodes WHERE id IN (SELECT source FROM cn_edges UNION SELECT target from cn_edges)",
               "refId": "A",
               "sql": {
                 "columns": [
