@@ -4,6 +4,7 @@
 
 - [Information](#information)
   - [Showcase](#showcase)
+  - [Target Audience](#target-audience)
 - [Requirements](#requirements)
 - [Installation](#installation)
 - [Getting Started](#getting-started)
@@ -27,6 +28,10 @@ Cardano Ignite is a toolbox for rapidly deploying and managing Cardano testnets 
 |Network|Process|
 |---    |---    |
 |<img src=https://github.com/user-attachments/assets/c351d8ec-453a-4b6a-9dd7-ec7c549d67b5 width="420" title="Network">|<img src=https://github.com/user-attachments/assets/0eafeb25-6a6f-4f0b-9aa8-a72e19519db1 width="420" title="Process">|
+
+### Target Audience
+
+This project is designed for developers and end users who wish to run their own Cardano testnet for rapid development or experimentation. It is not intended for performance benchmarking or integration testing, such as the [Antithesis](https://github.com/cardano-foundation/antithesis) project.
 
 ## Requirements
 
@@ -119,7 +124,7 @@ Please consult the [SETUP.md](./SETUP.md) file for detailed installation instruc
 - Show detail about all stake-pools from Blockfrost
 
   ```
-  make pool
+  make pools
   ```
 
 ## Appendix
