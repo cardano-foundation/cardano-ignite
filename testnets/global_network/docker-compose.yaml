@@ -2,7 +2,7 @@
 
 x-base: &base
   image: ${testnet}:latest
-  restart: unless-stopped
+  restart: no
   cap_add:
     - NET_ADMIN
   logging:
@@ -675,6 +675,36 @@ services:
       db:
         condition: service_started
 
+  # Amaru client
+  a1:
+    image: amaru_${testnet}:latest
+    container_name: a1
+    hostname: a1.example
+    volumes:
+      - a1:/opt/cardano-node
+    restart: no
+    cap_add:
+      - NET_ADMIN
+    logging:
+      driver: "loki"
+      options:
+        mode: non-blocking
+        loki-url: "http://127.0.0.1:3100/loki/api/v1/push"
+        loki-retries: "5"
+    build:
+      context: "../../"
+      dockerfile: "amaru/Dockerfile.source"
+    environment:
+      POOL_ID: "1"
+      TYPE: "client"
+      SYSTEM_START: ${SYSTEM_START:-}
+    depends_on:
+      ns:
+        condition: service_started
+    networks:
+      eu_net:
+        ipv4_address: 172.16.3.10
+
   # Client 1
   # Used by cardano-db-sync
   c1:
@@ -864,6 +894,7 @@ volumes:
   p6r1:
   p6r2:
   p6r3:
+  a1:
   c1:
   db:
   dbsync:
