@@ -8,8 +8,6 @@
 
 ## Installation
 
-Please consult the [INSTALL.md](./install.md) file.
-
 ### Prerequisites
 
 Please install the dependencies below. All commands are compatible with Debian 12.
@@ -60,7 +58,7 @@ Please install the dependencies below. All commands are compatible with Debian 1
 - Add the Docker APT repository
 
   ```
-  sudo echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian $(. /etc/os-release && echo ${VERSION_CODENAME}) stable" > /etc/apt/sources.list.d/docker.list
+  echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian $(. /etc/os-release && echo "${VERSION_CODENAME}") stable" | sudo tee /etc/apt/sources.list.d/docker.list >/dev/null
   ```
 
 - Refresh the APT package cache
