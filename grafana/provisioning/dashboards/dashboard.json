@@ -2745,7 +2745,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT\n    time,\n    AVG(rel_size) AS rel_size,\n    AVG(rel_mem)  AS rel_mem,\n    AVG(rel_steps) AS rel_steps\nFROM (\n    SELECT\n        MIN(time) AS time,\n        1.0 * MIN(b.size) / MIN(p.max_block_size)     AS rel_size,\n        SUM(r.unit_mem) / MIN(p.max_block_ex_mem)      AS rel_mem,\n        SUM(r.unit_steps) / MIN(p.max_block_ex_steps)  AS rel_steps\n    FROM block b\n    LEFT JOIN tx t\n        ON b.id = t.block_id\n    LEFT JOIN redeemer r\n        ON t.id = r.tx_id\n    LEFT JOIN epoch_param p\n        ON b.epoch_no = p.epoch_no\n    WHERE b.time > (\n        SELECT MAX(time) - INTERVAL '5 minutes'\n        FROM block\n    )\n    GROUP BY b.hash\n) a GROUP BY time;",
+          "rawSql": "SELECT\n DATE_BIN('5 min',itime, '2000-1-1') AS time,\n AVG(rel_size) AS avg_rel_size,\n AVG(rel_mem) AS avg_rel_mem,\n AVG(rel_steps) AS avg_rel_steps\n FROM (\n SELECT\n MIN(b.time) AS itime,\n 1.0 * MIN(b.size) / MIN(p.max_block_size) AS rel_size,\n SUM(r.unit_mem) / MIN(p.max_block_ex_mem) AS rel_mem,\n SUM(r.unit_steps) / MIN(p.max_block_ex_steps) AS rel_steps\n FROM block b\n LEFT JOIN tx t\n ON b.id = t.block_id\n LEFT JOIN redeemer r\n ON t.id = r.tx_id\n LEFT JOIN epoch_param p\n ON b.epoch_no = p.epoch_no\n WHERE $__timeFilter(time)\n GROUP BY b.hash\n ) a                                        \n GROUP BY time\n ORDER BY time;",
           "refId": "A",
           "sql": {
             "columns": [
