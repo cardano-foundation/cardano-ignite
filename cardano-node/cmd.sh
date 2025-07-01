@@ -3,31 +3,31 @@
 # Required for overriding exit code
 #set -o errexit
 set -o pipefail
-set -x
 
 SHELL="/bin/bash"
 PATH="/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin"
 
 # Environment variables
+DB_HOST="${DB_HOST:-db.example}"
+DB_PORT="${DB_PORT:-5432}"
+DB_SIDECAR_DATABASE="${DB_SIDECAR_DATABASE:-sidecar}"
+DB_SIDECAR_PASSWORD="${DB_SIDECAR_PASSWORD:-sidecar}"
+DB_SIDECAR_USERNAME="${DB_SIDECAR_USERNAME:-sidecar}"
+EKG_PORT="${EKG_PORT:-12788}"
 LOG_TO_CONSOLE="${LOG_TO_CONSOLE:-true}"
 LOG_TO_FILE="${LOG_TO_FILE:-true}"
 MIN_SEVERITY="${MIN_SEVERITY:-Info}"
+OUROBOROS_GENESIS="${OUROBOROS_GENESIS:-false}"
 PEER_SHARING="${PEER_SHARING:-true}"
 POOL_ID="${POOL_ID:-}"
 PORT="${PORT:-3001}"
 PROMETHEUS_LISTEN="${PROMETHEUS_LISTEN:-0.0.0.0}"
 PROMETHEUS_PORT="${PROMETHEUS_PORT:-12798}"
-EKG_PORT="${EKG_PORT:-12788}"
 SYSTEM_START="${SYSTEM_START:-$(date -d "@$(( ( $(date +%s) / 180 ) * 180 ))" +%Y-%m-%dT%H:%M:00Z)}"
+TPS="${TSP:-1}"
 TYPE="${TYPE:-bprelay}"
 USE_LEDGER_AFTER_SLOT="${USE_LEDGER_AFTER_SLOT:-0}"
-OUROBOROS_GENESIS="${OUROBOROS_GENESIS:-false}"
 UTXOHD="${UTXOHD:-false}"
-DB_SIDECAR_DATABASE="${DB_SIDECAR_DATABASE:-sidecar}"
-DB_SIDECAR_PASSWORD="${DB_SIDECAR_PASSWORD:-sidecar}"
-DB_SIDECAR_USERNAME="${DB_SIDECAR_USERNAME:-sidecar}"
-DB_HOST="${DB_HOST:-db.example}"
-DB_PORT="${DB_PORT:-5432}"
 
 # Configuration files
 BYRON_GENESIS_JSON="${BYRON_GENESIS_JSON:-/opt/cardano-node/pools/${POOL_ID}/configs/byron-genesis.json}"
@@ -337,7 +337,7 @@ config_topology() {
   "bprelay")
     bprelay_config_topology_json
     ;;
-  "client")
+  "client" | "txg")
     client_config_topology_json
     ;;
   "relay")
@@ -379,6 +379,10 @@ update_start_time() {
 
 canary_tx() {
     /canary_tx.sh >/dev/null 2>&1
+}
+
+tx_generator() {
+    /tx-generator.sh >/dev/null 2>&1
 }
 
 add_routes() {
@@ -467,6 +471,9 @@ main() {
     set_start_time
     if [ "${TYPE,,}" = "bp" ] || [ "${TYPE,,}" = "bprelay" ]; then
         canary_tx &
+    fi
+    if [ "${TYPE,,}" = "txg" ]; then
+	tx_generator &
     fi
     add_routes
     start_node_exporter &
