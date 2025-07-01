@@ -85,6 +85,20 @@ services:
       TYPE: "client"
       SYSTEM_START: ${SYSTEM_START:-}
 
+  # TX generator 1
+  c2:
+    <<: *base_na
+    container_name: c2
+    hostname: c2.example
+    volumes:
+      - c2:/opt/cardano-node
+    environment:
+      POOL_ID: "1"
+      TYPE: "txg"
+      TPS: "1"
+      UTXOHD: "true"
+      SYSTEM_START: ${SYSTEM_START:-}
+
   # PostgreSQL Database
   db:
     image: postgresql:latest
@@ -184,6 +198,7 @@ volumes:
   p2:
   p3:
   c1:
+  c2:
   db:
   dbsync:
   prometheus:

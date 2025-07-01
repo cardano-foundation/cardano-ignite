@@ -200,6 +200,10 @@ RUN cabal update && \
     cabal build exe:cardano-node
 RUN ln -s /usr/local/src/cardano-node/dist-newstyle/build/x86_64-linux/ghc-${BOOTSTRAP_HASKELL_GHC_VERSION}/cardano-node-*/x/cardano-node/build/cardano-node/cardano-node /usr/local/bin/cardano-node
 
+# Build tx-generator binary
+RUN cabal build exe:tx-generator
+RUN ln -s /usr/local/src/cardano-node/dist-newstyle/build/x86_64-linux/ghc-${BOOTSTRAP_HASKELL_GHC_VERSION}/tx-generator-*/x/tx-generator/build/tx-generator/tx-generator /usr/local/bin/tx-generator
+
 # Create process_exporter source directory
 RUN install --directory --owner=root --group=root --mode=0755 /usr/local/src/process_exporter
 
@@ -317,6 +321,7 @@ RUN ldconfig
 # Copy binaries from build stage
 COPY --from=build --chown=root:root /usr/local/bin/cardano-cli /usr/local/bin/cardano-cli
 COPY --from=build --chown=root:root /usr/local/bin/cardano-node /usr/local/bin/cardano-node
+COPY --from=build --chown=root:root /usr/local/bin/tx-generator /usr/local/bin/tx-generator
 COPY --from=build --chown=root:root /usr/local/bin/node_exporter /usr/local/bin/node_exporter
 COPY --from=build --chown=root:root /usr/local/bin/process_exporter /usr/local/bin/process_exporter
 
@@ -344,6 +349,10 @@ RUN echo 'permit nopass cardano as root cmd tc' >> /etc/doas.conf
 # Copy canary_tx.sh
 COPY cardano-node/canary_tx.sh /
 RUN chmod 0755 /canary_tx.sh
+
+# Copy tx-generator
+COPY cardano-node/tx-generator.sh /
+RUN chmod 0755 /tx-generator.sh
 
 # Copy localroot_edges.sh
 COPY cardano-node/localroot_edges.sh /
