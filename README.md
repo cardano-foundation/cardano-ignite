@@ -5,6 +5,7 @@
 - [Information](#information)
   - [Showcase](#showcase)
   - [Target Audience](#target-audience)
+  - [Tech Stack](#tech-stack)
 - [Requirements](#requirements)
 - [Installation](#installation)
 - [Getting Started](#getting-started)
@@ -32,6 +33,24 @@ Cardano Ignite is a toolbox for rapidly deploying and managing Cardano testnets 
 ### Target Audience
 
 This project is designed for developers and end users who wish to run their own Cardano testnet for rapid development or experimentation. It is not intended for performance benchmarking or integration testing, such as the [Antithesis](https://github.com/cardano-foundation/antithesis) project.
+
+### Tech Stack
+
+The following list provides an overview of the key tools and technologies used in the Cardano Ignite project.
+
+|Name                 |Description                                                          |Link                                                 |
+|---                  |---                                                                  |---                                                  |
+|Blackbox Exporter    |A Prometheus Exporter for probing endpoints over multiple protocols. |https://github.com/prometheus/blackbox_exporter      |
+|Blockfrost           |A blockchain explorer and API for Cardano.                           |https://github.com/blockfrost/blockfrost-backend-ryo |
+|Cardano CLI          |A command-line interface for the Cardano blockchain.                 |https://github.com/IntersectMBO/cardano-cli          |
+|Cardano DB Sync      |A database synchronization tool for the Cardano ledger.              |https://github.com/IntersectMBO/cardano-db-sync      |
+|Cardano Node         |A node implementation of the Cardano blockchain.                     |https://github.com/IntersectMBO/cardano-node         |
+|Cardano TX Generator |A tool for generating transactions on the Cardano blockchain.        |https://github.com/IntersectMBO/cardano-node/tree/master/bench/tx-generator |
+|CoreDNS              |A flexible, extensible DNS server.                                   |https://github.com/coredns/coredns                   |
+|Grafana              |A open and composable observability and data visualization platform. |https://github.com/grafana/grafana                   |
+|Loki                 |A log aggregation system designed to store and query logs.           |https://github.com/grafana/loki                      |
+|PostgreSQL           |An object-relational database system.                                |https://www.postgresql.org                           |
+|Prometheus           |A systems and service monitoring system.                             |https://github.com/prometheus/prometheus             |
 
 ## Requirements
 
