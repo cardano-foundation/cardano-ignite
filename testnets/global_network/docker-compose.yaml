@@ -826,7 +826,7 @@ services:
     restart: unless-stopped
     command: -config.file=/etc/loki/local-config.yaml
     ports:
-      - "3100:3100"
+      - "${LOKI_HOST:-3100}:3100"
     volumes:
       - loki:/loki
     networks:
@@ -842,7 +842,7 @@ services:
     hostname: grafana.example
     restart: unless-stopped
     ports:
-      - "3000:3000"
+      - "${GRAFANA_HOST:-3000}:3000"
     volumes:
       - grafana:/var/lib/grafana
       - ../../grafana/provisioning:/etc/grafana/provisioning
