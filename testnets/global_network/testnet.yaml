@@ -14,11 +14,12 @@ protocolConsts:
   k: 432
 
 --- # Optional Shelley Genesis Overide
-slotLength: 0.2
-epochLength: 86400
-securityParam: 432
+slotLength: 1
+epochLength: 17280
+securityParam: 90
 maxLovelaceSupply: 45000000000000000
 protocolParams:
+  maxBlockBodySize: 90112
   decentralisationParam: 0
   protocolVersion:
     major: 10
