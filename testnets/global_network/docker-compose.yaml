@@ -634,7 +634,7 @@ services:
 
   # DNS Server
   ns:
-    image: coredns/coredns
+    image: coredns/coredns:1.12.2
     container_name: ns
     hostname: ns.example
     restart: unless-stopped
@@ -774,7 +774,7 @@ services:
         condition: service_started
 
   prometheus:
-    image: prom/prometheus:latest
+    image: prom/prometheus:v3.4.2
     container_name: prometheus
     hostname: prometheus.example
     restart: unless-stopped
@@ -797,7 +797,7 @@ services:
         condition: service_started
 
   blackbox:
-    image: quay.io/prometheus/blackbox-exporter:latest
+    image: quay.io/prometheus/blackbox-exporter:v0.27.0
     container_name: blackbox
     hostname: blackbox.example
     restart: unless-stopped
@@ -820,7 +820,7 @@ services:
       - 172.16.7.2
 
   loki:
-    image: grafana/loki:latest
+    image: grafana/loki:3.4.4
     container_name: loki
     hostname: loki.example
     restart: unless-stopped
@@ -837,7 +837,7 @@ services:
       - 172.16.7.2
 
   grafana:
-    image: grafana/grafana:latest
+    image: grafana/grafana:12.0.2
     container_name: grafana
     hostname: grafana.example
     restart: unless-stopped

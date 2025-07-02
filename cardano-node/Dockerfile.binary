@@ -1,4 +1,4 @@
-FROM docker.io/debian:stable-slim AS build
+FROM docker.io/debian:stable-20250630-slim AS build
 
 ARG CARDANO_NODE_VERSION="${CARDANO_NODE_VERSION:-10.4.1}"
 ARG NODE_EXPORTER_VERSION="${NODE_EXPORTER_VERSION:-1.9.1}"
@@ -137,7 +137,7 @@ RUN find /tmp/testnet -type f -name 'topology.json' -exec rm -f '{}' ';'
 
 #---------------------------------------------------------------------
 
-FROM docker.io/debian:stable-slim AS main
+FROM docker.io/debian:stable-20250630-slim AS main
 
 # Set environment variables
 ENV CARDANO_NODE_SOCKET_PATH="/opt/cardano-node/data/db/node.socket"
