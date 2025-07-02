@@ -89,10 +89,16 @@ Please consult the [SETUP.md](./SETUP.md) file for detailed installation instruc
   make build testnet=global_network
   ```
 
-- Start the `global_network` testnet
+- Start the `global_network` testnet **without** optional containers
 
   ```
   make up testnet=global_network
+  ```
+
+- Start the `global_network` testnet **with** optional containers (Blockfrost, TX Generator...)
+
+  ```
+  make up-all testnet=global_network
   ```
 
 - Open your browser and navigate to \

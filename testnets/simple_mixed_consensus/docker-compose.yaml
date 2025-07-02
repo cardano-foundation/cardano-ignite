@@ -199,6 +199,8 @@ services:
       TPS: "1"
       UTXOHD: "true"
       SYSTEM_START: ${SYSTEM_START:-}
+    profiles:
+      - optional
 
   # PostgreSQL Database
   db:
@@ -244,6 +246,8 @@ services:
     depends_on:
       dbsync:
         condition: service_started
+    profiles:
+      - optional
 
   prometheus:
     image: prom/prometheus:v3.4.2

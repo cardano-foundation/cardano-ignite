@@ -708,6 +708,8 @@ services:
     networks:
       na_net:
         ipv4_address: 172.16.1.12
+    profiles:
+      - optional
 
   # PostgreSQL Database
   db:
@@ -772,6 +774,8 @@ services:
     depends_on:
       dbsync:
         condition: service_started
+    profiles:
+      - optional
 
   prometheus:
     image: prom/prometheus:v3.4.2

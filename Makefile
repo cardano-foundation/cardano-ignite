@@ -58,6 +58,10 @@ testnets/%/prometheus/prometheus.yml: scripts/prometheus_targets.sh testnets/%/d
 	mkdir -p testnets/${testnet}/prometheus/
 	./scripts/prometheus_targets.sh testnets/$*/docker-compose.yaml >$@
 
+testnets/%/.env.tmp: TESTNET
+	export SYSTEM_START=$$(date -u +%Y-%m-%dT%H:%M:%SZ) \
+	&& echo "SYSTEM_START=$${SYSTEM_START}" > testnets/$*/.env.tmp
+
 build: TESTNET prerequisites testnets/${testnet}/graph_nodes.sql testnets/${testnet}/coredns/example.zone testnets/${testnet}/prometheus/prometheus.yml ## Build testnet
 	ln -snf testnets/${testnet}/testnet.yaml .testnet.yaml && \
 	cd testnets/${testnet} && \
@@ -71,17 +75,21 @@ all:
 		fi; \
 	done
 
-up: TESTNET ## Start testnet
-	@export SYSTEM_START=$$(date -u +%Y-%m-%dT%H:%M:%SZ) \
-	&& echo "SYSTEM_START=$${SYSTEM_START}" > testnets/${testnet}/.env.tmp \
-	&& cd testnets/${testnet} \
-	&& $(HOST_INTERFACE_SETUP) \
-	&& docker compose --env-file .env.tmp up --detach
+up: TESTNET testnets/${testnet}/.env.tmp ## Start testnet without optional containers
+	cd testnets/${testnet} && \
+	$(HOST_INTERFACE_SETUP) && \
+	docker compose --env-file .env.tmp up --detach
+
+up-all: TESTNET testnets/${testnet}/.env.tmp ## Start testnet with optional containers (Blockfrost, TX Generator...)
+
+	cd testnets/${testnet} && \
+	$(HOST_INTERFACE_SETUP) && \
+	docker compose --env-file .env.tmp --profile optional up --detach
 
 down: TESTNET ## Stop testnet
 	@cd testnets/${testnet} && \
 	$(HOST_INTERFACE_SETUP) && \
-	docker compose down --volumes --timeout 1
+	docker compose --profile optional down --volumes --timeout 1
 
 query: TESTNET ## Query tip of all pools
 	pools="$$(awk '/container_name: /{ print $$2 }' testnets/${testnet}/docker-compose.yaml | grep -E '^p[0-9][a-zA-Z0-9]*$$')" ; \
