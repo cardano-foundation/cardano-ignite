@@ -16,7 +16,7 @@ Please install the dependencies below. All commands are compatible with Debian 1
 
   ```
   sudo apt update
-  sudo apt --no-install-recommends -y git make yq
+  sudo apt install --no-install-recommends -y git make yq
   ```
 
 > [!NOTE]
@@ -34,7 +34,7 @@ Please install the dependencies below. All commands are compatible with Debian 1
 
   ```
   sudo apt update
-  sudo apt --no-install-recommends -y ca-certificates curl
+  sudo apt install --no-install-recommends -y ca-certificates curl
   ```
 
 - Create APT keyrings directory
@@ -76,5 +76,13 @@ Please install the dependencies below. All commands are compatible with Debian 1
 - Install Docker Plugin to stream logs to Loki
 
   ```
-  docker plugin install grafana/loki-docker-driver --alias loki --grant-all-permissions
+  sudo docker plugin install grafana/loki-docker-driver --alias loki --grant-all-permissions
   ```
+
+- Add your user to the docker group
+
+  ```
+  sudo usermod -aG docker $USER
+  ```
+
+  Relog to have the group change take affect.
