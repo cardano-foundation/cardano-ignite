@@ -1,4 +1,4 @@
-FROM docker.io/debian:stable-slim AS build
+FROM docker.io/debian:stable-20250630-slim AS build
 
 ARG CARDANO_CLI_VERSION="${CARDANO_CLI_VERSION:-10.1.1.0}"
 ARG CARDANO_DB_SYNC_VERSION="${CARDANO_DB_SYNC_VERSION:-13.6.0.4}"
@@ -94,7 +94,7 @@ RUN ln -s /usr/local/src/process_exporter/process-exporter-${PROCESS_EXPORTER_VE
 
 #---------------------------------------------------------------------
 
-FROM docker.io/debian:stable-slim AS main
+FROM docker.io/debian:stable-20250630-slim AS main
 
 # Set environment variables
 ENV CARDANO_NODE_SOCKET_PATH="/opt/cardano-node/data/db/node.socket" \

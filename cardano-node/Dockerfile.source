@@ -1,4 +1,4 @@
-FROM docker.io/debian:stable-slim AS build
+FROM docker.io/debian:stable-20250630-slim AS build
 
 # NOTE:
 # Additional ARG definitions can be found further below in the Dockerfile.
@@ -123,7 +123,7 @@ ENV LD_LIBRARY_PATH="/usr/local/lib:$LD_LIBRARY_PATH" \
 
 # CARDANO_CLI
 
-ARG CARDANO_CLI_VERSION="${CARDANO_CLI_VERSION:-10.8.0.0}"
+ARG CARDANO_CLI_VERSION="${CARDANO_CLI_VERSION:-10.11.1.0}"
 
 # Clone cardano-cli.git repository
 WORKDIR /usr/local/src
@@ -275,7 +275,7 @@ RUN find /tmp/testnet -type f -name 'topology.json' -exec rm -f '{}' ';'
 
 #---------------------------------------------------------------------
 
-FROM docker.io/debian:stable-slim AS main
+FROM docker.io/debian:stable-20250630-slim AS main
 
 # Set environment variables
 ENV CARDANO_NODE_SOCKET_PATH="/opt/cardano-node/data/db/node.socket"
