@@ -200,6 +200,8 @@ services:
     networks:
       na_net:
         ipv4_address: 172.16.1.101
+    profiles:
+      - p1
 
   # Relay
   p1r1:
@@ -215,6 +217,9 @@ services:
     networks:
       na_net:
         ipv4_address: 172.16.1.102
+    profiles:
+      - p1
+      - p1relays
 
   # Relay
   p1r2:
@@ -230,6 +235,9 @@ services:
     networks:
       na_net:
         ipv4_address: 172.16.1.103
+    profiles:
+      - p1
+      - p1relays
 
   # Relay
   p1r3:
@@ -245,6 +253,10 @@ services:
     networks:
       na_net:
         ipv4_address: 172.16.1.104
+    profiles:
+      - privaterelays
+      - p1
+      - p1relays
 
   # Pool 2
 
@@ -262,6 +274,8 @@ services:
     networks:
       eu_net:
         ipv4_address: 172.16.3.101
+    profiles:
+      - p2
 
   # Relay
   p2r1:
@@ -277,6 +291,9 @@ services:
     networks:
       eu_net:
         ipv4_address: 172.16.3.102
+    profiles:
+      - p2
+      - p2relays
 
   # Relay
   p2r2:
@@ -292,6 +309,9 @@ services:
     networks:
       eu_net:
         ipv4_address: 172.16.3.103
+    profiles:
+      - p2
+      - p2relays
 
   # Relay
   p2r3:
@@ -307,6 +327,10 @@ services:
     networks:
       eu_net:
         ipv4_address: 172.16.3.104
+    profiles:
+      - privaterelays
+      - p2
+      - p2relays
 
   # Pool 3
 
