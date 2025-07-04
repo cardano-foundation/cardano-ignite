@@ -29,6 +29,7 @@ services:
     environment:
       <<: *env
       POOL_ID: "1"
+    profiles: [core, pools]
 
   p2:
     <<: *base
@@ -40,6 +41,7 @@ services:
       <<: *env
       POOL_ID: "2"
       PEER_SHARING: "false"
+    profiles: [core, pools]
 
   p3:
     <<: *base
@@ -50,6 +52,7 @@ services:
     environment:
       <<: *env
       POOL_ID: "3"
+    profiles: [core, pools]
 
   # DNS Server
   ns:
@@ -60,6 +63,8 @@ services:
     command: -conf /etc/coredns/corefile
     volumes:
       - ./coredns:/etc/coredns # Mount custom corefile
+    profiles:
+      - core
 
   sidecar:
     image: ${testnet}_sidecar:latest
@@ -84,10 +89,12 @@ services:
       POOL_ID: "1"
       TYPE: "client"
       SYSTEM_START: ${SYSTEM_START:-}
+    profiles:
+      - core
 
   # TX generator 1
   c2:
-    <<: *base_na
+    <<: *base
     container_name: c2
     hostname: c2.example
     volumes:
@@ -112,6 +119,8 @@ services:
     build:
       context: "../../"
       dockerfile: "postgresql/Dockerfile"
+    profiles:
+      - core
 
   dbsync:
     image: cardano-db-sync:latest
@@ -129,6 +138,8 @@ services:
     depends_on:
       db:
         condition: service_started
+    profiles:
+      - core
 
   blockfrost:
     image: blockfrost:latest
@@ -142,9 +153,6 @@ services:
     build:
       context: "../../"
       dockerfile: "blockfrost/Dockerfile"
-    depends_on:
-      dbsync:
-        condition: service_started
     profiles:
       - optional
 
@@ -159,6 +167,8 @@ services:
     depends_on:
       blackbox:
         condition: service_started
+    profiles:
+      - core
 
   blackbox:
     image: quay.io/prometheus/blackbox-exporter:v0.27.0
@@ -171,6 +181,8 @@ services:
     cap_add:
       - NET_ADMIN
       - NET_RAW
+    profiles:
+      - core
 
   loki:
     image: grafana/loki:3.4.4
@@ -182,6 +194,8 @@ services:
       - "3100:3100"
     volumes:
       - loki:/loki
+    profiles:
+      - core
 
   grafana:
     image: grafana/grafana:12.0.2
@@ -196,6 +210,8 @@ services:
     environment:
       GF_SECURITY_ADMIN_USER: cardano
       GF_SECURITY_ADMIN_PASSWORD: cardano
+    profiles:
+      - core
 
 volumes:
   p1:

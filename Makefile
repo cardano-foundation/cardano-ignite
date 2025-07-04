@@ -1,7 +1,7 @@
 SHELL:=/bin/bash
 
 .PHONY: all clean example_zone node_graph prerequisites prometheus_target
-.SILENT: all block build dbsync down pools prerequisites query up validate
+.SILENT: all block build dbsync down pools prerequisites query up up-all validate
 
 # Required for builds on OSX ARM
 export DOCKER_DEFAULT_PLATFORM?=linux/amd64
@@ -78,18 +78,21 @@ all:
 up: TESTNET testnets/${testnet}/.env.tmp ## Start testnet without optional containers
 	cd testnets/${testnet} && \
 	$(HOST_INTERFACE_SETUP) && \
-	docker compose --env-file .env.tmp up --detach
+	echo "HOST_INTERFACE=$$HOST_INTERFACE" >> .env.tmp && \
+	echo "testnet=$$testnet" >> .env.tmp && \
+	docker compose --env-file .env.tmp --profile core up --detach
 
-up-all: TESTNET testnets/${testnet}/.env.tmp ## Start testnet with optional containers (Blockfrost, TX Generator...)
-
+up-all: TESTNET ## Start testnet with optional containers (Blockfrost, TX Generator...)
+	@if [ ! -f testnets/${testnet}/.env.tmp ]; then \
+		$(MAKE) up testnet=${testnet}; \
+	fi
 	cd testnets/${testnet} && \
-	$(HOST_INTERFACE_SETUP) && \
-	docker compose --env-file .env.tmp --profile optional up --detach
+	docker compose --env-file .env.tmp --profile optional --profile privaterelays up --detach
 
 down: TESTNET ## Stop testnet
 	@cd testnets/${testnet} && \
-	$(HOST_INTERFACE_SETUP) && \
-	docker compose --profile optional down --volumes --timeout 1
+	docker compose --env-file .env.tmp --profile core --profile optional --profile privaterelays down --volumes --timeout 1 && \
+	rm -f .env.tmp
 
 query: TESTNET ## Query tip of all pools
 	pools="$$(awk '/container_name: /{ print $$2 }' testnets/${testnet}/docker-compose.yaml | grep -E '^p[0-9][a-zA-Z0-9]*$$')" ; \
