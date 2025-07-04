@@ -1,7 +1,7 @@
 SHELL:=/bin/bash
 
 .PHONY: all clean example_zone node_graph prerequisites prometheus_target
-.SILENT: all block build dbsync down pools prerequisites query up validate
+.SILENT: all block build dbsync down pools prerequisites query up up-all validate
 
 # Required for builds on OSX ARM
 export DOCKER_DEFAULT_PLATFORM?=linux/amd64
@@ -58,6 +58,10 @@ testnets/%/prometheus/prometheus.yml: scripts/prometheus_targets.sh testnets/%/d
 	mkdir -p testnets/${testnet}/prometheus/
 	./scripts/prometheus_targets.sh testnets/$*/docker-compose.yaml >$@
 
+testnets/%/.env.tmp: TESTNET
+	export SYSTEM_START=$$(date -u +%Y-%m-%dT%H:%M:%SZ) \
+	&& echo "SYSTEM_START=$${SYSTEM_START}" > testnets/$*/.env.tmp
+
 build: TESTNET prerequisites testnets/${testnet}/graph_nodes.sql testnets/${testnet}/coredns/example.zone testnets/${testnet}/prometheus/prometheus.yml ## Build testnet
 	ln -snf testnets/${testnet}/testnet.yaml .testnet.yaml && \
 	cd testnets/${testnet} && \
@@ -71,17 +75,24 @@ all:
 		fi; \
 	done
 
-up: TESTNET ## Start testnet
-	@export SYSTEM_START=$$(date -u +%Y-%m-%dT%H:%M:%SZ) \
-	&& echo "SYSTEM_START=$${SYSTEM_START}" > testnets/${testnet}/.env.tmp \
-	&& cd testnets/${testnet} \
-	&& $(HOST_INTERFACE_SETUP) \
-	&& docker compose --env-file .env.tmp up --detach
+up: TESTNET testnets/${testnet}/.env.tmp ## Start testnet without optional containers
+	cd testnets/${testnet} && \
+	$(HOST_INTERFACE_SETUP) && \
+	echo "HOST_INTERFACE=$$HOST_INTERFACE" >> .env.tmp && \
+	echo "testnet=$$testnet" >> .env.tmp && \
+	docker compose --env-file .env.tmp --profile core up --detach
+
+up-all: TESTNET ## Start testnet with optional containers (Blockfrost, TX Generator...)
+	@if [ ! -f testnets/${testnet}/.env.tmp ]; then \
+		$(MAKE) up testnet=${testnet}; \
+	fi
+	cd testnets/${testnet} && \
+	docker compose --env-file .env.tmp --profile optional --profile privaterelays up --detach
 
 down: TESTNET ## Stop testnet
 	@cd testnets/${testnet} && \
-	$(HOST_INTERFACE_SETUP) && \
-	docker compose down --volumes --timeout 1
+	docker compose --env-file .env.tmp --profile core --profile optional --profile privaterelays down --volumes --timeout 1 && \
+	rm -f .env.tmp
 
 query: TESTNET ## Query tip of all pools
 	pools="$$(awk '/container_name: /{ print $$2 }' testnets/${testnet}/docker-compose.yaml | grep -E '^p[0-9][a-zA-Z0-9]*$$')" ; \
