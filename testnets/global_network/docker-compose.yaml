@@ -245,7 +245,7 @@ services:
     networks:
       na_net:
         ipv4_address: 172.16.1.104
-    profiles: [p1, na, p1relays, privaterelays]
+    profiles: [na, p1, p1relays, privaterelays]
 
   # Pool 2
 
@@ -311,7 +311,7 @@ services:
     networks:
       eu_net:
         ipv4_address: 172.16.3.104
-    profiles: [p2, eu, p2relays, privaterelays]
+    profiles: [eu, p2, p2relays, privaterelays]
 
   # Pool 3
 
@@ -329,7 +329,7 @@ services:
     networks:
       as_net:
         ipv4_address: 172.16.4.101
-    profiles: [as, core, p3]
+    profiles: [core, as, p3]
 
   # Relay
   p3r1:
@@ -345,7 +345,7 @@ services:
     networks:
       as_net:
         ipv4_address: 172.16.4.102
-    profiles: [as, core, p3, p3relays]
+    profiles: [core, as, p3, p3relays]
 
   # Relay
   p3r2:
@@ -361,7 +361,7 @@ services:
     networks:
       as_net:
         ipv4_address: 172.16.4.103
-    profiles: [as, core, p3, p3relays]
+    profiles: [core, as, p3, p3relays]
 
   # Relay
   p3r3:
@@ -377,7 +377,7 @@ services:
     networks:
       as_net:
         ipv4_address: 172.16.4.104
-    profiles: [privaterelays, p3, p3relays]
+    profiles: [p3, p3relays, privaterelays]
 
   # Pool 4
 
@@ -443,7 +443,7 @@ services:
     networks:
       eu_net:
         ipv4_address: 172.16.3.114
-    profiles: [eu, privaterelays, p4, p4relays]
+    profiles: [eu, p4, p4relays, privaterelays]
 
   # Pool 5
 
@@ -509,7 +509,7 @@ services:
     networks:
       na_net:
         ipv4_address: 172.16.1.124
-    profiles: [na, privaterelays, p5, p5relays]
+    profiles: [na, p5, p5relays, privaterelays]
 
   # Pool 6
 
@@ -575,7 +575,7 @@ services:
     networks:
       eu_net:
         ipv4_address: 172.16.3.124
-    profiles: [privaterelays, eu, p6, p6relays]
+    profiles: [eu, p6, p6relays, privaterelays]
 
   # North America Gateway
   nagw:
@@ -595,7 +595,7 @@ services:
         ipv4_address: 172.16.10.11
     dns:
       - 172.16.1.2
-    profiles: [core, gateways, na]
+    profiles: [core, na, gateways]
 
   # Europe Gateway
   eugw:
