@@ -66,7 +66,7 @@ build: TESTNET prerequisites testnets/${testnet}/graph_nodes.sql testnets/${test
 	ln -snf testnets/${testnet}/testnet.yaml .testnet.yaml && \
 	cd testnets/${testnet} && \
 	$(HOST_INTERFACE_SETUP) && \
-	docker compose build --build-arg GRAPHNODES="testnets/${testnet}/graph_nodes.sql"
+	docker compose --profile core build --build-arg GRAPHNODES="testnets/${testnet}/graph_nodes.sql"
 
 all:
 	for dir in testnets/*; do \
