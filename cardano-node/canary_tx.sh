@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# This script sends transactions on average once per 60 seconds including metadata when it was submitted.
+# This script sends transactions on average once per 300 seconds including metadata when it was submitted.
 
 set -o errexit
 set -o pipefail
@@ -11,7 +11,7 @@ PATH="/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin"
 NETWORK_ID="--testnet-magic 42"
 WORK_DIR="${WORK_DIR:-/tmp/canary_tx}"
 POOL_ID="${POOL_ID:-}"
-TTL="${TTL:-50}"
+TTL="${TTL:-260}"
 
 debug_to_console() {
     local message=${1}
@@ -207,8 +207,8 @@ print_success() {
 sleep_random_time() {
     debug_to_console "* Sleep for random time..."
 
-    random_seconds=$((RANDOM % 11))
-    total_sleep=$((55 + random_seconds))
+    random_seconds=$((RANDOM % 61))
+    total_sleep=$((270 + random_seconds))
     sleep ${total_sleep}
 }
 
@@ -224,6 +224,16 @@ main() {
     get_slot_length
 
     CURRENT_SEQ=0
+
+    POOLS=$(ls /opt/cardano-node/pools | sort -n | tail -1)
+
+    if [[ "$POOLS" -gt 0 ]]; then
+        start_sleep=$(( (300 / POOLS) * (POOL_ID - 1 )))
+    else
+        start_sleep=0
+    fi
+
+    sleep "${start_sleep}"
 
     while true; do
         get_payment_address_balance
