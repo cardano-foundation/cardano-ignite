@@ -738,6 +738,43 @@ services:
         ipv4_address: 172.16.1.12
     profiles: [optional, tx-generators]
 
+  # TX generator 2
+  c3:
+    <<: *base_eu
+    container_name: c3
+    hostname: c3.example
+    volumes:
+      - c3:/opt/cardano-node
+    environment:
+      POOL_ID: "2"
+      TYPE: "txg"
+      TPS: "2"
+      UTXOHD: "true"
+      SYSTEM_START: ${SYSTEM_START:-}
+    networks:
+      eu_net:
+        ipv4_address: 172.16.3.13
+    profiles: [optional, tx-generators]
+
+  # TX generator 3
+  c4:
+    <<: *base_as
+    container_name: c4
+    hostname: c4.example
+    volumes:
+      - c4:/opt/cardano-node
+    environment:
+      POOL_ID: "3"
+      TYPE: "txg"
+      TPS: "1"
+      UTXOHD: "true"
+      SYSTEM_START: ${SYSTEM_START:-}
+    networks:
+      as_net:
+        ipv4_address: 172.16.4.14
+    profiles: [optional, tx-generators]
+
+
   # PostgreSQL Database
   db:
     image: postgresql:latest
@@ -916,6 +953,8 @@ volumes:
   p6r3:
   c1:
   c2:
+  c3:
+  c4:
   db:
   dbsync:
   prometheus:
