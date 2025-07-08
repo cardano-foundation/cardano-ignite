@@ -167,6 +167,10 @@ RUN chmod 0755 /usr/local/src/cardano-db-sync/config/config.json
 COPY cardano-db-sync/cmd.sh /
 RUN chmod 0755 /cmd.sh
 
+# Copy scripts
+COPY cardano-db-sync/scripts/*.sh /
+RUN chmod 0755 /*.sh
+
 USER cardano
 STOPSIGNAL SIGINT
 

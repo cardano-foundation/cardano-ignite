@@ -82,6 +82,14 @@ up: TESTNET testnets/${testnet}/.env.tmp ## Start testnet without optional conta
 	echo "testnet=$$testnet" >> .env.tmp && \
 	docker compose --env-file .env.tmp --profile core up --detach
 
+up-tx: TESTNET ## Start testnet with TX Generators
+	@if [ ! -f testnets/${testnet}/.env.tmp ]; then \
+		$(MAKE) up testnet=${testnet}; \
+	fi
+	cd testnets/${testnet} && \
+	docker compose --env-file .env.tmp --profile tx-generators up --detach
+
+
 up-all: TESTNET ## Start testnet with optional containers (Blockfrost, TX Generator...)
 	@if [ ! -f testnets/${testnet}/.env.tmp ]; then \
 		$(MAKE) up testnet=${testnet}; \
