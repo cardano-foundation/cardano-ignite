@@ -3,7 +3,7 @@ FROM docker.io/debian:stable-20250630-slim AS build
 ARG CARDANO_NODE_VERSION="${CARDANO_NODE_VERSION:-10.4.1}"
 ARG NODE_EXPORTER_VERSION="${NODE_EXPORTER_VERSION:-1.9.1}"
 ARG PROCESS_EXPORTER_VERSION="${PROCESS_EXPORTER_VERSION:-0.8.7}"
-ARG UV_VERSION="${UV_VERSION:-0.7.12}"
+ARG UV_VERSION="${UV_VERSION:-0.7.19}"
 
 # Set time zone
 ENV TZ="UTC"
@@ -195,13 +195,9 @@ RUN echo 'permit setenv { PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr
 RUN echo 'permit nopass cardano as root cmd ip' >> /etc/doas.conf
 RUN echo 'permit nopass cardano as root cmd tc' >> /etc/doas.conf
 
-# Copy canary_tx.sh
-COPY cardano-node/canary_tx.sh /
-RUN chmod 0755 /canary_tx.sh
-
-# Copy localroot_edges.sh
-COPY cardano-node/localroot_edges.sh /
-RUN chmod 0755 /localroot_edges.sh
+# Copy scripts
+COPY cardano-node/scripts/*.sh /
+RUN chmod 0755 /*.sh
 
 # Copy cmd.sh
 COPY cardano-node/cmd.sh /

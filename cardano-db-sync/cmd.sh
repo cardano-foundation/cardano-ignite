@@ -122,7 +122,7 @@ insert_genesis_hashes() {
     ALONZO_GENESIS_JSON="$(cardano-cli conway genesis hash --genesis ${SRC_DIR}/alonzo-genesis.json)"
     BYRON_GENESIS_JSON="$(cardano-cli byron genesis print-genesis-hash --genesis-json ${SRC_DIR}/byron-genesis.json)"
     CONWAY_GENESIS_JSON="$(cardano-cli conway genesis hash --genesis ${SRC_DIR}/conway-genesis.json)"
-    SHELLEY_GENESIS_JSON="$(cardano-cli shelley genesis hash --genesis ${SRC_DIR}/shelley-genesis.json)"
+    SHELLEY_GENESIS_JSON="$(cardano-cli latest genesis hash --genesis ${SRC_DIR}/shelley-genesis.json)"
 
     jq ".AlonzoGenesisHash = \"${ALONZO_GENESIS_JSON}\"" "${CONFIG_JSON}" | write_file "${CONFIG_JSON}"
     jq ".ByronGenesisHash = \"${BYRON_GENESIS_JSON}\"" "${CONFIG_JSON}" | write_file "${CONFIG_JSON}"
