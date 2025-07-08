@@ -195,13 +195,9 @@ RUN echo 'permit setenv { PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr
 RUN echo 'permit nopass cardano as root cmd ip' >> /etc/doas.conf
 RUN echo 'permit nopass cardano as root cmd tc' >> /etc/doas.conf
 
-# Copy canary_tx.sh
-COPY cardano-node/canary_tx.sh /
-RUN chmod 0755 /canary_tx.sh
-
-# Copy localroot_edges.sh
-COPY cardano-node/localroot_edges.sh /
-RUN chmod 0755 /localroot_edges.sh
+# Copy scripts
+COPY cardano-node/scripts/*.sh /
+RUN chmod 0755 /*.sh
 
 # Copy cmd.sh
 COPY cardano-node/cmd.sh /
