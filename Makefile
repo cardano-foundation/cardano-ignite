@@ -8,12 +8,13 @@ export DOCKER_DEFAULT_PLATFORM?=linux/amd64
 
 # Determine and set the parent network interface
 HOST_INTERFACE_SETUP = \
-	if [ -z "$${HOST_INTERFACE+x}" ]; then \
-		HOST_INTERFACE=$$(ip -br link show | awk '$$1 !~ /^lo$$/ && $$1 !~ /^vir/ && $$1 !~ /^wl/ && $$1 !~ /@/ {print $$1; exit}') && \
-		[ -n "$$HOST_INTERFACE" ] || { echo "No physical interface found"; exit 1; }; \
-	fi && \
-	export HOST_INTERFACE && \
-	echo "Using HOST_INTERFACE=\"$$HOST_INTERFACE"\"
+    if [ -z "$${HOST_INTERFACE+x}" ]; then \
+        HOST_INTERFACE=$$(ip -br link show | awk '$$1 ~ /^dummy[0-9]*$$/ {print $$1; exit}') ; \
+        [ -n "$$HOST_INTERFACE" ] || HOST_INTERFACE=$$(ip -br link show | awk '$$1 !~ /^lo$$|^vir|^wl/ && $$1 !~ /@/ {print $$1; exit}'); \
+        [ -n "$$HOST_INTERFACE" ] || { echo "No physical interface found"; exit 1; }; \
+    fi && \
+    export HOST_INTERFACE && \
+    echo "Using HOST_INTERFACE=\"$$HOST_INTERFACE\""
 
 help:
 	@echo
