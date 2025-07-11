@@ -1,0 +1,55 @@
+name: Build All Testnets
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-all-testnets:
+    runs-on: debian-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          docker.io \
+          docker-compose \
+          git \
+          make \
+          curl \
+          jq
+
+        wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+        chmod +x /usr/local/bin/yq
+
+    - name: Setup Docker
+      uses: docker/setup-docker@v3
+
+    - name: Setup Docker Compose
+      uses: docker/compose-action@v2
+
+    - name: Install Loki Docker Driver
+      run: |
+        docker plugin install grafana/loki-docker-driver --alias loki --grant-all-permissions
+
+    - name: Build all testnets
+      run: |
+        make all
+
+    - name: Verify testnet startup
+      run: |
+        make up-all testnet=global_network
+        sleep 30
+        make validate
+
+    - name: Clean up
+      if: always()
+      run: |
+        make down testnet=global_network
+        docker system prune -af
