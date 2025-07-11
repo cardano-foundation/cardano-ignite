@@ -1,6 +1,7 @@
 FROM docker.io/debian:stable-20250721-slim AS testnet_builder
 
-ARG UV_VERSION="${UV_VERSION:-0.7.21}"
+#ARG UV_VERSION="${UV_VERSION:-0.9.1}"
+ARG UV_VERSION="0.9.1"
 
 ENV TZ="UTC"
 RUN ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime && \

@@ -12,11 +12,11 @@
 
 Please install the dependencies below. All commands are compatible with Debian 12.
 
-- Install `git`, `make` and `yq` with your package manager
+- Install dependencies with your package manager
 
   ```
   sudo apt update
-  sudo apt install --no-install-recommends -y git make yq
+  sudo apt install --no-install-recommends -y ca-certificates curl git iproute2 make tar
   ```
 
 > [!NOTE]

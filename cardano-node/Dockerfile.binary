@@ -1,9 +1,8 @@
-ARG TESTNET_BUILDER_IMAGE
+ARG TESTNET_BUILDER_IMAGE=${$TESTNET_BUILDER_IMAGE:-}
 
 #---------------------------------------------------------------------
 
 FROM ${TESTNET_BUILDER_IMAGE} AS testnet_builder
-
 #---------------------------------------------------------------------
 
 FROM docker.io/debian:stable-20250721-slim AS build
