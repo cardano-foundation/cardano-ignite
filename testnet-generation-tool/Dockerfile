@@ -1,6 +1,6 @@
 FROM docker.io/debian:stable-20250630-slim AS testnet_builder
 
-ARG UV_VERSION="${UV_VERSION:-0.7.19}"
+ARG UV_VERSION="${UV_VERSION:-0.7.21}"
 
 # Set time zone
 ENV TZ="UTC"
@@ -57,5 +57,3 @@ RUN uv run python3 genesis-cli.py testnet.yaml -o /tmp/testnet -c generate
 
 # Remove dynamic topology.json
 RUN find /tmp/testnet -type f -name 'topology.json' -exec rm -f '{}' ';'
-
-

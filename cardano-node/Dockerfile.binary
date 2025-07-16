@@ -96,9 +96,6 @@ RUN chmod 0755 /usr/local/src/process_exporter/process-exporter-${PROCESS_EXPORT
 # Create process_exporter symlink
 RUN ln -s /usr/local/src/process_exporter/process-exporter-${PROCESS_EXPORTER_VERSION}.linux-amd64/process-exporter /usr/local/bin/process_exporter
 
-# Create uv source directory
-RUN install --directory --owner=root --group=root --mode=0755 /usr/local/src/uv
-
 #---------------------------------------------------------------------
 
 FROM docker.io/debian:stable-20250630-slim AS main
@@ -153,7 +150,6 @@ RUN install --directory --owner=root --group=root --mode=0755 /opt/cardano-node 
 # Copy pool config and key material
 COPY --from=testnet_builder --chown=cardano:cardano /tmp/testnet/pools /opt/cardano-node/pools
 COPY --from=testnet_builder --chown=cardano:cardano /tmp/testnet/utxos /opt/cardano-node/utxos
-
 
 # Permit cardano user to run commands 'ip' and 'tc' as root
 RUN echo 'permit setenv { PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin } :cardano' >> /etc/doas.conf
