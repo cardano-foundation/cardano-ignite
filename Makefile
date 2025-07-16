@@ -6,6 +6,9 @@ SHELL:=/bin/bash
 # Required for builds on OSX ARM
 export DOCKER_DEFAULT_PLATFORM?=linux/amd64
 
+export DOCKER_BUILDKIT=1
+export COMPOSE_DOCKER_CLI_BUILD=1
+
 # Determine and set the parent network interface
 HOST_INTERFACE_SETUP = \
     if [ -z "$${HOST_INTERFACE+x}" ]; then \
@@ -65,9 +68,10 @@ testnets/%/.env.tmp: TESTNET
 
 build: TESTNET prerequisites testnets/${testnet}/graph_nodes.sql testnets/${testnet}/coredns/example.zone testnets/${testnet}/prometheus/prometheus.yml ## Build testnet
 	ln -snf testnets/${testnet}/testnet.yaml .testnet.yaml && \
-	cd testnets/${testnet} && \
 	$(HOST_INTERFACE_SETUP) && \
-	docker compose --profile core build --build-arg GRAPHNODES="testnets/${testnet}/graph_nodes.sql"
+	docker build -t ${testnet}-testnet_builder -f testnet-generation-tool/Dockerfile . && \
+	cd testnets/${testnet} && \
+	docker compose --profile core build --build-arg GRAPHNODES="testnets/${testnet}/graph_nodes.sql" --build-arg TESTNET_BUILDER_IMAGE="${testnet}-testnet_builder"
 
 all:
 	for dir in testnets/*; do \
