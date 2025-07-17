@@ -1,0 +1,146 @@
+ARG TESTNET_BUILDER_IMAGE
+
+FROM ${TESTNET_BUILDER_IMAGE} AS testnet_builder
+
+#---------------------------------------------------------------------
+
+FROM docker.io/debian:stable-20250630-slim AS build
+
+ARG YACI_STORE_VERSION="${YACI_STORE_VERSION:-2.0.0-beta3}"
+ARG NODE_EXPORTER_VERSION="${NODE_EXPORTER_VERSION:-1.9.1}"
+ARG PROCESS_EXPORTER_VERSION="${PROCESS_EXPORTER_VERSION:-0.8.7}"
+
+
+# Set time zone
+ENV TZ="UTC"
+RUN ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime && \
+    echo ${TZ} > /etc/timezone
+
+# Install packages required in build stage
+RUN apt update && \
+    apt install -y --no-install-recommends \
+    ca-certificates \
+    curl \
+    unzip
+
+# Create yaci-store source directories
+RUN install --directory --owner=root --group=root --mode=0755 /usr/local/src/yaci-store
+
+# Download yaci-store archive
+WORKDIR /usr/local/src/yaci-store
+RUN curl --proto '=https' --tlsv1.2 \
+        --location https://github.com/bloxbean/yaci-store/releases/download/rel-native-${YACI_STORE_VERSION}/yaci-store-${YACI_STORE_VERSION}-linux-x64-all.zip \
+        --output yaci-store-${YACI_STORE_VERSION}-linux-x64-all.zip
+
+RUN unzip yaci-store-${YACI_STORE_VERSION}-linux-x64-all.zip
+RUN ln -s yaci-store-${YACI_STORE_VERSION}/yaci-store yaci-store
+
+# Create node_exporter source directory
+RUN install --directory --owner=root --group=root --mode=0755 /usr/local/src/node_exporter
+
+# Download node_exporter archive
+RUN curl --proto '=https' --tlsv1.2 \
+        --location https://github.com/prometheus/node_exporter/releases/download/v${NODE_EXPORTER_VERSION}/node_exporter-${NODE_EXPORTER_VERSION}.linux-amd64.tar.gz \
+        --output /usr/local/src/node_exporter/node_exporter-${NODE_EXPORTER_VERSION}.linux-amd64.tar.gz
+
+# Download node_exporter checksum
+RUN curl --proto '=https' --tlsv1.2 \
+        --location https://github.com/prometheus/node_exporter/releases/download/v${NODE_EXPORTER_VERSION}/sha256sums.txt \
+        --output /usr/local/src/node_exporter/sha256sums.txt
+
+# Verify node_exporter checksum
+WORKDIR /usr/local/src/node_exporter
+RUN sha256sum --ignore-missing --check sha256sums.txt
+
+# Unarchive node_exporter tarball
+RUN tar --extract --gzip --file=/usr/local/src/node_exporter/node_exporter-${NODE_EXPORTER_VERSION}.linux-amd64.tar.gz --directory=/usr/local/src/node_exporter
+
+# Make node_exporter executable
+RUN chmod 0755 /usr/local/src/node_exporter/node_exporter-${NODE_EXPORTER_VERSION}.linux-amd64
+
+# Create node_exporter symlink
+RUN ln -s /usr/local/src/node_exporter/node_exporter-${NODE_EXPORTER_VERSION}.linux-amd64/node_exporter /usr/local/bin/node_exporter
+
+# Create process_exporter source directory
+RUN install --directory --owner=root --group=root --mode=0755 /usr/local/src/process_exporter
+
+# Download process_exporter archive
+RUN curl --proto '=https' --tlsv1.2 \
+        --location https://github.com/ncabatoff/process-exporter/releases/download/v${PROCESS_EXPORTER_VERSION}/process-exporter-${PROCESS_EXPORTER_VERSION}.linux-amd64.tar.gz \
+        --output /usr/local/src/process_exporter/process-exporter-${PROCESS_EXPORTER_VERSION}.linux-amd64.tar.gz
+
+# Download process_exporter checksum
+RUN curl --proto '=https' --tlsv1.2 \
+        --location https://github.com/ncabatoff/process-exporter/releases/download/v${PROCESS_EXPORTER_VERSION}/checksums.txt \
+        --output /usr/local/src/process_exporter/checksums.txt
+
+# Verify process_exporter checksum
+WORKDIR /usr/local/src/process_exporter
+RUN sha256sum --ignore-missing --check checksums.txt
+
+# Unarchive process_exporter tarball
+RUN tar --extract --gzip --file=/usr/local/src/process_exporter/process-exporter-${PROCESS_EXPORTER_VERSION}.linux-amd64.tar.gz --directory=/usr/local/src/process_exporter
+
+# Make process_exporter executable
+RUN chmod 0755 /usr/local/src/process_exporter/process-exporter-${PROCESS_EXPORTER_VERSION}.linux-amd64/process-exporter
+
+# Create process_exporter symlink
+RUN ln -s /usr/local/src/process_exporter/process-exporter-${PROCESS_EXPORTER_VERSION}.linux-amd64/process-exporter /usr/local/bin/process_exporter
+
+#---------------------------------------------------------------------
+
+FROM docker.io/debian:stable-20250630-slim AS main
+
+# Set time zone
+ENV TZ="UTC"
+RUN ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime && \
+    echo ${TZ} > /etc/timezone
+
+# Install packages required in main stage
+RUN apt update && \
+    apt install -y --no-install-recommends \
+        curl \
+        doas \
+        dnsutils \
+        iproute2 \
+        iputils-ping \
+        jq \
+        less \
+        lsof \
+        netbase \
+        netcat-openbsd \
+        openssl \
+        postgresql-client-15 \
+        procps \
+        tcpdump \
+        telnet \
+        vim
+
+# Copy monitoring binaries from build stage
+COPY --from=build --chown=root:root /usr/local/bin/node_exporter /usr/local/bin/node_exporter
+COPY --from=build --chown=root:root /usr/local/bin/process_exporter /usr/local/bin/process_exporter
+
+# Create cardano group and user
+RUN groupadd --gid 10000 cardano && \
+    useradd --comment 'cardano' --create-home --gid 10000 --password '!' --shell '/bin/bash' --uid 10000 cardano
+
+RUN install --directory --owner=cardano --group=cardano --mode=0750 /opt/yaci/config
+
+COPY --from=build --chown=root:root /usr/local/src/yaci-store/yaci-store /opt/yaci/yaci-store
+COPY --from=testnet_builder --chown=cardano:cardano /tmp/testnet/pools/1/configs/alonzo-genesis.json /opt/yaci/config/
+COPY --from=testnet_builder --chown=cardano:cardano /tmp/testnet/pools/1/configs/byron-genesis.json /opt/yaci/config/
+COPY --from=testnet_builder --chown=cardano:cardano /tmp/testnet/pools/1/configs/conway-genesis.json /opt/yaci/config/
+COPY --from=testnet_builder --chown=cardano:cardano /tmp/testnet/pools/1/configs/shelley-genesis.json /opt/yaci/config/
+
+# Permit cardano user to run commands 'ip' and 'tc' as root
+RUN echo 'permit setenv { PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin } :cardano' >> /etc/doas.conf
+RUN echo 'permit nopass cardano as root cmd ip' >> /etc/doas.conf
+RUN echo 'permit nopass cardano as root cmd tc' >> /etc/doas.conf
+
+# Copy cmd.sh
+COPY yaci-store/cmd.sh /
+RUN chmod 0755 /cmd.sh
+
+USER cardano
+
+CMD ["/cmd.sh"]
