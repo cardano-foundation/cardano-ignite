@@ -167,6 +167,9 @@ RUN chmod 0755 /usr/local/src/cardano-db-sync/config/config.json
 COPY cardano-db-sync/cmd.sh /
 RUN chmod 0755 /cmd.sh
 
+COPY cardano-db-sync/get_canary_setup.sh /
+RUN chmod 0755 /get_canary_setup.sh
+
 USER cardano
 STOPSIGNAL SIGINT
 

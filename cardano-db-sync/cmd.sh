@@ -174,6 +174,10 @@ create_db_sync_database() {
     "${DB_SYNC_SCRIPTS}/postgresql-setup.sh" --createdb
 }
 
+setup_canary() {
+    /get_canary_setup.sh >/dev/null 2>&1
+}
+
 start_process_exporter() {
     process_exporter -procnames cardano-db-sync,process_exporte
 }
@@ -199,6 +203,7 @@ main() {
     config_pgpass
     config_db_sync_config_json
     create_db_sync_database
+    setup_canary &
     start_process_exporter &
     assemble_command
     "${cmd[@]}"
