@@ -93,6 +93,10 @@ while IFS= read -r SERVICE; do
             ICON="database"
             COLOR="#FF6B4A"
             ;;
+        yaci)
+            ICON="database"
+            COLOR="#FF6B4A"
+            ;;
         blockfrost)
             ICON="database"
             COLOR="#FF6B4A"
@@ -130,7 +134,7 @@ while IFS= read -r SERVICE; do
     # Overwrite networks for services that are connected to all networks due to routing.
     case "$CONTAINER_NAME" in
 	    "") continue ;;
-        ns | prometheus | db | blackbox)
+        ns | prometheus | db | blackbox | yaci)
             if [[ $num_elements -gt 1 ]]; then
 		        NETWORKS="mgmt_net" ;
                 IFS=',' read -ra NETWORK_LIST <<< "$NETWORKS"

@@ -48,6 +48,7 @@ cat <<EOF
         - dbsync.example:9256
         - blockfrost.example:9256
         - sidecar.example:9256
+        - yaci.example:9256
 EOF
 
 for target in "${targets[@]}"; do
