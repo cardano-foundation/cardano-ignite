@@ -51,6 +51,7 @@ The following list provides an overview of the key tools and technologies used i
 |Loki                 |A log aggregation system designed to store and query logs.           |https://github.com/grafana/loki                      |
 |PostgreSQL           |An object-relational database system.                                |https://www.postgresql.org                           |
 |Prometheus           |A systems and service monitoring system.                             |https://github.com/prometheus/prometheus             |
+|Yaci Store           |A modular, high-performance Cardano blockchain indexer and datastore.|https://github.com/bloxbean/yaci-store               |
 
 ## Requirements
 
