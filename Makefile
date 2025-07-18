@@ -1,7 +1,7 @@
 SHELL:=/bin/bash
 
 .PHONY: all clean example_zone node_graph prerequisites prometheus_target
-.SILENT: all block build dbsync down pools prerequisites query up up-all validate
+.SILENT: all block build dbsync down pools prerequisites query up up-all validate yaci
 
 # Required for builds on OSX ARM
 export DOCKER_DEFAULT_PLATFORM?=linux/amd64
@@ -71,7 +71,7 @@ build: TESTNET prerequisites testnets/${testnet}/graph_nodes.sql testnets/${test
 	$(HOST_INTERFACE_SETUP) && \
 	docker build -t ${testnet}-testnet_builder -f testnet-generation-tool/Dockerfile . && \
 	cd testnets/${testnet} && \
-	docker compose --profile core build --build-arg GRAPHNODES="testnets/${testnet}/graph_nodes.sql" --build-arg TESTNET_BUILDER_IMAGE="${testnet}-testnet_builder"
+	docker compose --profile build build --build-arg GRAPHNODES="testnets/${testnet}/graph_nodes.sql" --build-arg TESTNET_BUILDER_IMAGE="${testnet}-testnet_builder"
 
 all:
 	for dir in testnets/*; do \
@@ -110,6 +110,10 @@ validate: ## Check for consensus among all pools
 
 dbsync: ## Run SQL query in cardano-db-sync
 	docker exec -ti dbsync /usr/bin/psql --host db.example --dbname dbsync --user dbsync --command="SELECT time,block_no,slot_no FROM block WHERE block_no=(SELECT MAX(block_no) FROM block);"
+
+yaci: ## Run SQL query in yaci-store
+	docker exec -ti sidecar /usr/bin/psql --host db.example --dbname yaci --user yaci --command="SELECT to_timestamp(block_time),number,slot FROM block WHERE number=(SELECT MAX(number) FROM block);"
+
 
 block: ## Run Blockfrost query on '/blocks/latest'
 	docker exec -ti blockfrost curl http://127.0.0.1:3000/blocks/latest | jq

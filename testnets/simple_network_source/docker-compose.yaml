@@ -29,7 +29,7 @@ services:
     environment:
       <<: *env
       POOL_ID: "1"
-    profiles: [core, pools]
+    profiles: [build, core, pools]
 
   p2:
     <<: *base
@@ -41,7 +41,7 @@ services:
       <<: *env
       POOL_ID: "2"
       PEER_SHARING: "false"
-    profiles: [core, pools]
+    profiles: [build, core, pools]
 
   p3:
     <<: *base
@@ -52,7 +52,7 @@ services:
     environment:
       <<: *env
       POOL_ID: "3"
-    profiles: [core, pools]
+    profiles: [build, core, pools]
 
   # DNS Server
   ns:
@@ -63,7 +63,7 @@ services:
     command: -conf /etc/coredns/corefile
     volumes:
       - ./coredns:/etc/coredns # Mount custom corefile
-    profiles: [core]
+    profiles: [build, core]
 
   sidecar:
     image: ${testnet}_sidecar:latest
@@ -88,7 +88,7 @@ services:
       POOL_ID: "1"
       TYPE: "client"
       SYSTEM_START: ${SYSTEM_START:-}
-    profiles: [core]
+    profiles: [build, core]
 
   # TX generator 1
   c2:
@@ -103,7 +103,7 @@ services:
       TPS: "1"
       UTXOHD: "true"
       SYSTEM_START: ${SYSTEM_START:-}
-    profiles: [optional]
+    profiles: [build, optional]
 
   # PostgreSQL Database
   db:
@@ -116,7 +116,7 @@ services:
     build:
       context: "../../"
       dockerfile: "postgresql/Dockerfile"
-    profiles: [core]
+    profiles: [build, core]
 
   dbsync:
     image: cardano-db-sync:latest
@@ -134,7 +134,7 @@ services:
     depends_on:
       db:
         condition: service_started
-    profiles: [core]
+    profiles: [build, core]
 
   blockfrost:
     image: blockfrost:latest
@@ -148,7 +148,7 @@ services:
     build:
       context: "../../"
       dockerfile: "blockfrost/Dockerfile"
-    profiles: [optional]
+    profiles: [build, optional]
 
   prometheus:
     image: prom/prometheus:v3.4.2
@@ -161,7 +161,7 @@ services:
     depends_on:
       blackbox:
         condition: service_started
-    profiles: [core]
+    profiles: [build, core]
 
   blackbox:
     image: quay.io/prometheus/blackbox-exporter:v0.27.0
@@ -174,7 +174,7 @@ services:
     cap_add:
       - NET_ADMIN
       - NET_RAW
-    profiles: [core]
+    profiles: [build, core]
 
   loki:
     image: grafana/loki:3.4.4
@@ -186,7 +186,7 @@ services:
       - "3100:3100"
     volumes:
       - loki:/loki
-    profiles: [core]
+    profiles: [build, core]
 
   grafana:
     image: grafana/grafana:12.0.2
@@ -201,7 +201,21 @@ services:
     environment:
       GF_SECURITY_ADMIN_USER: cardano
       GF_SECURITY_ADMIN_PASSWORD: cardano
-    profiles: [core]
+    profiles: [build, core]
+
+  yaci:
+    image: yaci:latest
+    container_name: yaci
+    hostname: yaci.example
+    restart: unless-stopped
+    volumes:
+      - c1:/opt/cardano-node
+      - ../../yaci-store/application.properties:/opt/yaci/config/application.properties
+      - ../../yaci-store/application-ledger-state.properties:/opt/yaci/config/application-ledger-state.properties
+    build:
+      context: "../../"
+      dockerfile: "yaci-store/Dockerfile.binary"
+    profiles: [build, optional]
 
 volumes:
   p1:
