@@ -16,6 +16,9 @@ DB_SIDECAR_USERNAME="${DB_SIDECAR_USERNAME:-sidecar}"
 DB_YACI_DATABASE="${DB_YACI_DATABASE:-yaci}"
 DB_YACI_PASSWORD="${DB_YACI_PASSWORD:-yaci}"
 DB_YACI_USERNAME="${DB_YACI_USERNAME:-yaci}"
+DB_DBSYNC_DATABASE="${DB_DBSYNC_DATABASE:-dbsync}"
+DB_DBSYNC_PASSWORD="${DB_DBSYNC_PASSWORD:-dbsync}"
+DB_DBSYNC_USERNAME="${DB_DBSYNC_USERNAME:-dbsync}"
 DB_HOST="${DB_HOST:-db.example}"
 DB_PORT="${DB_PORT:-5432}"
 PGPASS="$HOME/.pgpass"
@@ -67,6 +70,7 @@ config_pgpass() {
         cat <<EOF
 ${DB_HOST}:${DB_PORT}:${DB_SIDECAR_DATABASE}:${DB_SIDECAR_USERNAME}:${DB_SIDECAR_PASSWORD}
 ${DB_HOST}:${DB_PORT}:${DB_YACI_DATABASE}:${DB_YACI_USERNAME}:${DB_YACI_PASSWORD}
+${DB_HOST}:${DB_PORT}:${DB_DBSYNC_DATABASE}:${DB_DBSYNC_USERNAME}:${DB_DBSYNC_PASSWORD}
 EOF
     ) >"${PGPASS}"
 
@@ -117,7 +121,8 @@ main() {
     create_tables
     start_process_exporter &
     /opt/scripts/grafana_graph_nodes.sh >/dev/null 2>&1 &
-    /opt/scripts/grafana_consensus.sh >/dev/null 2>&1
+    /opt/scripts/grafana_consensus.sh >/dev/null 2>&1 &
+    /opt/scripts/pots.sh >/dev/null 2>&1
 }
 
 main
