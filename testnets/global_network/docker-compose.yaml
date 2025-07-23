@@ -21,7 +21,8 @@ x-base: &base
     # Source version
     dockerfile: "cardano-node/Dockerfile.source"
     args:
-      CARDANO_NODE_REF: "10.5.1"
+      #CARDANO_NODE_REF: "10.5.1"
+      CARDANO_NODE_REF: "12e5884da1f95c738df9114cd15e17569f739cd3"
 
 x-base_eu: &base_eu
   <<: *base
@@ -195,6 +196,7 @@ services:
       TYPE: bp
       PEER_SHARING: "false"
       EGRESS_POLL_INTERVAL: 0.001
+      TX_SUBMISSION_LOGIC_VERSION: 2
     networks:
       na_net:
         ipv4_address: 172.16.1.101
@@ -212,6 +214,7 @@ services:
       RELAY_ID: "1"
       TYPE: relay
       EGRESS_POLL_INTERVAL: 0.001
+      TX_SUBMISSION_LOGIC_VERSION: 2
     networks:
       na_net:
         ipv4_address: 172.16.1.102
@@ -229,6 +232,7 @@ services:
       RELAY_ID: "2"
       TYPE: relay
       EGRESS_POLL_INTERVAL: 0.001
+      TX_SUBMISSION_LOGIC_VERSION: 2
     networks:
       na_net:
         ipv4_address: 172.16.1.103
@@ -246,6 +250,7 @@ services:
       RELAY_ID: "3"
       TYPE: privaterelay
       EGRESS_POLL_INTERVAL: 0.001
+      TX_SUBMISSION_LOGIC_VERSION: 2
     networks:
       na_net:
         ipv4_address: 172.16.1.104
@@ -725,6 +730,7 @@ services:
       TYPE: "client"
       UTXOHD: "true"
       SYSTEM_START: ${SYSTEM_START:-}
+      TX_SUBMISSION_LOGIC_VERSION: 2
     networks:
       eu_net:
         ipv4_address: 172.16.3.4
@@ -743,6 +749,7 @@ services:
       TPS: "1"
       UTXOHD: "true"
       SYSTEM_START: ${SYSTEM_START:-}
+      TX_SUBMISSION_LOGIC_VERSION: 2
     networks:
       na_net:
         ipv4_address: 172.16.1.12
