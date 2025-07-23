@@ -288,7 +288,7 @@
       },
       "gridPos": {
         "h": 2,
-        "w": 3,
+        "w": 2,
         "x": 0,
         "y": 5
       },
@@ -405,7 +405,7 @@
       "gridPos": {
         "h": 2,
         "w": 2,
-        "x": 3,
+        "x": 2,
         "y": 5
       },
       "id": 80,
@@ -488,7 +488,7 @@
       "gridPos": {
         "h": 2,
         "w": 2,
-        "x": 5,
+        "x": 4,
         "y": 5
       },
       "id": 76,
@@ -621,7 +621,7 @@
       "gridPos": {
         "h": 2,
         "w": 2,
-        "x": 7,
+        "x": 6,
         "y": 5
       },
       "id": 65,
@@ -754,7 +754,7 @@
       "gridPos": {
         "h": 2,
         "w": 2,
-        "x": 9,
+        "x": 8,
         "y": 5
       },
       "id": 61,
@@ -887,7 +887,7 @@
       "gridPos": {
         "h": 2,
         "w": 2,
-        "x": 11,
+        "x": 10,
         "y": 5
       },
       "id": 62,
@@ -1020,7 +1020,140 @@
       "gridPos": {
         "h": 2,
         "w": 2,
-        "x": 13,
+        "x": 12,
+        "y": 5
+      },
+      "id": 100,
+      "options": {
+        "colorMode": "background_solid",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "value",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.0.2",
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "probe_http_status_code{job=\"http_ip4_basic\",instance=\"http://yaci.example:8080/actuator/health\"}",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Yaci Store",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus_uid"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "from": 0,
+                "result": {
+                  "color": "light-red",
+                  "index": 0,
+                  "text": "No Data"
+                },
+                "to": 99
+              },
+              "type": "range"
+            },
+            {
+              "options": {
+                "from": 100,
+                "result": {
+                  "color": "light-blue",
+                  "index": 1,
+                  "text": "Informational"
+                },
+                "to": 199
+              },
+              "type": "range"
+            },
+            {
+              "options": {
+                "from": 200,
+                "result": {
+                  "color": "light-green",
+                  "index": 2,
+                  "text": "Success"
+                },
+                "to": 299
+              },
+              "type": "range"
+            },
+            {
+              "options": {
+                "from": 300,
+                "result": {
+                  "color": "yellow",
+                  "index": 3,
+                  "text": "Redirection"
+                },
+                "to": 399
+              },
+              "type": "range"
+            },
+            {
+              "options": {
+                "from": 400,
+                "result": {
+                  "color": "light-orange",
+                  "index": 4,
+                  "text": "Client Error"
+                },
+                "to": 499
+              },
+              "type": "range"
+            },
+            {
+              "options": {
+                "from": 500,
+                "result": {
+                  "color": "light-red",
+                  "index": 5,
+                  "text": "Server Error"
+                },
+                "to": 999
+              },
+              "type": "range"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "light-red"
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 2,
+        "x": 14,
         "y": 5
       },
       "id": 82,
@@ -1153,7 +1286,7 @@
       "gridPos": {
         "h": 2,
         "w": 2,
-        "x": 15,
+        "x": 16,
         "y": 5
       },
       "id": 63,
@@ -1286,7 +1419,7 @@
       "gridPos": {
         "h": 2,
         "w": 2,
-        "x": 17,
+        "x": 18,
         "y": 5
       },
       "id": 64,
@@ -1419,7 +1552,7 @@
       "gridPos": {
         "h": 2,
         "w": 2,
-        "x": 19,
+        "x": 20,
         "y": 5
       },
       "id": 60,
@@ -1460,8 +1593,8 @@
       },
       "gridPos": {
         "h": 2,
-        "w": 3,
-        "x": 21,
+        "w": 2,
+        "x": 22,
         "y": 5
       },
       "id": 84,
@@ -1699,7 +1832,7 @@
             "h": 13,
             "w": 24,
             "x": 0,
-            "y": 116
+            "y": 134
           },
           "id": 34,
           "options": {
@@ -1784,7 +1917,7 @@
             "h": 13,
             "w": 24,
             "x": 0,
-            "y": 129
+            "y": 147
           },
           "id": 45,
           "options": {
@@ -1869,7 +2002,7 @@
             "h": 13,
             "w": 24,
             "x": 0,
-            "y": 142
+            "y": 160
           },
           "id": 59,
           "options": {
@@ -1938,7 +2071,7 @@
             "h": 26,
             "w": 12,
             "x": 0,
-            "y": 183
+            "y": 201
           },
           "id": 1,
           "options": {
@@ -2024,7 +2157,7 @@
             "h": 26,
             "w": 12,
             "x": 12,
-            "y": 183
+            "y": 201
           },
           "id": 2,
           "options": {
@@ -5289,7 +5422,56 @@
                 ]
               }
             },
-            "overrides": []
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "epoch_no"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Epoch"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "fees"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Fees"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "treasury"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Treasury"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "reserves"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Reserves"
+                  }
+                ]
+              }
+            ]
           },
           "gridPos": {
             "h": 7,
@@ -5375,7 +5557,56 @@
                 ]
               }
             },
-            "overrides": []
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "epoch_no"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Epoch"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "fees"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Fees"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "treasury"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Treasury"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "reserves"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Reserves"
+                  }
+                ]
+              }
+            ]
           },
           "gridPos": {
             "h": 7,
@@ -5431,7 +5662,7 @@
           "type": "table"
         }
       ],
-      "title": "ADA Pots",
+      "title": "Ada Pots",
       "type": "row"
     }
   ],
