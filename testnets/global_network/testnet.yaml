@@ -78,4 +78,8 @@ TracePeerSelection: true
 TracePeerSelectionActions: true
 TracePublicRootPeers: false
 TraceServer: true
+TraceTxInbound: true
+TraceTxLogic: false
+TraceTxOutbound: false
+
 TurnOnLogMetrics: true
