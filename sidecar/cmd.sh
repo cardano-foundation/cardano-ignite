@@ -13,6 +13,12 @@ DB_ADMIN_USERNAME="${DB_ADMIN_USERNAME:-admin}"
 DB_SIDECAR_DATABASE="${DB_SIDECAR_DATABASE:-sidecar}"
 DB_SIDECAR_PASSWORD="${DB_SIDECAR_PASSWORD:-sidecar}"
 DB_SIDECAR_USERNAME="${DB_SIDECAR_USERNAME:-sidecar}"
+DB_YACI_DATABASE="${DB_YACI_DATABASE:-yaci}"
+DB_YACI_PASSWORD="${DB_YACI_PASSWORD:-yaci}"
+DB_YACI_USERNAME="${DB_YACI_USERNAME:-yaci}"
+DB_DBSYNC_DATABASE="${DB_DBSYNC_DATABASE:-dbsync}"
+DB_DBSYNC_PASSWORD="${DB_DBSYNC_PASSWORD:-dbsync}"
+DB_DBSYNC_USERNAME="${DB_DBSYNC_USERNAME:-dbsync}"
 DB_HOST="${DB_HOST:-db.example}"
 DB_PORT="${DB_PORT:-5432}"
 PGPASS="$HOME/.pgpass"
@@ -39,16 +45,22 @@ wait_for_postgresql() {
 }
 
 config_database_instance() {
-    if [ $(psql ${DB_OPTIONS} --no-align --tuples-only --command="SELECT COUNT(*) FROM pg_database WHERE datname = '${DB_SIDECAR_DATABASE}';") -ne 1 ]; then
-        psql ${DB_OPTIONS} --command="CREATE DATABASE ${DB_SIDECAR_DATABASE};"
+    local DATABASE="$1"
+
+    if [ $(psql ${DB_OPTIONS} --no-align --tuples-only --command="SELECT COUNT(*) FROM pg_database WHERE datname = '${DATABASE}';") -ne 1 ]; then
+        psql ${DB_OPTIONS} --command="CREATE DATABASE ${DATABASE};"
     fi
 }
 
 config_database_user() {
-    if [ $(psql ${DB_OPTIONS} --no-align --tuples-only --command="SELECT COUNT(*) FROM pg_roles WHERE rolname = '${DB_SIDECAR_USERNAME}';") -ne 1 ]; then
-        psql ${DB_OPTIONS} --command="CREATE USER ${DB_SIDECAR_USERNAME} WITH PASSWORD '${DB_SIDECAR_PASSWORD}';"
-        psql ${DB_OPTIONS} --command="ALTER ROLE ${DB_SIDECAR_USERNAME} WITH SUPERUSER;"
-        psql ${DB_OPTIONS} --command="GRANT ALL PRIVILEGES ON DATABASE ${DB_SIDECAR_DATABASE} TO ${DB_SIDECAR_USERNAME};"
+    local USERNAME="$1"
+    local PASSWORD="$2"
+    local DATABASE="$3"
+
+    if [ $(psql ${DB_OPTIONS} --no-align --tuples-only --command="SELECT COUNT(*) FROM pg_roles WHERE rolname = '${USER_NAME}';") -ne 1 ]; then
+        psql ${DB_OPTIONS} --command="CREATE USER ${USERNAME} WITH PASSWORD '${PASSWORD}';"
+        psql ${DB_OPTIONS} --command="ALTER ROLE ${USERNAME} WITH SUPERUSER;"
+        psql ${DB_OPTIONS} --command="GRANT ALL PRIVILEGES ON DATABASE ${DATABASE} TO ${USERNAME};"
     fi
 }
 
@@ -57,6 +69,8 @@ config_pgpass() {
     (
         cat <<EOF
 ${DB_HOST}:${DB_PORT}:${DB_SIDECAR_DATABASE}:${DB_SIDECAR_USERNAME}:${DB_SIDECAR_PASSWORD}
+${DB_HOST}:${DB_PORT}:${DB_YACI_DATABASE}:${DB_YACI_USERNAME}:${DB_YACI_PASSWORD}
+${DB_HOST}:${DB_PORT}:${DB_DBSYNC_DATABASE}:${DB_DBSYNC_USERNAME}:${DB_DBSYNC_PASSWORD}
 EOF
     ) >"${PGPASS}"
 
@@ -99,13 +113,16 @@ main() {
     verify_environment_variables
     add_routes
     wait_for_postgresql
-    config_database_instance
-    config_database_user
+    config_database_instance ${DB_SIDECAR_DATABASE}
+    config_database_user ${DB_SIDECAR_USERNAME} ${DB_SIDECAR_PASSWORD} ${DB_SIDECAR_DATABASE}
+    config_database_instance ${DB_YACI_DATABASE}
+    config_database_user ${DB_YACI_USERNAME} ${DB_YACI_PASSWORD} ${DB_YACI_DATABASE}
     config_pgpass
     create_tables
     start_process_exporter &
     /opt/scripts/grafana_graph_nodes.sh >/dev/null 2>&1 &
-    /opt/scripts/grafana_consensus.sh >/dev/null 2>&1
+    /opt/scripts/grafana_consensus.sh >/dev/null 2>&1 &
+    /opt/scripts/pots.sh >/dev/null 2>&1
 }
 
 main

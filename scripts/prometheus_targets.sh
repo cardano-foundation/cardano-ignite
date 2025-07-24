@@ -48,6 +48,7 @@ cat <<EOF
         - dbsync.example:9256
         - blockfrost.example:9256
         - sidecar.example:9256
+        - yaci.example:9256
 EOF
 
 for target in "${targets[@]}"; do
@@ -72,13 +73,15 @@ cat <<EOF
       module: [http_ip4_basic]
     static_configs:
       - targets:
-        - http://ns.example:8090/health
-        - http://dbsync.example:8080
-        - http://blockfrost.example:3000/health
-        - http://prometheus.example:9090/metrics
         - http://blackbox.example:9115/metrics
-        - http://loki.example:3100/metrics
+        - http://blockfrost.example:3000/health
+        - http://dbsync.example:8080
         - http://grafana.example:3000
+        - http://loki.example:3100/metrics
+        - http://ns.example:8090/health
+        - http://prometheus.example:9090/metrics
+        - http://yaci.example:8080/actuator/health
+
 EOF
 
 for target in "${targets[@]}"; do

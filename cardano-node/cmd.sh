@@ -29,9 +29,6 @@ TPS="${TSP:-1}"
 TYPE="${TYPE:-bprelay}"
 USE_LEDGER_AFTER_SLOT="${USE_LEDGER_AFTER_SLOT:-0}"
 UTXOHD="${UTXOHD:-false}"
-LOCAL_DELAY="${LOCAL_DELAY:-5ms}"
-LOCAL_JITTER="${LOCAL_JITTER:-1ms}"
-LOCAL_LOSS="${LOCAL_LOSS:-0.01%}"
 
 # Configuration files
 BYRON_GENESIS_JSON="${BYRON_GENESIS_JSON:-/opt/cardano-node/pools/${POOL_ID}/configs/byron-genesis.json}"
@@ -391,41 +388,6 @@ tx_generator() {
     /tx-generator.sh >/dev/null 2>&1
 }
 
-add_routes() {
-    case ${REGION} in
-        "NA")
-            doas ip route add 172.16.2.0/24 via 172.16.1.11 dev eth0
-            doas ip route add 172.16.3.0/24 via 172.16.1.11 dev eth0
-            doas ip route add 172.16.4.0/24 via 172.16.1.11 dev eth0
-            doas ip route add 172.16.7.0/24 via 172.16.1.11 dev eth0
-            doas tc qdisc replace dev eth0 root netem delay ${LOCAL_DELAY} ${LOCAL_JITTER} loss ${LOCAL_LOSS}
-            ;;
-        "EU")
-            doas ip route add 172.16.1.0/24 via 172.16.3.12 dev eth0
-            doas ip route add 172.16.2.0/24 via 172.16.3.12 dev eth0
-            doas ip route add 172.16.4.0/24 via 172.16.3.12 dev eth0
-            doas ip route add 172.16.7.0/24 via 172.16.3.12 dev eth0
-            doas tc qdisc replace dev eth0 root netem delay ${LOCAL_DELAY} ${LOCAL_JITTER} loss ${LOCAL_LOSS}
-            ;;
-        "AS")
-            doas ip route add 172.16.1.0/24 via 172.16.4.13 dev eth0
-            doas ip route add 172.16.2.0/24 via 172.16.4.13 dev eth0
-            doas ip route add 172.16.3.0/24 via 172.16.4.13 dev eth0
-            doas ip route add 172.16.7.0/24 via 172.16.4.13 dev eth0
-            doas tc qdisc replace dev eth0 root netem delay ${LOCAL_DELAY} ${LOCAL_JITTER} loss ${LOCAL_LOSS}
-            ;;
-        "AD")
-            doas ip route add 172.16.1.0/24 via 172.16.7.14 dev eth0
-            doas ip route add 172.16.2.0/24 via 172.16.7.14 dev eth0
-            doas ip route add 172.16.3.0/24 via 172.16.7.14 dev eth0
-            doas ip route add 172.16.4.0/24 via 172.16.7.14 dev eth0
-            ;;
-        *)
-            true
-            ;;
-    esac
-}
-
 config_pgpass() {
     # hostname:port:database:username:password
     (
@@ -481,7 +443,7 @@ main() {
     if [ "${TYPE,,}" = "txg" ]; then
 	tx_generator &
     fi
-    add_routes
+    /node_routes.sh
     start_node_exporter &
     start_process_exporter &
     localroot_edges &

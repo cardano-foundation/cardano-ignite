@@ -198,7 +198,7 @@ services:
     networks:
       na_net:
         ipv4_address: 172.16.1.101
-    profiles: [core, na, p1]
+    profiles: [build, core, na, p1]
 
   # Relay
   p1r1:
@@ -215,7 +215,7 @@ services:
     networks:
       na_net:
         ipv4_address: 172.16.1.102
-    profiles: [core, na, p1, p1relays]
+    profiles: [build, core, na, p1, p1relays]
 
   # Relay
   p1r2:
@@ -232,7 +232,7 @@ services:
     networks:
       na_net:
         ipv4_address: 172.16.1.103
-    profiles: [core, na, p1, p1relays]
+    profiles: [build, core, na, p1, p1relays]
 
   # Relay
   p1r3:
@@ -267,7 +267,7 @@ services:
     networks:
       eu_net:
         ipv4_address: 172.16.3.101
-    profiles: [core, eu, p2]
+    profiles: [build, core, eu, p2]
 
   # Relay
   p2r1:
@@ -283,7 +283,7 @@ services:
     networks:
       eu_net:
         ipv4_address: 172.16.3.102
-    profiles: [core, eu, p2, p2relays]
+    profiles: [build, core, eu, p2, p2relays]
 
   # Relay
   p2r2:
@@ -299,7 +299,7 @@ services:
     networks:
       eu_net:
         ipv4_address: 172.16.3.103
-    profiles: [core, eu, p2, p2relays]
+    profiles: [build, core, eu, p2, p2relays]
 
   # Relay
   p2r3:
@@ -333,7 +333,7 @@ services:
     networks:
       as_net:
         ipv4_address: 172.16.4.101
-    profiles: [core, as, p3]
+    profiles: [build, core, as, p3]
 
   # Relay
   p3r1:
@@ -349,7 +349,7 @@ services:
     networks:
       as_net:
         ipv4_address: 172.16.4.102
-    profiles: [core, as, p3, p3relays]
+    profiles: [build, core, as, p3, p3relays]
 
   # Relay
   p3r2:
@@ -365,7 +365,7 @@ services:
     networks:
       as_net:
         ipv4_address: 172.16.4.103
-    profiles: [core, as, p3, p3relays]
+    profiles: [build, core, as, p3, p3relays]
 
   # Relay
   p3r3:
@@ -399,7 +399,7 @@ services:
     networks:
       eu_net:
         ipv4_address: 172.16.3.111
-    profiles: [core, eu, p4]
+    profiles: [build, core, eu, p4]
 
   # Relay
   p4r1:
@@ -415,7 +415,7 @@ services:
     networks:
       eu_net:
         ipv4_address: 172.16.3.112
-    profiles: [core, eu, p4, p4relays]
+    profiles: [build, core, eu, p4, p4relays]
 
   # Relay
   p4r2:
@@ -431,7 +431,7 @@ services:
     networks:
       eu_net:
         ipv4_address: 172.16.3.113
-    profiles: [core, eu, p4, p4relays]
+    profiles: [build, core, eu, p4, p4relays]
 
   # Relay
   p4r3:
@@ -465,7 +465,7 @@ services:
     networks:
       na_net:
         ipv4_address: 172.16.1.111
-    profiles: [core, na, p5]
+    profiles: [build, core, na, p5]
 
   # Relay
   p5r1:
@@ -481,7 +481,7 @@ services:
     networks:
       na_net:
         ipv4_address: 172.16.1.112
-    profiles: [core, na, p5, p5relays]
+    profiles: [build, core, na, p5, p5relays]
 
   # Relay
   p5r2:
@@ -497,7 +497,7 @@ services:
     networks:
       na_net:
         ipv4_address: 172.16.1.123
-    profiles: [core, na, p5, p5relays]
+    profiles: [build, core, na, p5, p5relays]
 
   # Relay
   p5r3:
@@ -531,7 +531,7 @@ services:
     networks:
       eu_net:
         ipv4_address: 172.16.3.121
-    profiles: [core, eu, p6]
+    profiles: [build, core, eu, p6]
 
   # Relay
   p6r1:
@@ -547,7 +547,7 @@ services:
     networks:
       eu_net:
         ipv4_address: 172.16.3.122
-    profiles: [core, eu, p6, p6relays]
+    profiles: [build, core, eu, p6, p6relays]
 
   # Relay
   p6r2:
@@ -563,7 +563,7 @@ services:
     networks:
       eu_net:
         ipv4_address: 172.16.3.123
-    profiles: [core, eu, p6, p6relays]
+    profiles: [build, core, eu, p6, p6relays]
 
   # Relay
   p6r3:
@@ -599,7 +599,7 @@ services:
         ipv4_address: 172.16.10.11
     dns:
       - 172.16.1.2
-    profiles: [core, na, gateways]
+    profiles: [build, core, na, gateways]
 
   # Europe Gateway
   eugw:
@@ -619,7 +619,7 @@ services:
         ipv4_address: 172.16.9.12
     dns:
       - 172.16.2.2
-    profiles: [core, eu, gateways]
+    profiles: [build, core, eu, gateways]
 
   # Asia Gateway
   asgw:
@@ -639,7 +639,7 @@ services:
         ipv4_address: 172.16.8.13
     dns:
       - 172.16.4.2
-    profiles: [core, as, gateways]
+    profiles: [build, core, as, gateways]
 
   # Management Gateway
   adgw:
@@ -659,7 +659,7 @@ services:
         ipv4_address: 172.16.10.14
     dns:
       - 172.16.7.2
-    profiles: [core, mgmt, gateways]
+    profiles: [build, core, mgmt, gateways]
 
   # DNS Server
   ns:
@@ -681,7 +681,7 @@ services:
         ipv4_address: 172.16.4.2
       mgmt_net:
         ipv4_address: 172.16.7.2
-    profiles: [core, mgmt]
+    profiles: [build, core, mgmt]
 
   sidecar:
     image: ${testnet}_sidecar:latest
@@ -704,7 +704,7 @@ services:
     depends_on:
       db:
         condition: service_started
-    profiles: [core, mgmt]
+    profiles: [build, core, mgmt]
 
   # Client 1
   # Used by cardano-db-sync
@@ -722,7 +722,7 @@ services:
     networks:
       eu_net:
         ipv4_address: 172.16.3.4
-    profiles: [core, eu]
+    profiles: [build, core, eu]
 
   # TX generator 1
   c2:
@@ -740,7 +740,7 @@ services:
     networks:
       na_net:
         ipv4_address: 172.16.1.12
-    profiles: [optional, tx-generators]
+    profiles: [build, optional, tx-generators]
 
   # PostgreSQL Database
   db:
@@ -764,7 +764,7 @@ services:
         ipv4_address: 172.16.7.5
     dns:
       - 172.16.7.2
-    profiles: [core, mgmt]
+    profiles: [build, core, mgmt]
 
   dbsync:
     image: cardano-db-sync:latest
@@ -787,7 +787,7 @@ services:
     depends_on:
       db:
         condition: service_started
-    profiles: [core, mgmt]
+    profiles: [build, core, mgmt]
 
   blockfrost:
     image: blockfrost:latest
@@ -804,7 +804,7 @@ services:
     networks:
       mgmt_net:
         ipv4_address: 172.16.7.7
-    profiles: [optional, mgmt]
+    profiles: [build, optional, mgmt]
 
   prometheus:
     image: prom/prometheus:v3.4.2
@@ -828,7 +828,7 @@ services:
     depends_on:
       blackbox:
         condition: service_started
-    profiles: [core, mgmt]
+    profiles: [build, core, mgmt]
 
   blackbox:
     image: quay.io/prometheus/blackbox-exporter:v0.27.0
@@ -852,7 +852,7 @@ services:
         ipv4_address: 172.16.7.9
     dns:
       - 172.16.7.2
-    profiles: [core, mgmt]
+    profiles: [build, core, mgmt]
 
   loki:
     image: grafana/loki:3.4.4
@@ -870,7 +870,7 @@ services:
         ipv4_address: 172.16.7.10
     dns:
       - 172.16.7.2
-    profiles: [core, mgmt]
+    profiles: [build, core, mgmt]
 
   grafana:
     image: grafana/grafana:12.0.2
@@ -891,7 +891,30 @@ services:
         ipv4_address: 172.16.7.11
     dns:
       - 172.16.7.2
-    profiles: [core, mgmt]
+    profiles: [build, core, mgmt]
+
+  yaci:
+    image: yaci-store:latest
+    container_name: yaci
+    hostname: yaci.example
+    restart: unless-stopped
+    volumes:
+      - c1:/opt/cardano-node
+      - ../../yaci-store/application.properties:/opt/yaci/config/application.properties
+      - ../../yaci-store/application-ledger-state.properties:/opt/yaci/config/application-ledger-state.properties
+    build:
+      context: "../../"
+      dockerfile: "yaci-store/Dockerfile.binary"
+    environment:
+      REGION: EU
+    cap_add:
+      - NET_ADMIN
+    networks:
+      eu_net:
+        ipv4_address: 172.16.3.22
+    dns:
+      - 172.16.3.2
+    profiles: [build, optional]
 
 volumes:
   p1bp:

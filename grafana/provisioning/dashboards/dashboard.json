@@ -105,7 +105,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "12.0.1",
+      "pluginVersion": "12.0.2",
       "targets": [
         {
           "datasource": {
@@ -258,7 +258,7 @@
         "textMode": "name",
         "wideLayout": true
       },
-      "pluginVersion": "12.0.1",
+      "pluginVersion": "12.0.2",
       "targets": [
         {
           "editorMode": "code",
@@ -288,7 +288,7 @@
       },
       "gridPos": {
         "h": 2,
-        "w": 3,
+        "w": 2,
         "x": 0,
         "y": 5
       },
@@ -302,7 +302,7 @@
         "content": "",
         "mode": "markdown"
       },
-      "pluginVersion": "12.0.1",
+      "pluginVersion": "12.0.2",
       "title": "",
       "transparent": true,
       "type": "text"
@@ -405,7 +405,7 @@
       "gridPos": {
         "h": 2,
         "w": 2,
-        "x": 3,
+        "x": 2,
         "y": 5
       },
       "id": 80,
@@ -426,7 +426,7 @@
         "textMode": "value",
         "wideLayout": true
       },
-      "pluginVersion": "12.0.1",
+      "pluginVersion": "12.0.2",
       "targets": [
         {
           "editorMode": "code",
@@ -488,7 +488,7 @@
       "gridPos": {
         "h": 2,
         "w": 2,
-        "x": 5,
+        "x": 4,
         "y": 5
       },
       "id": 76,
@@ -509,7 +509,7 @@
         "textMode": "value",
         "wideLayout": true
       },
-      "pluginVersion": "12.0.1",
+      "pluginVersion": "12.0.2",
       "targets": [
         {
           "editorMode": "code",
@@ -621,7 +621,7 @@
       "gridPos": {
         "h": 2,
         "w": 2,
-        "x": 7,
+        "x": 6,
         "y": 5
       },
       "id": 65,
@@ -642,7 +642,7 @@
         "textMode": "value",
         "wideLayout": true
       },
-      "pluginVersion": "12.0.1",
+      "pluginVersion": "12.0.2",
       "targets": [
         {
           "editorMode": "code",
@@ -754,7 +754,7 @@
       "gridPos": {
         "h": 2,
         "w": 2,
-        "x": 9,
+        "x": 8,
         "y": 5
       },
       "id": 61,
@@ -775,7 +775,7 @@
         "textMode": "value",
         "wideLayout": true
       },
-      "pluginVersion": "12.0.1",
+      "pluginVersion": "12.0.2",
       "targets": [
         {
           "editorMode": "code",
@@ -887,7 +887,7 @@
       "gridPos": {
         "h": 2,
         "w": 2,
-        "x": 11,
+        "x": 10,
         "y": 5
       },
       "id": 62,
@@ -908,7 +908,7 @@
         "textMode": "value",
         "wideLayout": true
       },
-      "pluginVersion": "12.0.1",
+      "pluginVersion": "12.0.2",
       "targets": [
         {
           "editorMode": "code",
@@ -1020,7 +1020,140 @@
       "gridPos": {
         "h": 2,
         "w": 2,
-        "x": 13,
+        "x": 12,
+        "y": 5
+      },
+      "id": 100,
+      "options": {
+        "colorMode": "background_solid",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "value",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.0.2",
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "probe_http_status_code{job=\"http_ip4_basic\",instance=\"http://yaci.example:8080/actuator/health\"}",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Yaci Store",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus_uid"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "from": 0,
+                "result": {
+                  "color": "light-red",
+                  "index": 0,
+                  "text": "No Data"
+                },
+                "to": 99
+              },
+              "type": "range"
+            },
+            {
+              "options": {
+                "from": 100,
+                "result": {
+                  "color": "light-blue",
+                  "index": 1,
+                  "text": "Informational"
+                },
+                "to": 199
+              },
+              "type": "range"
+            },
+            {
+              "options": {
+                "from": 200,
+                "result": {
+                  "color": "light-green",
+                  "index": 2,
+                  "text": "Success"
+                },
+                "to": 299
+              },
+              "type": "range"
+            },
+            {
+              "options": {
+                "from": 300,
+                "result": {
+                  "color": "yellow",
+                  "index": 3,
+                  "text": "Redirection"
+                },
+                "to": 399
+              },
+              "type": "range"
+            },
+            {
+              "options": {
+                "from": 400,
+                "result": {
+                  "color": "light-orange",
+                  "index": 4,
+                  "text": "Client Error"
+                },
+                "to": 499
+              },
+              "type": "range"
+            },
+            {
+              "options": {
+                "from": 500,
+                "result": {
+                  "color": "light-red",
+                  "index": 5,
+                  "text": "Server Error"
+                },
+                "to": 999
+              },
+              "type": "range"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "light-red"
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 2,
+        "x": 14,
         "y": 5
       },
       "id": 82,
@@ -1041,7 +1174,7 @@
         "textMode": "value",
         "wideLayout": true
       },
-      "pluginVersion": "12.0.1",
+      "pluginVersion": "12.0.2",
       "targets": [
         {
           "editorMode": "code",
@@ -1153,7 +1286,7 @@
       "gridPos": {
         "h": 2,
         "w": 2,
-        "x": 15,
+        "x": 16,
         "y": 5
       },
       "id": 63,
@@ -1174,7 +1307,7 @@
         "textMode": "value",
         "wideLayout": true
       },
-      "pluginVersion": "12.0.1",
+      "pluginVersion": "12.0.2",
       "targets": [
         {
           "editorMode": "code",
@@ -1286,7 +1419,7 @@
       "gridPos": {
         "h": 2,
         "w": 2,
-        "x": 17,
+        "x": 18,
         "y": 5
       },
       "id": 64,
@@ -1307,7 +1440,7 @@
         "textMode": "value",
         "wideLayout": true
       },
-      "pluginVersion": "12.0.1",
+      "pluginVersion": "12.0.2",
       "targets": [
         {
           "editorMode": "code",
@@ -1419,7 +1552,7 @@
       "gridPos": {
         "h": 2,
         "w": 2,
-        "x": 19,
+        "x": 20,
         "y": 5
       },
       "id": 60,
@@ -1440,7 +1573,7 @@
         "textMode": "value",
         "wideLayout": true
       },
-      "pluginVersion": "12.0.1",
+      "pluginVersion": "12.0.2",
       "targets": [
         {
           "editorMode": "code",
@@ -1460,8 +1593,8 @@
       },
       "gridPos": {
         "h": 2,
-        "w": 3,
-        "x": 21,
+        "w": 2,
+        "x": 22,
         "y": 5
       },
       "id": 84,
@@ -1474,7 +1607,7 @@
         "content": "",
         "mode": "markdown"
       },
-      "pluginVersion": "12.0.1",
+      "pluginVersion": "12.0.2",
       "title": "",
       "transparent": true,
       "type": "text"
@@ -1586,7 +1719,7 @@
           }
         ]
       },
-      "pluginVersion": "12.0.1",
+      "pluginVersion": "12.0.2",
       "targets": [
         {
           "datasource": {
@@ -1699,7 +1832,7 @@
             "h": 13,
             "w": 24,
             "x": 0,
-            "y": 27
+            "y": 134
           },
           "id": 34,
           "options": {
@@ -1784,7 +1917,7 @@
             "h": 13,
             "w": 24,
             "x": 0,
-            "y": 40
+            "y": 147
           },
           "id": 45,
           "options": {
@@ -1869,7 +2002,7 @@
             "h": 13,
             "w": 24,
             "x": 0,
-            "y": 53
+            "y": 160
           },
           "id": 59,
           "options": {
@@ -1938,7 +2071,7 @@
             "h": 26,
             "w": 12,
             "x": 0,
-            "y": 94
+            "y": 201
           },
           "id": 1,
           "options": {
@@ -2024,7 +2157,7 @@
             "h": 26,
             "w": 12,
             "x": 12,
-            "y": 94
+            "y": 201
           },
           "id": 2,
           "options": {
@@ -2135,7 +2268,7 @@
         "content": "<h1></h1>\n<h3 style=\"text-align: left\">Block Chain</h3>",
         "mode": "html"
       },
-      "pluginVersion": "12.0.1",
+      "pluginVersion": "12.0.2",
       "title": "",
       "transparent": true,
       "type": "text"
@@ -2220,7 +2353,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.1",
+      "pluginVersion": "12.0.2",
       "targets": [
         {
           "editorMode": "code",
@@ -2323,7 +2456,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.1",
+      "pluginVersion": "12.0.2",
       "targets": [
         {
           "editorMode": "code",
@@ -2426,7 +2559,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.1",
+      "pluginVersion": "12.0.2",
       "targets": [
         {
           "editorMode": "code",
@@ -2529,7 +2662,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.1",
+      "pluginVersion": "12.0.2",
       "targets": [
         {
           "editorMode": "code",
@@ -2632,7 +2765,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.1",
+      "pluginVersion": "12.0.2",
       "targets": [
         {
           "editorMode": "code",
@@ -2735,7 +2868,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.1",
+      "pluginVersion": "12.0.2",
       "targets": [
         {
           "datasource": {
@@ -2870,7 +3003,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.1",
+      "pluginVersion": "12.0.2",
       "targets": [
         {
           "datasource": {
@@ -3111,7 +3244,7 @@
         "content": "<h1></h1>\n<h3 style=\"text-align: left\">Block Forging</h3>",
         "mode": "html"
       },
-      "pluginVersion": "12.0.1",
+      "pluginVersion": "12.0.2",
       "title": "",
       "transparent": true,
       "type": "text"
@@ -3197,7 +3330,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.1",
+      "pluginVersion": "12.0.2",
       "targets": [
         {
           "editorMode": "code",
@@ -3300,7 +3433,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.1",
+      "pluginVersion": "12.0.2",
       "targets": [
         {
           "editorMode": "code",
@@ -3404,7 +3537,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.1",
+      "pluginVersion": "12.0.2",
       "targets": [
         {
           "editorMode": "code",
@@ -3448,7 +3581,7 @@
         "content": "<h1></h1>\n<h3 style=\"text-align: left\">Network</h3>",
         "mode": "html"
       },
-      "pluginVersion": "12.0.1",
+      "pluginVersion": "12.0.2",
       "title": "",
       "transparent": true,
       "type": "text"
@@ -3533,7 +3666,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.1",
+      "pluginVersion": "12.0.2",
       "targets": [
         {
           "editorMode": "code",
@@ -3636,7 +3769,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.1",
+      "pluginVersion": "12.0.2",
       "targets": [
         {
           "editorMode": "code",
@@ -3739,7 +3872,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.1",
+      "pluginVersion": "12.0.2",
       "targets": [
         {
           "editorMode": "code",
@@ -3843,7 +3976,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.1",
+      "pluginVersion": "12.0.2",
       "targets": [
         {
           "editorMode": "code",
@@ -3947,7 +4080,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.1",
+      "pluginVersion": "12.0.2",
       "targets": [
         {
           "editorMode": "code",
@@ -4050,7 +4183,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.1",
+      "pluginVersion": "12.0.2",
       "targets": [
         {
           "editorMode": "code",
@@ -4153,7 +4286,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.1",
+      "pluginVersion": "12.0.2",
       "targets": [
         {
           "editorMode": "code",
@@ -4256,7 +4389,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.1",
+      "pluginVersion": "12.0.2",
       "targets": [
         {
           "editorMode": "code",
@@ -4359,7 +4492,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.1",
+      "pluginVersion": "12.0.2",
       "targets": [
         {
           "editorMode": "code",
@@ -4403,7 +4536,7 @@
         "content": "<h1></h1>\n<h3 style=\"text-align: left\">Transactions</h3>",
         "mode": "html"
       },
-      "pluginVersion": "12.0.1",
+      "pluginVersion": "12.0.2",
       "title": "",
       "transparent": true,
       "type": "text"
@@ -4489,7 +4622,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.1",
+      "pluginVersion": "12.0.2",
       "targets": [
         {
           "editorMode": "code",
@@ -4592,7 +4725,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.1",
+      "pluginVersion": "12.0.2",
       "targets": [
         {
           "editorMode": "code",
@@ -4696,7 +4829,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.1",
+      "pluginVersion": "12.0.2",
       "targets": [
         {
           "editorMode": "code",
@@ -4740,7 +4873,7 @@
         "content": "<h1></h1>\n<h3 style=\"text-align: left\">Process</h3>",
         "mode": "html"
       },
-      "pluginVersion": "12.0.1",
+      "pluginVersion": "12.0.2",
       "title": "",
       "transparent": true,
       "type": "text"
@@ -4825,7 +4958,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.1",
+      "pluginVersion": "12.0.2",
       "targets": [
         {
           "editorMode": "code",
@@ -4928,7 +5061,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.1",
+      "pluginVersion": "12.0.2",
       "targets": [
         {
           "editorMode": "code",
@@ -5032,7 +5165,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.1",
+      "pluginVersion": "12.0.2",
       "targets": [
         {
           "editorMode": "code",
@@ -5136,7 +5269,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.1",
+      "pluginVersion": "12.0.2",
       "targets": [
         {
           "editorMode": "code",
@@ -5158,6 +5291,379 @@
         }
       ],
       "type": "timeseries"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 100
+      },
+      "id": 99,
+      "panels": [
+        {
+          "datasource": {
+            "uid": "sidecar_uid"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [
+                {
+                  "options": {
+                    "Consensus": {
+                      "color": "light-green",
+                      "index": 0
+                    },
+                    "Divergence": {
+                      "color": "light-red",
+                      "index": 1
+                    }
+                  },
+                  "type": "value"
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 2,
+            "w": 24,
+            "x": 0,
+            "y": 101
+          },
+          "id": 98,
+          "options": {
+            "colorMode": "background_solid",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "percentChangeColorMode": "standard",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "/^result$/",
+              "values": false
+            },
+            "showPercentChange": false,
+            "textMode": "auto",
+            "wideLayout": true
+          },
+          "pluginVersion": "12.0.2",
+          "targets": [
+            {
+              "editorMode": "code",
+              "format": "table",
+              "rawQuery": true,
+              "rawSql": "SELECT \n    CASE \n        WHEN NOT EXISTS (\n            SELECT 1\n            FROM ada_pots\n            GROUP BY epoch_no\n            HAVING NOT (\n                (COUNT(DISTINCT fees) = 0 OR (COUNT(DISTINCT fees) = 1 AND COUNT(fees) = COUNT(*)))\n                AND\n                (COUNT(DISTINCT treasury) = 0 OR (COUNT(DISTINCT treasury) = 1 AND COUNT(treasury) = COUNT(*)))\n                AND\n                (COUNT(DISTINCT reserves) = 0 OR (COUNT(DISTINCT reserves) = 1 AND COUNT(reserves) = COUNT(*)))\n            )\n        ) THEN 'Consensus'\n        ELSE 'Divergence'\n    END AS result;",
+              "refId": "A",
+              "sql": {
+                "columns": [
+                  {
+                    "parameters": [],
+                    "type": "function"
+                  }
+                ],
+                "groupBy": [
+                  {
+                    "property": {
+                      "type": "string"
+                    },
+                    "type": "groupBy"
+                  }
+                ],
+                "limit": 50
+              }
+            }
+          ],
+          "title": "Status",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "sidecar_uid"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "custom": {
+                "align": "auto",
+                "cellOptions": {
+                  "type": "auto"
+                },
+                "inspect": false
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "epoch_no"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Epoch"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "fees"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Fees"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "treasury"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Treasury"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "reserves"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Reserves"
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 7,
+            "w": 12,
+            "x": 0,
+            "y": 103
+          },
+          "id": 97,
+          "options": {
+            "cellHeight": "sm",
+            "footer": {
+              "countRows": false,
+              "fields": "",
+              "reducer": [
+                "sum"
+              ],
+              "show": false
+            },
+            "showHeader": true
+          },
+          "pluginVersion": "12.0.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "grafana-postgresql-datasource",
+                "uid": "sidecar_uid"
+              },
+              "editorMode": "code",
+              "format": "table",
+              "rawQuery": true,
+              "rawSql": "select epoch_no,fees,treasury,reserves from ada_pots where source='dbsync' order by epoch_no desc limit 5;",
+              "refId": "A",
+              "sql": {
+                "columns": [
+                  {
+                    "parameters": [],
+                    "type": "function"
+                  }
+                ],
+                "groupBy": [
+                  {
+                    "property": {
+                      "type": "string"
+                    },
+                    "type": "groupBy"
+                  }
+                ],
+                "limit": 50
+              }
+            }
+          ],
+          "title": "Cardano DB Sync",
+          "type": "table"
+        },
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "sidecar_uid"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "custom": {
+                "align": "auto",
+                "cellOptions": {
+                  "type": "auto"
+                },
+                "inspect": false
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "epoch_no"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Epoch"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "fees"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Fees"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "treasury"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Treasury"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "reserves"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Reserves"
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 7,
+            "w": 12,
+            "x": 12,
+            "y": 103
+          },
+          "id": 96,
+          "options": {
+            "cellHeight": "sm",
+            "footer": {
+              "countRows": false,
+              "fields": "",
+              "reducer": [
+                "sum"
+              ],
+              "show": false
+            },
+            "showHeader": true
+          },
+          "pluginVersion": "12.0.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "grafana-postgresql-datasource",
+                "uid": "sidecar_uid"
+              },
+              "editorMode": "code",
+              "format": "table",
+              "rawQuery": true,
+              "rawSql": "select epoch_no,fees,treasury,reserves from ada_pots where source='yaci' order by epoch_no desc limit 5;",
+              "refId": "A",
+              "sql": {
+                "columns": [
+                  {
+                    "parameters": [],
+                    "type": "function"
+                  }
+                ],
+                "groupBy": [
+                  {
+                    "property": {
+                      "type": "string"
+                    },
+                    "type": "groupBy"
+                  }
+                ],
+                "limit": 50
+              }
+            }
+          ],
+          "title": "Yaci Store",
+          "type": "table"
+        }
+      ],
+      "title": "Ada Pots",
+      "type": "row"
     }
   ],
   "preload": false,
