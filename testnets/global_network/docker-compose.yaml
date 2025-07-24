@@ -16,12 +16,12 @@ x-base: &base
     # Binary version
     #dockerfile: "cardano-node/Dockerfile.binary"
     #args:
-    #  CARDANO_NODE_VERSION: "10.5.0"
+    #  CARDANO_NODE_VERSION: "10.5.1"
 
     # Source version
     dockerfile: "cardano-node/Dockerfile.source"
     args:
-      CARDANO_NODE_REF: "10.5.0"
+      CARDANO_NODE_REF: "10.5.1"
 
 x-base_eu: &base_eu
   <<: *base
