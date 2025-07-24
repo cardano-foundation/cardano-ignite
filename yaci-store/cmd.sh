@@ -6,11 +6,6 @@ set -o pipefail
 SHELL="/bin/bash"
 PATH="/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin"
 
-# Environment variables
-LOCAL_DELAY="${LOCAL_DELAY:-5ms}"
-LOCAL_JITTER="${LOCAL_JITTER:-1ms}"
-LOCAL_LOSS="${LOCAL_LOSS:-0.01%}"
-
 # Configuration files
 BYRON_GENESIS_JSON="${BYRON_GENESIS_JSON:-/opt/yaci/config/byron-genesis.json}"
 SHELLEY_GENESIS_JSON="${SHELLEY_GENESIS_JSON:-/opt/yaci/config/shelley-genesis.json}"
@@ -50,41 +45,6 @@ update_start_time() {
     jq ".startTime = ${SYSTEM_START_UNIX}" "${BYRON_GENESIS_JSON}" | write_file "${BYRON_GENESIS_JSON}"
 }
 
-add_routes() {
-    case ${REGION} in
-        "NA")
-            doas ip route add 172.16.2.0/24 via 172.16.1.11 dev eth0
-            doas ip route add 172.16.3.0/24 via 172.16.1.11 dev eth0
-            doas ip route add 172.16.4.0/24 via 172.16.1.11 dev eth0
-            doas ip route add 172.16.7.0/24 via 172.16.1.11 dev eth0
-            doas tc qdisc replace dev eth0 root netem delay ${LOCAL_DELAY} ${LOCAL_JITTER} loss ${LOCAL_LOSS}
-            ;;
-        "EU")
-            doas ip route add 172.16.1.0/24 via 172.16.3.12 dev eth0
-            doas ip route add 172.16.2.0/24 via 172.16.3.12 dev eth0
-            doas ip route add 172.16.4.0/24 via 172.16.3.12 dev eth0
-            doas ip route add 172.16.7.0/24 via 172.16.3.12 dev eth0
-            doas tc qdisc replace dev eth0 root netem delay ${LOCAL_DELAY} ${LOCAL_JITTER} loss ${LOCAL_LOSS}
-            ;;
-        "AS")
-            doas ip route add 172.16.1.0/24 via 172.16.4.13 dev eth0
-            doas ip route add 172.16.2.0/24 via 172.16.4.13 dev eth0
-            doas ip route add 172.16.3.0/24 via 172.16.4.13 dev eth0
-            doas ip route add 172.16.7.0/24 via 172.16.4.13 dev eth0
-            doas tc qdisc replace dev eth0 root netem delay ${LOCAL_DELAY} ${LOCAL_JITTER} loss ${LOCAL_LOSS}
-            ;;
-        "AD")
-            doas ip route add 172.16.1.0/24 via 172.16.7.14 dev eth0
-            doas ip route add 172.16.2.0/24 via 172.16.7.14 dev eth0
-            doas ip route add 172.16.3.0/24 via 172.16.7.14 dev eth0
-            doas ip route add 172.16.4.0/24 via 172.16.7.14 dev eth0
-            ;;
-        *)
-            true
-            ;;
-    esac
-}
-
 start_node_exporter() {
     node_exporter >/dev/null 2>&1
 }
@@ -95,7 +55,7 @@ start_process_exporter() {
 
 main () {
     set_start_time
-    add_routes
+    /node_routes.sh
     start_node_exporter &
     start_process_exporter &
 

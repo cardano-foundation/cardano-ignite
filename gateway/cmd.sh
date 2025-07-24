@@ -17,13 +17,13 @@ case $GATEWAY_ID in
     GW="172.16.2.12"
     INTERFACE=$(ip route get "$GW" | awk '{print $3}')
     ip route add 172.16.3.0/24 via "$GW" dev "$INTERFACE"
-    tc qdisc replace dev "$INTERFACE" root netem delay 50ms 3ms loss 0.5%
+    tc qdisc replace dev "$INTERFACE" root netem rate 1000mbit delay 50ms 3ms loss 0.5%
 
     echo "North America <-> Asia"
     GW="172.16.6.13"
     INTERFACE=$(ip route get "$GW" | awk '{print $3}')
     ip route add 172.16.4.0/24 via "$GW" dev "$INTERFACE"
-    tc qdisc replace dev "$INTERFACE" root netem delay 100ms 6ms loss 0.5%
+    tc qdisc replace dev "$INTERFACE" root netem rate 1000mbit delay 100ms 6ms loss 0.5%
 
     echo "North America <-> Admin"
     GW="172.16.10.14"
@@ -37,13 +37,13 @@ case $GATEWAY_ID in
     GW="172.16.2.11"
     INTERFACE=$(ip route get "$GW" | awk '{print $3}')
     ip route add 172.16.1.0/24 via "$GW" dev "$INTERFACE"
-    tc qdisc replace dev "$INTERFACE" root netem delay 50ms 3ms loss 0.5%
+    tc qdisc replace dev "$INTERFACE" root netem rate 1000mbit delay 50ms 3ms loss 0.5%
 
     echo "Europe <-> Asia"
     GW="172.16.5.13"
     INTERFACE=$(ip route get "$GW" | awk '{print $3}')
     ip route add 172.16.4.0/24 via "$GW" dev "$INTERFACE"
-    tc qdisc replace dev "$INTERFACE" root netem delay 75ms 6ms loss 0.5%
+    tc qdisc replace dev "$INTERFACE" root netem rate 1000mbit delay 75ms 6ms loss 0.5%
 
     echo "Europe <-> Admin"
     GW="172.16.9.14"

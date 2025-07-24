@@ -158,6 +158,7 @@ RUN echo 'permit nopass cardano as root cmd tc' >> /etc/doas.conf
 
 # Copy scripts
 COPY cardano-node/scripts/*.sh /
+COPY scripts/node_routes.sh /
 RUN chmod 0755 /*.sh
 
 # Copy cmd.sh

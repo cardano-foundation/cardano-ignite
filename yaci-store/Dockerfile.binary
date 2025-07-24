@@ -123,6 +123,9 @@ RUN echo 'permit nopass cardano as root cmd tc' >> /etc/doas.conf
 COPY yaci-store/cmd.sh /
 RUN chmod 0755 /cmd.sh
 
+COPY scripts/node_routes.sh /
+RUN chmod 0755 /node_routes.sh
+
 USER cardano
 
 CMD ["/cmd.sh"]
