@@ -194,6 +194,7 @@ services:
       POOL_ID: "1"
       TYPE: bp
       PEER_SHARING: "false"
+      EGRESS_POLL_INTERVAL: 0.001
     networks:
       na_net:
         ipv4_address: 172.16.1.101
@@ -210,6 +211,7 @@ services:
       POOL_ID: "1"
       RELAY_ID: "1"
       TYPE: relay
+      EGRESS_POLL_INTERVAL: 0.001
     networks:
       na_net:
         ipv4_address: 172.16.1.102
@@ -226,6 +228,7 @@ services:
       POOL_ID: "1"
       RELAY_ID: "2"
       TYPE: relay
+      EGRESS_POLL_INTERVAL: 0.001
     networks:
       na_net:
         ipv4_address: 172.16.1.103
@@ -242,6 +245,7 @@ services:
       POOL_ID: "1"
       RELAY_ID: "3"
       TYPE: privaterelay
+      EGRESS_POLL_INTERVAL: 0.001
     networks:
       na_net:
         ipv4_address: 172.16.1.104

@@ -13,6 +13,7 @@ DB_PORT="${DB_PORT:-5432}"
 DB_SIDECAR_DATABASE="${DB_SIDECAR_DATABASE:-sidecar}"
 DB_SIDECAR_PASSWORD="${DB_SIDECAR_PASSWORD:-sidecar}"
 DB_SIDECAR_USERNAME="${DB_SIDECAR_USERNAME:-sidecar}"
+EGRESS_POLL_INTERVAL="${EGRESS_POLL_INTERVAL:-0}"
 EKG_PORT="${EKG_PORT:-12788}"
 LOG_TO_CONSOLE="${LOG_TO_CONSOLE:-true}"
 LOG_TO_FILE="${LOG_TO_FILE:-true}"
@@ -123,6 +124,8 @@ config_config_json() {
     else
         jq ".LedgerDB = {\"Backend\": \"V2InMemory\" }" "${CONFIG_JSON}" | write_file "${CONFIG_JSON}"
     fi
+
+    jq ".EgressPollInterval = ${EGRESS_POLL_INTERVAL}" "${CONFIG_JSON}" | write_file "${CONFIG_JSON}"
 }
 
 record_edges() {
