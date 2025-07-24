@@ -1,4 +1,4 @@
-FROM docker.io/debian:stable-20250630-slim AS testnet_builder
+FROM docker.io/debian:stable-20250721-slim AS testnet_builder
 
 ARG UV_VERSION="${UV_VERSION:-0.7.21}"
 

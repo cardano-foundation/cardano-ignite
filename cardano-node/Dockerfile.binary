@@ -3,7 +3,7 @@ ARG TESTNET_BUILDER_IMAGE
 
 FROM ${TESTNET_BUILDER_IMAGE} AS testnet_builder
 
-FROM docker.io/debian:stable-20250630-slim AS build
+FROM docker.io/debian:stable-20250721-slim AS build
 
 ARG CARDANO_NODE_VERSION="${CARDANO_NODE_VERSION:-10.4.1}"
 ARG NODE_EXPORTER_VERSION="${NODE_EXPORTER_VERSION:-1.9.1}"
@@ -98,7 +98,7 @@ RUN ln -s /usr/local/src/process_exporter/process-exporter-${PROCESS_EXPORTER_VE
 
 #---------------------------------------------------------------------
 
-FROM docker.io/debian:stable-20250630-slim AS main
+FROM docker.io/debian:stable-20250721-slim AS main
 
 # Set environment variables
 ENV CARDANO_NODE_SOCKET_PATH="/opt/cardano-node/data/db/node.socket"

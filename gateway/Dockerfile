@@ -1,4 +1,4 @@
-FROM docker.io/debian:stable-20250630-slim AS main
+FROM docker.io/debian:stable-20250721-slim AS main
 
 # Set time zone
 ENV TZ="UTC"

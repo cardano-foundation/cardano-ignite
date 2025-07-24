@@ -1,4 +1,4 @@
-FROM docker.io/debian:stable-20250630-slim AS build
+FROM docker.io/debian:stable-20250721-slim AS build
 
 ARG BLOCKFROST_BACKEND_RYO="${BLOCKFROST_BACKEND_RYO:-4.1.2}"
 ARG CARDANO_CLI_VERSION="${CARDANO_CLI_VERSION:-10.11.1.0}"
@@ -98,7 +98,7 @@ RUN ln -s /usr/local/src/process_exporter/process-exporter-${PROCESS_EXPORTER_VE
 
 #---------------------------------------------------------------------
 
-FROM docker.io/debian:stable-20250630-slim AS main
+FROM docker.io/debian:stable-20250721-slim AS main
 
 # Set environment variables
 ENV CARDANO_NODE_SOCKET_PATH="/opt/cardano-node/data/db/node.socket"
