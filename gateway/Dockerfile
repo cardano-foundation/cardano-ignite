@@ -28,6 +28,12 @@ RUN apt update && \
 RUN groupadd --gid 10000 cardano && \
     useradd --comment 'cardano' --create-home --gid 10000 --password '!' --shell '/bin/bash' --uid 10000 cardano
 
+# Create scripts directory
+RUN install --directory --owner=cardano --group=cardano --mode=0750 /opt/scripts
+
+COPY gateway/scripts/*.sh /opt/scripts/
+RUN chmod 0755 /opt/scripts/*
+
 #Setup routing functionality here
 # Copy cardano-node.sh
 COPY gateway/cmd.sh /
