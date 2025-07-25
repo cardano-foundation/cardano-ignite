@@ -20,7 +20,7 @@ Please install the dependencies below. All commands are compatible with Debian 1
   ```
 
 > [!NOTE]
-> If `yq` isn’t available in your package manager, you can download the binary from GitHub and manually copy it to `/usr/local/bin/yq`.
+> If `yq` isn’t available in your package manager, you can download the binary [from GitHub](https://github.com/kislyuk/yq) and manually copy it to `/usr/local/bin/yq`.
 
 ### Docker
 
