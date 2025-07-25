@@ -592,8 +592,10 @@ services:
       na_net:
         ipv4_address: 172.16.1.11
       eu_na_net:
+        interface_name: eunax0
         ipv4_address: 172.16.2.11
       as_na_net:
+        interface_name: asnax0
         ipv4_address: 172.16.6.11
       ad_na_net:
         ipv4_address: 172.16.10.11
@@ -612,8 +614,10 @@ services:
       eu_net:
         ipv4_address: 172.16.3.12
       eu_na_net:
+        interface_name: eunax0
         ipv4_address: 172.16.2.12
       as_eu_net:
+        interface_name: aseux0
         ipv4_address: 172.16.5.12
       ad_eu_net:
         ipv4_address: 172.16.9.12
@@ -632,8 +636,10 @@ services:
       as_net:
         ipv4_address: 172.16.4.13
       as_eu_net:
+        interface_name: aseux0
         ipv4_address: 172.16.5.13
       as_na_net:
+        interface_name: asnax0
         ipv4_address: 172.16.6.13
       ad_as_net:
         ipv4_address: 172.16.8.13
