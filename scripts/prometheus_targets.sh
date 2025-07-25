@@ -34,6 +34,10 @@ scrape_configs:
   - job_name: 'node_exporter'
     static_configs:
       - targets:
+        - nagw.example:9100
+        - eugw.example:9100
+        - asgw.example:9100
+        - adgw.example:9100
 EOF
 
 for target in "${targets[@]}"; do

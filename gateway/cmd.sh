@@ -10,6 +10,5 @@ PATH="/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin"
 
 iptables -A FORWARD -j ACCEPT
 
-while true; do
-    sleep 60
-done
+node_exporter >/dev/null 2>&1
+
