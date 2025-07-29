@@ -15,6 +15,7 @@ DB_SIDECAR_PASSWORD="${DB_SIDECAR_PASSWORD:-sidecar}"
 DB_SIDECAR_USERNAME="${DB_SIDECAR_USERNAME:-sidecar}"
 EGRESS_POLL_INTERVAL="${EGRESS_POLL_INTERVAL:-0}"
 EKG_PORT="${EKG_PORT:-12788}"
+NO_INTERPOOL_LOCALROOTS="${NO_INTERPOOL_LOCALROOTS:-false}"
 LOG_TO_CONSOLE="${LOG_TO_CONSOLE:-true}"
 LOG_TO_FILE="${LOG_TO_FILE:-true}"
 MIN_SEVERITY="${MIN_SEVERITY:-Info}"
@@ -257,7 +258,35 @@ relay_config_topology_json() {
     sibling_address="${sibling_base_address}.example"
 
     # Generate the JSON topology file
-    cat <<EOF > "${CONFIG_PATH}/topology.json"
+    if [[ "${NO_INTERPOOL_LOCALROOTS}" == "true" ]]; then
+        cat <<EOF > "${CONFIG_PATH}/topology.json"
+{
+  "localRoots": [
+    {
+      "accessPoints": [
+        {"address": "p${POOL_ID}bp.example", "port": 3001}
+      ],
+      "advertise": false,
+      "trustable": true,
+      "valency": 1
+    },
+    {
+      "accessPoints": [
+        {"address": "${sibling_address}", "port": 3001}
+      ],
+      "advertise": false,
+      "trustable": true,
+      "valency": 1
+    }
+  ],
+  "publicRoots": [],
+  "useLedgerAfterSlot": 0
+}
+EOF
+
+        record_edges "p${POOL_ID}bp" ${sibling_base_address}
+    else
+        cat <<EOF > "${CONFIG_PATH}/topology.json"
 {
   "localRoots": [
     {
@@ -290,7 +319,8 @@ relay_config_topology_json() {
 }
 EOF
 
-    record_edges ${base_address} "p${POOL_ID}bp" ${sibling_base_address}
+        record_edges ${base_address} "p${POOL_ID}bp" ${sibling_base_address}
+    fi
 }
 
 privaterelay_config_topology_json() {
