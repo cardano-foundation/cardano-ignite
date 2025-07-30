@@ -740,7 +740,7 @@ services:
     networks:
       na_net:
         ipv4_address: 172.16.1.12
-    profiles: [build, optional, tx-generators]
+    profiles: [build, na, optional, tx-generators]
 
   # PostgreSQL Database
   db:
