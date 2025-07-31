@@ -1,4 +1,10 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
+set -o errexit
+set -o pipefail
+
+SHELL="/bin/bash"
+PATH="/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin"
 
 # Configuration
 DB_SIDECAR_DATABASE="${DB_SIDECAR_DATABASE:-sidecar}"

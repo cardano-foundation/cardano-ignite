@@ -3,10 +3,10 @@
 set -o errexit
 set -o pipefail
 
-GATEWAY_ID="${GATEWAY_ID:-}"
-
 SHELL="/bin/bash"
 PATH="/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin"
+
+GATEWAY_ID="${GATEWAY_ID:-}"
 
 case ${GATEWAY_ID} in
     "nagw")
