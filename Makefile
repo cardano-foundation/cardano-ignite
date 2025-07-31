@@ -63,8 +63,11 @@ testnets/%/prometheus/prometheus.yml: scripts/prometheus_targets.sh testnets/%/d
 	./scripts/prometheus_targets.sh testnets/$*/docker-compose.yaml >$@
 
 testnets/%/.env.tmp: TESTNET
-	export SYSTEM_START=$$(date -u +%Y-%m-%dT%H:%M:%SZ) \
-	&& echo "SYSTEM_START=$${SYSTEM_START}" > testnets/$*/.env.tmp
+	export SYSTEM_START=$$(date -u +'%Y-%m-%dT%H:%M:%SZ') \
+	&& echo "SYSTEM_START=$${SYSTEM_START}" > testnets/$*/.env.tmp \
+	&& if [ "$${NO_INTERPOOL_LOCALROOTS+set}" = "set" ]; then \
+		echo "NO_INTERPOOL_LOCALROOTS=$${NO_INTERPOOL_LOCALROOTS}" >> testnets/$*/.env.tmp; \
+	fi
 
 build: TESTNET prerequisites testnets/${testnet}/graph_nodes.sql testnets/${testnet}/coredns/example.zone testnets/${testnet}/prometheus/prometheus.yml ## Build testnet
 	ln -snf testnets/${testnet}/testnet.yaml .testnet.yaml && \
