@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
-# Required for overriding exit code
-#set -o errexit
+set -o errexit
 set -o pipefail
 
 SHELL="/bin/bash"
@@ -479,7 +478,6 @@ main() {
     localroot_edges &
     assemble_command
     "${cmd[@]}"
-    exit ${?}
 }
 
 main

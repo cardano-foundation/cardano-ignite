@@ -1,6 +1,10 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-set -uo pipefail
+set -o errexit
+set -o pipefail
+
+SHELL="/bin/bash"
+PATH="/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin"
 
 # Set default environment variables
 DB_HOST="${DB_HOST:-db.example}"
