@@ -466,7 +466,7 @@ main() {
     config_pgpass
     config_topology
     set_start_time
-    if [ "${TYPE,,}" = "bp" ] || [ "${TYPE,,}" = "bprelay" ]; then
+    if ( [ "${TYPE,,}" = "relay" ] && [ "${RELAY_ID,,}" -eq 1 ] ) || [ "${TYPE,,}" = "bprelay" ]; then
         canary_tx &
     fi
     if [ "${TYPE,,}" = "txg" ]; then
