@@ -8,6 +8,7 @@ FROM ${TESTNET_BUILDER_IMAGE} AS testnet_builder
 
 FROM docker.io/debian:stable-20250630-slim AS build
 
+ARG CARDANO_NODE_VERSION="${CARDANO_NODE_VERSION:-10.4.1}"
 ARG NODE_EXPORTER_VERSION="${NODE_EXPORTER_VERSION:-1.9.1}"
 ARG PROCESS_EXPORTER_VERSION="${PROCESS_EXPORTER_VERSION:-0.8.7}"
 ARG YACI_STORE_VERSION="${YACI_STORE_VERSION:-2.0.0-beta3}"
@@ -21,6 +22,21 @@ RUN apt update && \
     ca-certificates \
     curl \
     unzip
+
+# cardano-cli
+RUN install --directory --owner=root --group=root --mode=0755 /usr/local/src/cardano-node
+
+RUN curl --proto '=https' --tlsv1.2 \
+        --location https://github.com/IntersectMBO/cardano-node/releases/download/${CARDANO_NODE_VERSION}/cardano-node-${CARDANO_NODE_VERSION}-linux.tar.gz \
+        --output /usr/local/src/cardano-node/cardano-node-${CARDANO_NODE_VERSION}-linux.tar.gz
+
+RUN install --directory --owner=root --group=root --mode=0755 /usr/local/src/cardano-node/${CARDANO_NODE_VERSION}
+
+RUN tar --extract --gzip --file=/usr/local/src/cardano-node/cardano-node-${CARDANO_NODE_VERSION}-linux.tar.gz --directory=/usr/local/src/cardano-node/${CARDANO_NODE_VERSION}
+
+RUN chmod 0755 /usr/local/src/cardano-node/${CARDANO_NODE_VERSION}/bin/cardano-cli
+
+RUN ln -s /usr/local/src/cardano-node/${CARDANO_NODE_VERSION}/bin/cardano-cli /usr/local/bin/cardano-cli
 
 # yaci-store
 
@@ -103,6 +119,7 @@ RUN apt update && \
         telnet \
         vim
 
+COPY --from=build --chown=root:root /usr/local/bin/cardano-cli /usr/local/bin/cardano-cli
 COPY --from=build --chown=root:root /usr/local/bin/node_exporter /usr/local/bin/node_exporter
 COPY --from=build --chown=root:root /usr/local/bin/process_exporter /usr/local/bin/process_exporter
 
@@ -127,6 +144,9 @@ RUN chmod 0755 /cmd.sh
 
 COPY scripts/node_routes.sh /
 RUN chmod 0755 /node_routes.sh
+
+COPY scripts/wait_on_tip.sh /
+RUN chmod 0755 /wait_on_tip.sh
 
 USER cardano
 
