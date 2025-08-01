@@ -245,10 +245,12 @@ main() {
         build_canary_transaction
         sign_canary_transaction
         wait_canary_transaction
-        submit_canary_transaction
+        if ! submit_canary_transaction; then
+            debug_to_console "Warning: Failed to submit transaction. Continuing to next cycle..."
+        else
+            print_success
+        fi
 	CURRENT_SEQ=$((CURRENT_SEQ + 1))
-
-        get_payment_address_balance
 
         print_success
 
