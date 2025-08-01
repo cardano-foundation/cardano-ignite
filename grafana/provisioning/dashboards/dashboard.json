@@ -2911,77 +2911,32 @@
       ],
       "type": "timeseries"
     },
-    {
+ {
       "datasource": {
-        "type": "loki",
-        "uid": "loki_uid"
+        "type": "grafana-postgresql-datasource",
+        "uid": "dbsync_uid"
       },
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
+            "mode": "thresholds"
           },
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
-              }
-            ]
-          },
-          "unit": "string"
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Errors per 5min"
-            },
-            "properties": [
+                "color": "green",
+                "value": 0
+              },
               {
-                "id": "color",
-                "value": {
-                  "fixedColor": "dark-red",
-                  "mode": "fixed"
-                }
+                "color": "red",
+                "value": 80
               }
             ]
           }
-        ]
+        },
+        "overrides": []
       },
       "gridPos": {
         "h": 7,
@@ -2989,37 +2944,57 @@
         "x": 0,
         "y": 36
       },
-      "id": 30,
+      "id": 106,
       "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
         },
-        "tooltip": {
-          "hideZeros": false,
-          "mode": "single",
-          "sort": "none"
-        }
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
       },
-      "pluginVersion": "12.0.2",
+      "pluginVersion": "12.1.0",
       "targets": [
         {
           "datasource": {
-            "type": "loki",
-            "uid": "loki_uid"
+            "type": "grafana-postgresql-datasource",
+            "uid": "dbsync_uid"
           },
-          "direction": "backward",
           "editorMode": "code",
-          "expr": "sum by (error) (count_over_time({container_name=~\"p[0-9]+(bp|r[0-9])?\"} | json | sev=\"Error\" | line_format \"{{.data.error}}\"[5m]))",
-          "legendFormat": "Errors per 5min",
-          "queryType": "range",
-          "refId": "A"
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "select * from get_canary_loss();",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
         }
       ],
-      "title": "Logged Errors",
-      "type": "timeseries"
+      "title": "TX Canaries Lost",
+      "type": "stat"
     },
     {
       "datasource": {
@@ -3069,7 +3044,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
               },
               {
                 "color": "red",
@@ -3101,7 +3077,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.2",
+      "pluginVersion": "12.1.0",
       "targets": [
         {
           "datasource": {
@@ -3151,7 +3127,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "dark-red"
+                "color": "dark-red",
+                "value": 0
               },
               {
                 "color": "#EAB839",
@@ -3189,7 +3166,7 @@
         "showThresholdMarkers": true,
         "sizing": "auto"
       },
-      "pluginVersion": "12.0.2",
+      "pluginVersion": "12.1.0",
       "targets": [
         {
           "datasource": {
@@ -3222,6 +3199,143 @@
       ],
       "title": "TX 2 Blocks Acceptance Rate",
       "type": "gauge"
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "loki_uid"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "string"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Errors per 5min"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "dark-red",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 8,
+        "x": 0,
+        "y": 43
+      },
+      "id": 30,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.1.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki_uid"
+          },
+          "direction": "backward",
+          "editorMode": "code",
+          "expr": "sum by (error) (count_over_time({container_name=~\"p[0-9]+(bp|r[0-9])?\"} | json | sev=\"Error\" | line_format \"{{.data.error}}\"[5m]))",
+          "legendFormat": "Errors per 5min",
+          "queryType": "range",
+          "refId": "A"
+        }
+      ],
+      "title": "Logged Errors",
+      "type": "timeseries"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 24,
+        "x": 0,
+        "y": 50
+      },
+      "id": 87,
+      "options": {
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        },
+        "content": "<h1></h1>\n<h3 style=\"text-align: left\">Block Forging</h3>",
+        "mode": "html"
+      },
+      "pluginVersion": "12.1.0",
+      "title": "",
+      "transparent": true,
+      "type": "text"
     },
     {
       "fieldConfig": {
