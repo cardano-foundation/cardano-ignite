@@ -59,6 +59,9 @@ main () {
     start_node_exporter &
     start_process_exporter &
 
+    # Yaci-store can't handle early forks.
+    # Wait until c1's tip is at least on block number 3.
+    /wait_on_tip.sh c1.example 3001 3
     cd /opt/yaci
     SPRING_PROFILES_ACTIVE=ledger-state ./yaci-store
 }
