@@ -1,0 +1,8 @@
+
+[[filters]]
+type = "Selection"
+
+[filters.check]
+predicate = "variant_in"
+argument = ["Block", "Transaction"]
+

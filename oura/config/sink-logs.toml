@@ -1,0 +1,7 @@
+[sink]
+type = "Logs"
+output_path = "/opt/oura/sink"
+output_format = "JSONL"
+max_bytes_per_file = 1_000_000
+max_total_files = 10
+compress_files = true

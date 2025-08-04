@@ -1,0 +1,18 @@
+[source]
+type = ""
+address = ["", ""]
+magic = "42"
+
+[chain]
+byron_epoch_length  = 432000
+byron_slot_length = 20
+byron_known_slot = 0
+byron_known_hash = ""
+byron_known_time = 0
+shelley_epoch_length = 432000
+shelley_slot_length = 1
+shelley_known_slot = 1598400
+shelley_known_hash = ""
+shelley_known_time = 0
+address_hrp = "addr_test"
+adahandle_policy = ""

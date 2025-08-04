@@ -203,6 +203,42 @@ services:
       dockerfile: "yaci-store/Dockerfile.binary"
     profiles: [build, optional]
 
+  oura:
+    image: oura:latest
+    container_name: oura
+    hostname: oura.example
+    restart: unless-stopped
+    volumes:
+      - c1:/opt/cardano-node
+    build:
+      context: "../../"
+      dockerfile: "oura/Dockerfile"
+    profiles: [build, optional]
+
+  heron:
+    image: heron:latest
+    container_name: heron
+    hostname: heron.example
+    restart: unless-stopped
+    volumes:
+      - c1:/opt/cardano-node
+    build:
+      context: "../../"
+      dockerfile: "heron/Dockerfile"
+    profiles: [build, optional]
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    hostname: redis.example
+    restart: unless-stopped
+    volumes:
+      - redis:/opt/redis/db
+    build:
+      context: "../../"
+      dockerfile: "redis/Dockerfile"
+    profiles: [build, core]
+
 volumes:
   p1:
   p2:
@@ -213,3 +249,4 @@ volumes:
   prometheus:
   loki:
   grafana:
+  redis:
