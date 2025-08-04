@@ -142,6 +142,29 @@ RETURNS NUMERIC AS \$\$
         WHERE block_delay > 2
     ) d
 \$\$ LANGUAGE SQL;
+CREATE OR REPLACE FUNCTION get_canary_loss()
+RETURNS BIGINT AS \$\$
+SELECT
+    SUM((max_seq + 1) - count_seq) AS total_missing
+FROM (
+    SELECT
+        tx_out.address,
+        MAX(CAST(tm.json->>'sequence_no' AS BIGINT)) AS max_seq,
+        COUNT(DISTINCT CAST(tm.json->>'sequence_no' AS BIGINT)) AS count_seq
+    FROM tx_out
+    INNER JOIN tx_in
+        ON tx_out.tx_id = tx_in.tx_out_id
+    INNER JOIN tx
+        ON tx.id = tx_in.tx_in_id
+        AND tx_in.tx_out_index = tx_out.index
+    INNER JOIN block b
+        ON tx.block_id = b.id
+    INNER JOIN tx_metadata tm
+        ON tm.tx_id = tx.id
+    WHERE ( $where_clause )
+    GROUP BY tx_out.address
+) AS per_address;
+\$\$ LANGUAGE SQL;
 EOF
 
 # Check if the psql command succeeded
