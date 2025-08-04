@@ -112,7 +112,9 @@ EOF
 # Establish run order
 main() {
     verify_environment_variables
-    add_routes
+    if [[ "${TOPOLOGY}" == "fancy" ]]; then
+        add_routes
+    fi
     wait_for_postgresql
     config_database_instance ${DB_SIDECAR_DATABASE}
     config_database_user ${DB_SIDECAR_USERNAME} ${DB_SIDECAR_PASSWORD} ${DB_SIDECAR_DATABASE}
