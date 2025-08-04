@@ -1,0 +1,190 @@
+---
+
+x-base: &base
+  image: ${testnet}:latest
+  restart: unless-stopped
+  logging:
+    driver: "loki"
+    options:
+      mode: non-blocking
+      loki-url: "http://127.0.0.1:3100/loki/api/v1/push"
+      loki-retries: "5"
+  build:
+    context: "../../"
+    dockerfile: "cardano-node/Dockerfile.binary"
+    args:
+      CARDANO_NODE_VERSION: "10.4.1"
+
+x-env: &env
+  POOL_ID: "0" # Placeholder required for override
+  SYSTEM_START: ${SYSTEM_START:-}
+
+services:
+  p1:
+    <<: *base
+    container_name: p1
+    hostname: p1.example
+    volumes:
+      - p1:/opt/cardano-node/data
+    environment:
+      <<: *env
+      POOL_ID: "1"
+    profiles: [build, core, pools]
+
+  # DNS Server
+  ns:
+    image: coredns/coredns:1.12.2
+    container_name: ns
+    hostname: ns.example
+    restart: unless-stopped
+    command: -conf /etc/coredns/corefile
+    volumes:
+      - ./coredns:/etc/coredns # Mount custom corefile
+    profiles: [build, core]
+
+  sidecar:
+    image: ${testnet}_sidecar:latest
+    container_name: sidecar
+    hostname: sidecar.example
+    restart: unless-stopped
+    build:
+      context: "../../"
+      dockerfile: "sidecar/Dockerfile"
+    environment:
+      POOLS: "1"
+    profiles: [build, core]
+
+  # Client 1
+  # Used by cardano-db-sync
+  c1:
+    <<: *base
+    container_name: c1
+    hostname: c1.example
+    volumes:
+      - c1:/opt/cardano-node
+    environment:
+      POOL_ID: "1"
+      TYPE: "client"
+      SYSTEM_START: ${SYSTEM_START:-}
+    profiles: [build, core, clients]
+
+  # PostgreSQL Database
+  db:
+    image: postgresql:latest
+    container_name: db
+    hostname: db.example
+    restart: unless-stopped
+    volumes:
+      - db:/opt/postgresql
+    build:
+      context: "../../"
+      dockerfile: "postgresql/Dockerfile"
+    profiles: [build, core]
+
+  dbsync:
+    image: cardano-db-sync:latest
+    container_name: dbsync
+    hostname: dbsync.example
+    restart: unless-stopped
+    volumes:
+      - dbsync:/opt/cardano-db-sync
+      - c1:/opt/cardano-node
+    environment:
+      DB_HOST: "db.example"
+    build:
+      context: "../../"
+      dockerfile: "cardano-db-sync/Dockerfile.binary"
+    depends_on:
+      db:
+        condition: service_started
+    profiles: [build, core]
+
+  blockfrost:
+    image: blockfrost:latest
+    container_name: blockfrost
+    hostname: blockfrost.example
+    restart: unless-stopped
+    volumes:
+      - c1:/opt/cardano-node
+    environment:
+      DB_HOST: "db.example"
+    build:
+      context: "../../"
+      dockerfile: "blockfrost/Dockerfile"
+    profiles: [build, optional]
+
+  prometheus:
+    image: prom/prometheus:v3.5.0
+    container_name: prometheus
+    hostname: prometheus.example
+    restart: unless-stopped
+    volumes:
+      - prometheus:/prometheus
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    depends_on:
+      blackbox:
+        condition: service_started
+    profiles: [build, core]
+
+  blackbox:
+    image: quay.io/prometheus/blackbox-exporter:v0.27.0
+    container_name: blackbox
+    hostname: blackbox.example
+    restart: unless-stopped
+    command: --config.file=/etc/blackbox_exporter/blackbox.yml
+    volumes:
+      - ../../blackbox:/etc/blackbox_exporter/
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    profiles: [build, core]
+
+  loki:
+    image: grafana/loki:3.5.3
+    container_name: loki
+    hostname: loki.example
+    restart: unless-stopped
+    command: -config.file=/etc/loki/local-config.yaml
+    ports:
+      - "3100:3100"
+    volumes:
+      - loki:/loki
+    profiles: [build, core]
+
+  grafana:
+    image: grafana/grafana:12.1.0
+    container_name: grafana
+    hostname: grafana.example
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana:/var/lib/grafana
+      - ../../grafana/provisioning:/etc/grafana/provisioning
+    environment:
+      GF_SECURITY_ADMIN_USER: cardano
+      GF_SECURITY_ADMIN_PASSWORD: cardano
+    profiles: [build, core]
+
+  yaci:
+    image: yaci:latest
+    container_name: yaci
+    hostname: yaci.example
+    restart: unless-stopped
+    volumes:
+      - c1:/opt/cardano-node
+      - ../../yaci-store/application.properties:/opt/yaci/config/application.properties
+      - ../../yaci-store/application-ledger-state.properties:/opt/yaci/config/application-ledger-state.properties
+    build:
+      context: "../../"
+      dockerfile: "yaci-store/Dockerfile.binary"
+    profiles: [build, optional]
+
+volumes:
+  p1:
+  c1:
+  db:
+  dbsync:
+  prometheus:
+  loki:
+  grafana:
