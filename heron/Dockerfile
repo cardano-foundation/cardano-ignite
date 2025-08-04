@@ -1,7 +1,7 @@
 FROM docker.io/debian:stable-20250721-slim AS build
 
 ARG CARDANO_CLI_VERSION="${CARDANO_CLI_VERSION:-10.11.1.0}"
-ARG HERON_VERSION="${HERON_VERSION:-081905ed84de2f3c388dac4585bee84b890e1037}"
+ARG HERON_VERSION="${HERON_VERSION:-1753d4eed7b2b24f7b3eb4559d21ee2ffd722f04}"
 ARG PYTHON_VERSION="${PYTHON_VERSION:-3.11}"
 ARG UV_VERSION="${UV_VERSION:-0.7.21}"
 
@@ -100,7 +100,7 @@ RUN apt update && \
         telnet \
         vim
 
-COPY cardano-node/scripts/*.sh /
+COPY heron/scripts/*.sh /
 RUN chmod 0755 /*.sh
 
 COPY heron/cmd.sh /

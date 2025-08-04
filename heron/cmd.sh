@@ -82,30 +82,30 @@ config_database_user() {
 
 # Establish run order
 main() {
-    uv python install 3.11
-    uv venv
+#    uv python install 3.11
+#    uv venv
 
-    cd /usr/local/src/heron-cardano
-    uv pip install -r requirements.txt
+#    cd /usr/local/src/heron-cardano
+#    uv pip install -r requirements.txt
 
-    (
-        cat <<EOF
-BLOCKFROST_PROJECT_ID=preprod_cardanoignite
-POSTGRES_USER=heron
-POSTGRES_PASSWORD=heron
-POSTGRES_DBNAME=heron
-WALLET_ENCRYPTION_KEY=IZIbslT33LzrLQ1gsk/ril3sYZ35aCnMqzKMQ97etjo=
-EOF
-    ) >"/usr/local/src/heron-cardano/.env"
+#    (
+#        cat <<EOF
+#BLOCKFROST_PROJECT_ID=preprod_cardanoignite
+#POSTGRES_USER=heron
+#POSTGRES_PASSWORD=heron
+#POSTGRES_DBNAME=heron
+#WALLET_ENCRYPTION_KEY=IZIbslT33LzrLQ1gsk/ril3sYZ35aCnMqzKMQ97etjo=
+#EOF
+#    ) >"/usr/local/src/heron-cardano/.env"
 
-    source /usr/local/src/heron-cardano/.venv/bin/activate
+#    source /usr/local/src/heron-cardano/.venv/bin/activate
 
-    export PYTHONPATH=/usr/local/src/heron-cardano
-    export WALLET_ENCRYPTION_KEY="$(openssl rand -base64 32)"
+#    export PYTHONPATH=/usr/local/src/heron-cardano
+#    export WALLET_ENCRYPTION_KEY="$(openssl rand -base64 32)"
 
-    alembic upgrade head
+#    alembic upgrade head
 
-    uvicorn heron_app.main:app --host 0.0.0.0 --port 8000
+#    uvicorn heron_app.main:app --host 0.0.0.0 --port 8000
 
 #curl -X 'GET' 'http://localhost:8000/wallets/' -H 'accept: application/json'
 #  
