@@ -126,6 +126,7 @@ config_config_json() {
     jq ".EgressPollInterval = ${EGRESS_POLL_INTERVAL}" "${CONFIG_JSON}" | write_file "${CONFIG_JSON}"
 
     jq ".TxSubmissionLogicVersion = ${TX_SUBMISSION_LOGIC_VERSION}" "${CONFIG_JSON}" | write_file "${CONFIG_JSON}"
+    jq ".options.mapSeverity = ((.options.mapSeverity // {}) + {\"cardano.node.TxInbound\": \"Debug\", \"cardano.node.TxLogic\": \"Debug\"})" "${CONFIG_JSON}" | write_file "${CONFIG_JSON}"
 
 }
 
