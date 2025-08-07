@@ -18,19 +18,8 @@ fi
 # Create the target directory if it doesn't exist
 mkdir -p "$TARGET_DIR"
 
-# Create Corefile in the target directory
-cat <<EOF > "$TARGET_DIR/corefile"
-example {
-    file /etc/coredns/example.zone
-    log
-    errors
-    health 0.0.0.0:8090
-}
-EOF
-
-# Generate the zone file content into example.zone in the target directory
+# Generate the forward zone file (example.zone)
 {
-    # Zone header
     cat <<EOF
 \$ORIGIN example.
 \$TTL 1D
@@ -45,12 +34,11 @@ EOF
 ; Host A records
 EOF
 
-    # Generate A records from Docker Compose
     yq -r '
     .services
     | to_entries[]
     | .value as $svc
-    | $svc | select(has("networks"))  # Filter out services without networks
+    | $svc | select(has("networks"))
     | $svc.hostname as $hostname
     | $svc.networks
     | to_entries[]
@@ -68,3 +56,65 @@ EOF
     ' "$DOCKER_COMPOSE_FILE"
 
 } > "$TARGET_DIR/example.zone"
+
+# Generate reverse zone files
+yq -r '
+    .services
+    | to_entries[]
+    | .value as $svc
+    | $svc | select(has("networks"))
+    | $svc.hostname as $hostname
+    | $svc.networks
+    | to_entries[]
+    | .value.ipv4_address as $ip
+    | select($ip != null)
+    | $hostname + " " + $ip
+' "$DOCKER_COMPOSE_FILE" | while read -r hostname ip; do
+    IFS='.' read -r oct1 oct2 oct3 oct4 <<< "$ip"
+    reverse_zone="$oct3.$oct2.$oct1.in-addr.arpa"
+    zone_file="$TARGET_DIR/$reverse_zone.zone"
+
+    if [ ! -f "$zone_file" ]; then
+        cat <<EOF > "$zone_file"
+\$ORIGIN $reverse_zone.
+\$TTL 1D
+@	IN	SOA	ns.example. admin.example. (
+                $(date +%Y%m%d)01 ; serial
+                8H ; refresh
+                4H ; retry
+                4D ; expire
+                1D ) ; minimum TTL
+    IN	NS	ns.example.
+EOF
+    fi
+
+    echo "$oct4	IN PTR	$hostname." >> "$zone_file"
+done
+
+# Create or update the corefile to include reverse zones
+{
+    cat <<EOF
+example {
+    file /etc/coredns/example.zone
+    log
+    errors
+    health 0.0.0.0:8090
+}
+EOF
+
+    for zone_file in "$TARGET_DIR"/*.zone; do
+        zone=$(basename "$zone_file" .zone)
+        if [[ "$zone" == *in-addr.arpa ]]; then
+            cat <<EOF
+
+$zone {
+    file /etc/coredns/$(basename "$zone_file")
+    log
+    errors
+    health 0.0.0.0:8090
+}
+EOF
+        fi
+    done
+
+} > "$TARGET_DIR/corefile"
