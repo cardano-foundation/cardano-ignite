@@ -22,7 +22,7 @@ x-base: &base
     dockerfile: "cardano-node/Dockerfile.source"
     args:
       #CARDANO_NODE_REF: "10.5.1"
-      CARDANO_NODE_REF: "12e5884da1f95c738df9114cd15e17569f739cd3"
+      CARDANO_NODE_REF: "3935135d1602dc5008c6868c21d75b767fa0b4e7"
 
 x-base_eu: &base_eu
   <<: *base
