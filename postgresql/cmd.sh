@@ -33,7 +33,7 @@ WORK_MEM="${WORK_MEM:-16MB}"
 CONFIG_DST="/opt/postgresql/db"
 
 # PGSQL
-PGSQL_BIN="/usr/lib/postgresql/15/bin"
+PGSQL_BIN="/usr/lib/postgresql/17/bin"
 PGSQL_DB="/opt/postgresql/db"
 
 initialize_database() {
