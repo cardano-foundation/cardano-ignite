@@ -28,8 +28,8 @@ RUN apt update && \
         netbase \
         netcat-openbsd \
         openssl \
-        postgresql-15 \
-        postgresql-client-15 \
+        postgresql \
+        postgresql-client \
         procps \
         tcpdump \
         telnet \

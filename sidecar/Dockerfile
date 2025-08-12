@@ -77,7 +77,7 @@ RUN apt update && \
         netbase \
         netcat-openbsd \
         openssl \
-        postgresql-client-15 \
+        postgresql-client \
         procps \
         tcpdump \
         telnet \
