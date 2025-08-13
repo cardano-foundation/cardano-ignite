@@ -273,10 +273,15 @@ RUN install --directory --owner=root --group=root --mode=0755 /opt/cardano-node 
     install --directory --owner=cardano --group=cardano --mode=0750 /opt/cardano-node/data && \
     install --directory --owner=cardano --group=cardano --mode=0750 /opt/cardano-node/data/db && \
     install --directory --owner=cardano --group=cardano --mode=0750 /opt/cardano-node/log && \
-    install --directory --owner=cardano --group=cardano --mode=0750 /opt/cardano-node/pools
+    install --directory --owner=cardano --group=cardano --mode=0750 /opt/cardano-node/pools && \
+    install --directory --owner=cardano --group=cardano --mode=0750 /opt/tx-generator/data && \
+    install --directory --owner=cardano --group=cardano --mode=0750 /opt/tx-generator/scripts-fallback/
 
 COPY --from=testnet_builder --chown=cardano:cardano /tmp/testnet/pools /opt/cardano-node/pools
 COPY --from=testnet_builder --chown=cardano:cardano /tmp/testnet/utxos /opt/cardano-node/utxos
+
+COPY --from=build --chown=cardano:cardano /usr/local/src/cardano-node/bench/tx-generator/data/*.json /opt/tx-generator/data
+COPY --from=build --chown=cardano:cardano /usr/local/src/cardano-node/bench/tx-generator/scripts-fallback/*.plutus /opt/tx-generator/scripts-fallback/
 
 # Permit cardano user to run commands 'ip' and 'tc' as root
 RUN echo 'permit setenv { PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin } :cardano' >> /etc/doas.conf
