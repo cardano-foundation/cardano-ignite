@@ -741,6 +741,8 @@ services:
       POOL_ID: "1"
       TYPE: "txg"
       TPS: "1"
+      TX_GEN_MODE: "plain"
+      #TX_GEN_MODE: "plutus"
       UTXOHD: "true"
       SYSTEM_START: ${SYSTEM_START:-}
     networks:
