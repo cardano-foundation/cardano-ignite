@@ -85,7 +85,8 @@ Please install the dependencies below. All commands are compatible with Debian 1
   sudo usermod -aG docker $USER
   ```
 
-  Relog to have the group change take affect.
+> [!CAUTION]
+> Please log out and log back in for the group change to take effect.
 
 ### Dummy Interface
 
