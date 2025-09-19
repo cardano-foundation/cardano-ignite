@@ -385,16 +385,9 @@ esac
 }
 
 set_start_time() {
-    if [ ! -f "${DATA_PATH}/start_time.unix_epoch" ]; then
-        # Convert ISO time to unix epoch
-        SYSTEM_START_UNIX=$(date -d "${SYSTEM_START}" +%s)
-        echo "${SYSTEM_START_UNIX}" >"${DATA_PATH}/start_time.unix_epoch"
+    SYSTEM_START_UNIX="$(cat "${DATA_PATH}/start_time.unix_epoch")"
 
-        update_start_time
-    else
-        SYSTEM_START_UNIX="$(cat "${DATA_PATH}/start_time.unix_epoch")"
-        update_start_time
-    fi
+    update_start_time
 }
 
 update_start_time() {
@@ -464,6 +457,18 @@ main() {
     config_config_json
     config_pgpass
     config_topology
+
+    # If we don't have a db copy it from synth
+    if [ ! -f "${DATA_PATH}/start_time.unix_epoch" ]; then
+        while [ ! -f /opt/synth/start_time.unix_epoch ]; do
+            # echo "Waiting for initialization to complete..."
+            sleep 1
+        done
+
+        cp -r /opt/synth/db "${DATA_PATH}"
+        cp /opt/synth/start_time.unix_epoch "${DATA_PATH}"
+    fi
+
     set_start_time
     if ( [ "${TYPE,,}" = "relay" ] && [ "${RELAY_ID,,}" -eq 1 ] ) || [ "${TYPE,,}" = "bprelay" ]; then
         canary_tx &
