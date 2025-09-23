@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Validate exactly one argument is provided
 if [ $# -ne 1 ]; then

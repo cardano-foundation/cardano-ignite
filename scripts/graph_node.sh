@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # This script parses the testnet's dockercompose file in order to construct
 # a physical topology of the network. This topology is stored in a .sql file

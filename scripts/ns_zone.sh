@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Validate exactly two arguments are provided
 if [ $# -ne 2 ]; then
