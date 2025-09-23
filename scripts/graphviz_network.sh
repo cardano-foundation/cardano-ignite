@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Step 1: Get all running container IDs
 containers=$(docker ps -q)

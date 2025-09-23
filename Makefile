@@ -1,5 +1,3 @@
-SHELL:=/bin/bash
-
 .PHONY: all clean example_zone node_graph prerequisites prometheus_target
 .SILENT: all block build dbsync down pools prerequisites query up up-all validate yaci
 
