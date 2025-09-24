@@ -132,9 +132,11 @@ RUN git clone --branch master https://github.com/IntersectMBO/cardano-cli.git
 ARG BOOTSTRAP_HASKELL_CABAL_VERSION="${BOOTSTRAP_HASKELL_CABAL_VERSION:-3.12.1.0}"
 ARG BOOTSTRAP_HASKELL_GHC_VERSION="${BOOTSTRAP_HASKELL_GHC_VERSION:-9.6.7}"
 
-RUN curl --proto '=https' --tlsv1.2 -sSf https://get-ghcup.haskell.org | sh
+RUN --mount=type=cache,target=/root/.ghcup,id=ghcup-cache \
+    curl --proto '=https' --tlsv1.2 -sSf https://get-ghcup.haskell.org | sh
 
-RUN ln -s /root/.ghcup/bin/cabal-${BOOTSTRAP_HASKELL_CABAL_VERSION} /usr/local/bin/cabal && \
+RUN --mount=type=cache,target=/root/.ghcup,id=ghcup-cache \
+    ln -s /root/.ghcup/bin/cabal-${BOOTSTRAP_HASKELL_CABAL_VERSION} /usr/local/bin/cabal && \
     ln -s /root/.ghcup/ghc/${BOOTSTRAP_HASKELL_GHC_VERSION}/bin/ghc-${BOOTSTRAP_HASKELL_GHC_VERSION} /usr/local/bin/ghc
 
 # cardano-cli
@@ -149,7 +151,15 @@ jobs: \$ncpus\n\
 semaphore: True" > /usr/local/src/cardano-cli/cabal.project.local
 
 WORKDIR /usr/local/src/cardano-cli/cardano-cli
-RUN cabal update && \
+RUN --mount=type=cache,target=/root/.ghcup,id=ghcup-cache \
+    --mount=type=cache,target=/root/.local/state/cabal/store,id=cabal-store-cache \
+    --mount=type=cache,target=/root/.cache/cabal,id=cabal-cache \
+    cabal update
+
+RUN --mount=type=cache,target=/root/.ghcup,id=ghcup-cache \
+    --mount=type=cache,target=/root/.local/state/cabal/store,id=cabal-store-cache \
+    --mount=type=cache,target=/root/.cache/cabal,id=cabal-cache \
+    --mount=type=cache,target=./dist-newstyle,id=cardano-cli-cache \
     cabal build exe:cardano-cli
 
 RUN chmod 0755 /usr/local/src/cardano-cli/dist-newstyle/build/x86_64-linux/ghc-*/cardano-cli-*/x/cardano-cli/build/cardano-cli/cardano-cli
@@ -189,13 +199,26 @@ jobs: \$ncpus\n\
 semaphore: True" > /usr/local/src/cardano-node/cabal.project.local
 
 WORKDIR /usr/local/src/cardano-node/cardano-node
-RUN cabal update && \
+RUN --mount=type=cache,target=/root/.ghcup,id=ghcup-cache \
+    --mount=type=cache,target=/root/.local/state/cabal/store,id=cabal-store-cache \
+    --mount=type=cache,target=/root/.cache/cabal,id=cabal-cache \
+    cabal update
+
+
+RUN --mount=type=cache,target=/root/.ghcup,id=ghcup-cache \
+    --mount=type=cache,target=/root/.local/state/cabal/store,id=cabal-store-cache \
+    --mount=type=cache,target=/root/.cache/cabal,id=cabal-cache \
+    --mount=type=cache,target=./dist-newstyle,id=cardano-node-cache \
     cabal build exe:cardano-node
 RUN ln -s /usr/local/src/cardano-node/dist-newstyle/build/x86_64-linux/ghc-${BOOTSTRAP_HASKELL_GHC_VERSION}/cardano-node-*/x/cardano-node/build/cardano-node/cardano-node /usr/local/bin/cardano-node
 
 # tx-generator
 
-RUN cabal build exe:tx-generator
+RUN --mount=type=cache,target=/root/.ghcup,id=ghcup-cache \
+    --mount=type=cache,target=/root/.local/state/cabal/store,id=cabal-store-cache \
+    --mount=type=cache,target=/root/.cache/cabal,id=cabal-cache \
+    --mount=type=cache,target=./dist-newstyle,id=cardano-node-cache \
+    cabal build exe:tx-generator
 RUN ln -s /usr/local/src/cardano-node/dist-newstyle/build/x86_64-linux/ghc-${BOOTSTRAP_HASKELL_GHC_VERSION}/tx-generator-*/x/tx-generator/build/tx-generator/tx-generator /usr/local/bin/tx-generator
 
 # process_exporter

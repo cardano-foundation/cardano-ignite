@@ -190,6 +190,7 @@ services:
     hostname: p1bp.example
     volumes:
       - p1bp:/opt/cardano-node/data
+      - synth:/opt/synth:ro
     environment:
       POOL_ID: "1"
       TYPE: bp
@@ -207,6 +208,7 @@ services:
     hostname: p1r1.example
     volumes:
       - p1r1:/opt/cardano-node/data
+      - synth:/opt/synth:ro
     environment:
       POOL_ID: "1"
       RELAY_ID: "1"
@@ -224,6 +226,7 @@ services:
     hostname: p1r2.example
     volumes:
       - p1r2:/opt/cardano-node/data
+      - synth:/opt/synth:ro
     environment:
       POOL_ID: "1"
       RELAY_ID: "2"
@@ -241,6 +244,7 @@ services:
     hostname: p1r3.example
     volumes:
       - p1r3:/opt/cardano-node/data
+      - synth:/opt/synth:ro
     environment:
       POOL_ID: "1"
       RELAY_ID: "3"
@@ -260,6 +264,7 @@ services:
     hostname: p2bp.example
     volumes:
       - p2bp:/opt/cardano-node/data
+      - synth:/opt/synth:ro
     environment:
       POOL_ID: "2"
       TYPE: bp
@@ -276,6 +281,7 @@ services:
     hostname: p2r1.example
     volumes:
       - p2r1:/opt/cardano-node/data
+      - synth:/opt/synth:ro
     environment:
       POOL_ID: "2"
       RELAY_ID: "1"
@@ -292,6 +298,7 @@ services:
     hostname: p2r2.example
     volumes:
       - p2r2:/opt/cardano-node/data
+      - synth:/opt/synth:ro
     environment:
       POOL_ID: "2"
       RELAY_ID: "2"
@@ -308,6 +315,7 @@ services:
     hostname: p2r3.example
     volumes:
       - p2r3:/opt/cardano-node/data
+      - synth:/opt/synth:ro
     environment:
       POOL_ID: "2"
       RELAY_ID: "3"
@@ -326,6 +334,7 @@ services:
     hostname: p3bp.example
     volumes:
       - p3bp:/opt/cardano-node/data
+      - synth:/opt/synth:ro
     environment:
       POOL_ID: "3"
       TYPE: bp
@@ -342,6 +351,7 @@ services:
     hostname: p3r1.example
     volumes:
       - p3r1:/opt/cardano-node/data
+      - synth:/opt/synth:ro
     environment:
       POOL_ID: "3"
       RELAY_ID: "1"
@@ -358,6 +368,7 @@ services:
     hostname: p3r2.example
     volumes:
       - p3r2:/opt/cardano-node/data
+      - synth:/opt/synth:ro
     environment:
       POOL_ID: "3"
       RELAY_ID: "2"
@@ -374,6 +385,7 @@ services:
     hostname: p3r3.example
     volumes:
       - p3r3:/opt/cardano-node/data
+      - synth:/opt/synth:ro
     environment:
       POOL_ID: "3"
       RELAY_ID: "3"
@@ -392,6 +404,7 @@ services:
     hostname: p4bp.example
     volumes:
       - p4bp:/opt/cardano-node/data
+      - synth:/opt/synth:ro
     environment:
       POOL_ID: "4"
       TYPE: bp
@@ -408,6 +421,7 @@ services:
     hostname: p4r1.example
     volumes:
       - p4r1:/opt/cardano-node/data
+      - synth:/opt/synth:ro
     environment:
       POOL_ID: "4"
       RELAY_ID: "1"
@@ -424,6 +438,7 @@ services:
     hostname: p4r2.example
     volumes:
       - p4r2:/opt/cardano-node/data
+      - synth:/opt/synth:ro
     environment:
       POOL_ID: "4"
       RELAY_ID: "2"
@@ -440,6 +455,7 @@ services:
     hostname: p4r3.example
     volumes:
       - p4r3:/opt/cardano-node/data
+      - synth:/opt/synth:ro
     environment:
       POOL_ID: "4"
       RELAY_ID: "3"
@@ -458,6 +474,7 @@ services:
     hostname: p5bp.example
     volumes:
       - p5bp:/opt/cardano-node/data
+      - synth:/opt/synth:ro
     environment:
       POOL_ID: "5"
       TYPE: bp
@@ -474,6 +491,7 @@ services:
     hostname: p5r1.example
     volumes:
       - p5r1:/opt/cardano-node/data
+      - synth:/opt/synth:ro
     environment:
       POOL_ID: "5"
       RELAY_ID: "1"
@@ -490,6 +508,7 @@ services:
     hostname: p5r2.example
     volumes:
       - p5r2:/opt/cardano-node/data
+      - synth:/opt/synth:ro
     environment:
       POOL_ID: "5"
       RELAY_ID: "2"
@@ -506,6 +525,7 @@ services:
     hostname: p5r3.example
     volumes:
       - p5r3:/opt/cardano-node/data
+      - synth:/opt/synth:ro
     environment:
       POOL_ID: "5"
       RELAY_ID: "3"
@@ -524,6 +544,7 @@ services:
     hostname: p6bp.example
     volumes:
       - p6bp:/opt/cardano-node/data
+      - synth:/opt/synth:ro
     environment:
       POOL_ID: "6"
       TYPE: bp
@@ -540,6 +561,7 @@ services:
     hostname: p6r1.example
     volumes:
       - p6r1:/opt/cardano-node/data
+      - synth:/opt/synth:ro
     environment:
       POOL_ID: "6"
       RELAY_ID: "1"
@@ -556,6 +578,7 @@ services:
     hostname: p6r2.example
     volumes:
       - p6r2:/opt/cardano-node/data
+      - synth:/opt/synth:ro
     environment:
       POOL_ID: "6"
       RELAY_ID: "2"
@@ -572,6 +595,7 @@ services:
     hostname: p6r3.example
     volumes:
       - p6r3:/opt/cardano-node/data
+      - synth:/opt/synth:ro
     environment:
       POOL_ID: "6"
       RELAY_ID: "3"
@@ -712,6 +736,20 @@ services:
         condition: service_started
     profiles: [build, core, mgmt]
 
+  synth:
+    image: ${testnet}_db-synthesizer:latest
+    container_name: synth
+    restart: no
+    environment:
+      SYSTEM_START: ${SYSTEM_START:-}
+      PRE_EPOCHS: ${PRE_EPOCHS:-0}
+    volumes:
+      - synth:/opt/cardano-node/data
+    build:
+      context: "../../"
+      dockerfile: "db-synthesizer/Dockerfile"
+    profiles: [build, core, mgmt]
+
   # Client 1
   # Used by cardano-db-sync
   c1:
@@ -720,6 +758,7 @@ services:
     hostname: c1.example
     volumes:
       - c1:/opt/cardano-node
+      - synth:/opt/synth:ro
     environment:
       POOL_ID: "1"
       TYPE: "client"
@@ -737,6 +776,7 @@ services:
     hostname: c2.example
     volumes:
       - c2:/opt/cardano-node
+      - synth:/opt/synth:ro
     environment:
       POOL_ID: "1"
       TYPE: "txg"
@@ -956,3 +996,4 @@ volumes:
   prometheus:
   loki:
   grafana:
+  synth:

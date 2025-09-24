@@ -11,7 +11,7 @@ testnetDomain: example
 
 --- # Optional Byron Genesis Overide
 protocolConsts:
-  k: 432
+  k: 90
 
 --- # Optional Shelley Genesis Overide
 slotLength: 1
