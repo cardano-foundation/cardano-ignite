@@ -131,13 +131,19 @@ RUN git clone --branch master https://github.com/IntersectMBO/cardano-cli.git
 
 ARG BOOTSTRAP_HASKELL_CABAL_VERSION="${BOOTSTRAP_HASKELL_CABAL_VERSION:-3.12.1.0}"
 ARG BOOTSTRAP_HASKELL_GHC_VERSION="${BOOTSTRAP_HASKELL_GHC_VERSION:-9.6.7}"
+ARG BOOTSTRAP_HASKELL_GHCUP_VERSION="${BOOTSTRAP_HASKELL_GHCUP_VERSION:-0.1.50.2}"
 
 RUN --mount=type=cache,target=/root/.ghcup,id=ghcup-cache \
-    curl --proto '=https' --tlsv1.2 -sSf https://get-ghcup.haskell.org | sh
+    curl -L https://downloads.haskell.org/~ghcup/${BOOTSTRAP_HASKELL_GHCUP_VERSION}/x86_64-linux-ghcup-${BOOTSTRAP_HASKELL_GHCUP_VERSION} -o /usr/local/bin/ghcup && \
+    chmod +x /usr/local/bin/ghcup
+
+ENV PATH="/root/.ghcup/bin:/root/.cabal/bin:${PATH}"
 
 RUN --mount=type=cache,target=/root/.ghcup,id=ghcup-cache \
-    ln -s /root/.ghcup/bin/cabal-${BOOTSTRAP_HASKELL_CABAL_VERSION} /usr/local/bin/cabal && \
-    ln -s /root/.ghcup/ghc/${BOOTSTRAP_HASKELL_GHC_VERSION}/bin/ghc-${BOOTSTRAP_HASKELL_GHC_VERSION} /usr/local/bin/ghc
+    ghcup install cabal ${BOOTSTRAP_HASKELL_CABAL_VERSION} && \
+    ghcup set cabal ${BOOTSTRAP_HASKELL_CABAL_VERSION} && \
+    ghcup install ghc ${BOOTSTRAP_HASKELL_GHC_VERSION} && \
+    ghcup set ghc ${BOOTSTRAP_HASKELL_GHC_VERSION}
 
 # cardano-cli
 
