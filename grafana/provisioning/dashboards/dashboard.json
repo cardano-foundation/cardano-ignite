@@ -75,7 +75,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
               },
               {
                 "color": "red",
@@ -110,7 +111,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "12.0.2",
+      "pluginVersion": "12.1.0",
       "targets": [
         {
           "datasource": {
@@ -231,7 +232,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "light-red"
+                "color": "light-red",
+                "value": 0
               }
             ]
           },
@@ -263,7 +265,7 @@
         "textMode": "name",
         "wideLayout": true
       },
-      "pluginVersion": "12.0.2",
+      "pluginVersion": "12.1.0",
       "targets": [
         {
           "editorMode": "code",
@@ -307,7 +309,7 @@
         "content": "",
         "mode": "markdown"
       },
-      "pluginVersion": "12.0.2",
+      "pluginVersion": "12.1.0",
       "title": "",
       "transparent": true,
       "type": "text"
@@ -399,7 +401,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "light-red"
+                "color": "light-red",
+                "value": 0
               }
             ]
           },
@@ -431,7 +434,7 @@
         "textMode": "value",
         "wideLayout": true
       },
-      "pluginVersion": "12.0.2",
+      "pluginVersion": "12.1.0",
       "targets": [
         {
           "editorMode": "code",
@@ -482,7 +485,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "light-red"
+                "color": "light-red",
+                "value": 0
               }
             ]
           },
@@ -514,7 +518,7 @@
         "textMode": "value",
         "wideLayout": true
       },
-      "pluginVersion": "12.0.2",
+      "pluginVersion": "12.1.0",
       "targets": [
         {
           "editorMode": "code",
@@ -615,7 +619,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "light-red"
+                "color": "light-red",
+                "value": 0
               }
             ]
           },
@@ -647,7 +652,7 @@
         "textMode": "value",
         "wideLayout": true
       },
-      "pluginVersion": "12.0.2",
+      "pluginVersion": "12.1.0",
       "targets": [
         {
           "editorMode": "code",
@@ -748,7 +753,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "light-red"
+                "color": "light-red",
+                "value": 0
               }
             ]
           },
@@ -780,7 +786,7 @@
         "textMode": "value",
         "wideLayout": true
       },
-      "pluginVersion": "12.0.2",
+      "pluginVersion": "12.1.0",
       "targets": [
         {
           "editorMode": "code",
@@ -881,7 +887,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "light-red"
+                "color": "light-red",
+                "value": 0
               }
             ]
           },
@@ -913,7 +920,7 @@
         "textMode": "value",
         "wideLayout": true
       },
-      "pluginVersion": "12.0.2",
+      "pluginVersion": "12.1.0",
       "targets": [
         {
           "editorMode": "code",
@@ -1014,7 +1021,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "light-red"
+                "color": "light-red",
+                "value": 0
               }
             ]
           },
@@ -1046,7 +1054,7 @@
         "textMode": "value",
         "wideLayout": true
       },
-      "pluginVersion": "12.0.2",
+      "pluginVersion": "12.1.0",
       "targets": [
         {
           "editorMode": "code",
@@ -1147,7 +1155,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "light-red"
+                "color": "light-red",
+                "value": 0
               }
             ]
           },
@@ -1179,7 +1188,7 @@
         "textMode": "value",
         "wideLayout": true
       },
-      "pluginVersion": "12.0.2",
+      "pluginVersion": "12.1.0",
       "targets": [
         {
           "editorMode": "code",
@@ -1280,7 +1289,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "light-red"
+                "color": "light-red",
+                "value": 0
               }
             ]
           },
@@ -1312,7 +1322,7 @@
         "textMode": "value",
         "wideLayout": true
       },
-      "pluginVersion": "12.0.2",
+      "pluginVersion": "12.1.0",
       "targets": [
         {
           "editorMode": "code",
@@ -1413,7 +1423,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "light-red"
+                "color": "light-red",
+                "value": 0
               }
             ]
           },
@@ -1445,7 +1456,7 @@
         "textMode": "value",
         "wideLayout": true
       },
-      "pluginVersion": "12.0.2",
+      "pluginVersion": "12.1.0",
       "targets": [
         {
           "editorMode": "code",
@@ -1546,7 +1557,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "light-red"
+                "color": "light-red",
+                "value": 0
               }
             ]
           },
@@ -1578,7 +1590,7 @@
         "textMode": "value",
         "wideLayout": true
       },
-      "pluginVersion": "12.0.2",
+      "pluginVersion": "12.1.0",
       "targets": [
         {
           "editorMode": "code",
@@ -1612,7 +1624,7 @@
         "content": "",
         "mode": "markdown"
       },
-      "pluginVersion": "12.0.2",
+      "pluginVersion": "12.1.0",
       "title": "",
       "transparent": true,
       "type": "text"
@@ -1650,7 +1662,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
               },
               {
                 "color": "red",
@@ -1724,7 +1737,7 @@
           }
         ]
       },
-      "pluginVersion": "12.0.2",
+      "pluginVersion": "12.1.0",
       "targets": [
         {
           "datasource": {
@@ -1805,7 +1818,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "light-green"
+                    "color": "light-green",
+                    "value": 0
                   },
                   {
                     "color": "light-red",
@@ -1837,7 +1851,7 @@
             "h": 13,
             "w": 24,
             "x": 0,
-            "y": 134
+            "y": 18
           },
           "id": 34,
           "options": {
@@ -1856,7 +1870,7 @@
               "sort": "none"
             }
           },
-          "pluginVersion": "12.0.1",
+          "pluginVersion": "12.1.0",
           "targets": [
             {
               "editorMode": "code",
@@ -1907,7 +1921,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "light-red"
+                    "color": "light-red",
+                    "value": 0
                   },
                   {
                     "color": "light-green",
@@ -1922,7 +1937,7 @@
             "h": 13,
             "w": 24,
             "x": 0,
-            "y": 147
+            "y": 31
           },
           "id": 45,
           "options": {
@@ -1941,7 +1956,7 @@
               "sort": "none"
             }
           },
-          "pluginVersion": "12.0.1",
+          "pluginVersion": "12.1.0",
           "targets": [
             {
               "editorMode": "code",
@@ -2007,7 +2022,7 @@
             "h": 13,
             "w": 24,
             "x": 0,
-            "y": 160
+            "y": 44
           },
           "id": 59,
           "options": {
@@ -2076,7 +2091,7 @@
             "h": 26,
             "w": 12,
             "x": 0,
-            "y": 201
+            "y": 19
           },
           "id": 1,
           "options": {
@@ -2085,7 +2100,7 @@
             "nodes": {},
             "zoomMode": "cooperative"
           },
-          "pluginVersion": "12.0.1",
+          "pluginVersion": "12.1.0",
           "targets": [
             {
               "datasource": {
@@ -2095,7 +2110,7 @@
               "editorMode": "code",
               "format": "table",
               "rawQuery": true,
-              "rawSql": "SELECT \n  id,\n  title,\n  subtitle,\n  mainstat,\n  secondarystat,\n  color,\n  icon from ci_nodes ",
+              "rawSql": "SELECT \n  id,\n  title,\n  subtitle,\n  mainstat,\n  secondarystat,\n  color,\n  icon from ci_nodes",
               "refId": "A",
               "sql": {
                 "columns": [
@@ -2162,7 +2177,7 @@
             "h": 26,
             "w": 12,
             "x": 12,
-            "y": 201
+            "y": 19
           },
           "id": 2,
           "options": {
@@ -2171,7 +2186,7 @@
             "nodes": {},
             "zoomMode": "cooperative"
           },
-          "pluginVersion": "12.0.1",
+          "pluginVersion": "12.1.0",
           "targets": [
             {
               "datasource": {
@@ -2273,7 +2288,7 @@
         "content": "<h1></h1>\n<h3 style=\"text-align: left\">Block Chain</h3>",
         "mode": "html"
       },
-      "pluginVersion": "12.0.2",
+      "pluginVersion": "12.1.0",
       "title": "",
       "transparent": true,
       "type": "text"
@@ -2326,7 +2341,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
               },
               {
                 "color": "red",
@@ -2358,15 +2374,28 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.2",
+      "pluginVersion": "12.1.0",
       "targets": [
         {
           "editorMode": "code",
-          "expr": "cardano_node_metrics_blockNum_int",
+          "expr": "cardano_node_metrics_blockNum_int{instance!~\"otlp.*\"}",
           "interval": "",
           "legendFormat": "{{instance}}",
           "range": true,
           "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus_uid"
+          },
+          "editorMode": "code",
+          "expr": "cardano_node_metrics_blockNum_int{job=\"amaru\"}",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "{{exported_job}}",
+          "range": true,
+          "refId": "B"
         }
       ],
       "title": "Block Height",
@@ -2429,7 +2458,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
               },
               {
                 "color": "red",
@@ -2461,15 +2491,28 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.2",
+      "pluginVersion": "12.1.0",
       "targets": [
         {
           "editorMode": "code",
-          "expr": "cardano_node_metrics_slotNum_int",
+          "expr": "cardano_node_metrics_slotNum_int{instance!~\"otlp.*\"}",
           "interval": "",
           "legendFormat": "{{instance}}",
           "range": true,
           "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus_uid"
+          },
+          "editorMode": "code",
+          "expr": "cardano_node_metrics_slotNum_int{job=\"amaru\"}",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "{{exported_job}}",
+          "range": true,
+          "refId": "B"
         }
       ],
       "title": "Slot Height",
@@ -2532,7 +2575,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
               },
               {
                 "color": "red",
@@ -2564,15 +2608,28 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.2",
+      "pluginVersion": "12.1.0",
       "targets": [
         {
           "editorMode": "code",
-          "expr": "cardano_node_metrics_epoch_int",
+          "expr": "cardano_node_metrics_epoch_int{instance!~\"otlp.*\"}",
           "interval": "",
           "legendFormat": "{{instance}}",
           "range": true,
           "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus_uid"
+          },
+          "editorMode": "code",
+          "expr": "cardano_node_metrics_epoch_int{job=\"amaru\"}",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "{{exported_job}}",
+          "range": true,
+          "refId": "B"
         }
       ],
       "title": "Epoch",
@@ -2635,7 +2692,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
               },
               {
                 "color": "red",
@@ -2667,7 +2725,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.2",
+      "pluginVersion": "12.1.0",
       "targets": [
         {
           "editorMode": "code",
@@ -2738,7 +2796,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
               },
               {
                 "color": "red",
@@ -2770,15 +2829,28 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.2",
+      "pluginVersion": "12.1.0",
       "targets": [
         {
           "editorMode": "code",
-          "expr": "cardano_node_metrics_density_real ",
+          "expr": "cardano_node_metrics_density_real{instance!~\"otlp.*\"}",
           "interval": "",
           "legendFormat": "{{instance}}",
           "range": true,
           "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus_uid"
+          },
+          "editorMode": "code",
+          "expr": "cardano_node_metrics_density_real{job=\"amaru\"}",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "{{exported_job}}",
+          "range": true,
+          "refId": "B"
         }
       ],
       "title": "Chain Density",
@@ -2841,7 +2913,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
               },
               {
                 "color": "red",
@@ -2873,7 +2946,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.2",
+      "pluginVersion": "12.1.0",
       "targets": [
         {
           "datasource": {
@@ -2916,7 +2989,7 @@
       ],
       "type": "timeseries"
     },
- {
+    {
       "datasource": {
         "type": "grafana-postgresql-datasource",
         "uid": "dbsync_uid"
@@ -3034,7 +3107,7 @@
             "scaleDistribution": {
               "type": "linear"
             },
-            "showPoints": "auto",
+            "showPoints": "never",
             "spanNulls": false,
             "stacking": {
               "group": "A",
@@ -3181,7 +3254,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "select * from get_canary_percentage($__timeFrom(), $__timeTo())\n",
+          "rawSql": "select * from get_canary_percentage($__timeFrom(), $__timeTo())",
           "refId": "A",
           "sql": {
             "columns": [
@@ -3238,7 +3311,7 @@
             "scaleDistribution": {
               "type": "linear"
             },
-            "showPoints": "auto",
+            "showPoints": "never",
             "spanNulls": false,
             "stacking": {
               "group": "A",
@@ -3327,7 +3400,7 @@
         "x": 0,
         "y": 50
       },
-      "id": 87,
+      "id": 107,
       "options": {
         "code": {
           "language": "plaintext",
@@ -3338,32 +3411,6 @@
         "mode": "html"
       },
       "pluginVersion": "12.1.0",
-      "title": "",
-      "transparent": true,
-      "type": "text"
-    },
-    {
-      "fieldConfig": {
-        "defaults": {},
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 2,
-        "w": 24,
-        "x": 0,
-        "y": 43
-      },
-      "id": 87,
-      "options": {
-        "code": {
-          "language": "plaintext",
-          "showLineNumbers": false,
-          "showMiniMap": false
-        },
-        "content": "<h1></h1>\n<h3 style=\"text-align: left\">Block Forging</h3>",
-        "mode": "html"
-      },
-      "pluginVersion": "12.0.2",
       "title": "",
       "transparent": true,
       "type": "text"
@@ -3417,7 +3464,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
               },
               {
                 "color": "red",
@@ -3433,7 +3481,7 @@
         "h": 7,
         "w": 8,
         "x": 0,
-        "y": 45
+        "y": 52
       },
       "id": 21,
       "options": {
@@ -3449,7 +3497,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.2",
+      "pluginVersion": "12.1.0",
       "targets": [
         {
           "editorMode": "code",
@@ -3520,7 +3568,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
               },
               {
                 "color": "red",
@@ -3536,7 +3585,7 @@
         "h": 7,
         "w": 8,
         "x": 8,
-        "y": 45
+        "y": 52
       },
       "id": 24,
       "options": {
@@ -3552,11 +3601,11 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.2",
+      "pluginVersion": "12.1.0",
       "targets": [
         {
           "editorMode": "code",
-          "expr": "cardano_node_metrics_slotsMissedNum_int ",
+          "expr": "cardano_node_metrics_slotsMissedNum_int",
           "interval": "",
           "legendFormat": "{{instance}}",
           "range": true,
@@ -3624,7 +3673,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
               },
               {
                 "color": "red",
@@ -3640,7 +3690,7 @@
         "h": 7,
         "w": 8,
         "x": 16,
-        "y": 45
+        "y": 52
       },
       "id": 20,
       "options": {
@@ -3656,18 +3706,18 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.2",
+      "pluginVersion": "12.1.0",
       "targets": [
         {
           "editorMode": "code",
-          "expr": "(rate(cardano_node_metrics_Forge_node_is_leader_int[1h])/rate(cardano_node_metrics_slotNum_int[1h])) ",
+          "expr": "(rate(cardano_node_metrics_Forge_node_is_leader_int[1h])/rate(cardano_node_metrics_slotNum_int[1h]))",
           "interval": "",
           "legendFormat": "{{instance}}",
           "range": true,
           "refId": "A"
         }
       ],
-      "title": "Slot Leading Share ",
+      "title": "Slot Leading Share",
       "transformations": [
         {
           "id": "renameByRegex",
@@ -3688,7 +3738,33 @@
         "h": 2,
         "w": 24,
         "x": 0,
-        "y": 52
+        "y": 59
+      },
+      "id": 87,
+      "options": {
+        "code": {
+          "language": "plaintext",
+          "showLineNumbers": false,
+          "showMiniMap": false
+        },
+        "content": "<h1></h1>\n<h3 style=\"text-align: left\">Block Forging</h3>",
+        "mode": "html"
+      },
+      "pluginVersion": "12.1.0",
+      "title": "",
+      "transparent": true,
+      "type": "text"
+    },
+    {
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 2,
+        "w": 24,
+        "x": 0,
+        "y": 61
       },
       "id": 88,
       "options": {
@@ -3700,7 +3776,7 @@
         "content": "<h1></h1>\n<h3 style=\"text-align: left\">Network</h3>",
         "mode": "html"
       },
-      "pluginVersion": "12.0.2",
+      "pluginVersion": "12.1.0",
       "title": "",
       "transparent": true,
       "type": "text"
@@ -3753,7 +3829,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
               },
               {
                 "color": "red",
@@ -3769,7 +3846,7 @@
         "h": 7,
         "w": 8,
         "x": 0,
-        "y": 54
+        "y": 63
       },
       "id": 26,
       "options": {
@@ -3785,7 +3862,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.2",
+      "pluginVersion": "12.1.0",
       "targets": [
         {
           "editorMode": "code",
@@ -3856,7 +3933,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
               },
               {
                 "color": "red",
@@ -3872,7 +3950,7 @@
         "h": 7,
         "w": 8,
         "x": 8,
-        "y": 54
+        "y": 63
       },
       "id": 27,
       "options": {
@@ -3888,7 +3966,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.2",
+      "pluginVersion": "12.1.0",
       "targets": [
         {
           "editorMode": "code",
@@ -3959,7 +4037,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
               },
               {
                 "color": "red",
@@ -3975,7 +4054,7 @@
         "h": 7,
         "w": 8,
         "x": 16,
-        "y": 54
+        "y": 63
       },
       "id": 28,
       "options": {
@@ -3991,7 +4070,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.2",
+      "pluginVersion": "12.1.0",
       "targets": [
         {
           "editorMode": "code",
@@ -4063,7 +4142,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
               },
               {
                 "color": "red",
@@ -4079,7 +4159,7 @@
         "h": 7,
         "w": 8,
         "x": 0,
-        "y": 61
+        "y": 70
       },
       "id": 22,
       "options": {
@@ -4095,7 +4175,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.2",
+      "pluginVersion": "12.1.0",
       "targets": [
         {
           "editorMode": "code",
@@ -4167,7 +4247,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
               },
               {
                 "color": "red",
@@ -4183,7 +4264,7 @@
         "h": 7,
         "w": 8,
         "x": 8,
-        "y": 61
+        "y": 70
       },
       "id": 29,
       "options": {
@@ -4199,7 +4280,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.2",
+      "pluginVersion": "12.1.0",
       "targets": [
         {
           "editorMode": "code",
@@ -4270,7 +4351,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
               },
               {
                 "color": "red",
@@ -4286,7 +4368,7 @@
         "h": 7,
         "w": 8,
         "x": 16,
-        "y": 61
+        "y": 70
       },
       "id": 38,
       "options": {
@@ -4302,7 +4384,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.2",
+      "pluginVersion": "12.1.0",
       "targets": [
         {
           "editorMode": "code",
@@ -4373,7 +4455,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
               },
               {
                 "color": "red",
@@ -4389,7 +4472,7 @@
         "h": 7,
         "w": 8,
         "x": 0,
-        "y": 68
+        "y": 77
       },
       "id": 35,
       "options": {
@@ -4405,7 +4488,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.2",
+      "pluginVersion": "12.1.0",
       "targets": [
         {
           "editorMode": "code",
@@ -4476,7 +4559,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
               },
               {
                 "color": "red",
@@ -4492,7 +4576,7 @@
         "h": 7,
         "w": 8,
         "x": 8,
-        "y": 68
+        "y": 77
       },
       "id": 36,
       "options": {
@@ -4508,7 +4592,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.2",
+      "pluginVersion": "12.1.0",
       "targets": [
         {
           "editorMode": "code",
@@ -4579,7 +4663,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
               },
               {
                 "color": "red",
@@ -4595,7 +4680,7 @@
         "h": 7,
         "w": 8,
         "x": 16,
-        "y": 68
+        "y": 77
       },
       "id": 37,
       "options": {
@@ -4611,7 +4696,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.2",
+      "pluginVersion": "12.1.0",
       "targets": [
         {
           "editorMode": "code",
@@ -4643,7 +4728,7 @@
         "h": 2,
         "w": 24,
         "x": 0,
-        "y": 75
+        "y": 84
       },
       "id": 89,
       "options": {
@@ -4655,7 +4740,7 @@
         "content": "<h1></h1>\n<h3 style=\"text-align: left\">Transactions</h3>",
         "mode": "html"
       },
-      "pluginVersion": "12.0.2",
+      "pluginVersion": "12.1.0",
       "title": "",
       "transparent": true,
       "type": "text"
@@ -4709,7 +4794,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
               },
               {
                 "color": "red",
@@ -4725,7 +4811,7 @@
         "h": 7,
         "w": 8,
         "x": 0,
-        "y": 77
+        "y": 86
       },
       "id": 90,
       "options": {
@@ -4741,15 +4827,28 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.2",
+      "pluginVersion": "12.1.0",
       "targets": [
         {
           "editorMode": "code",
-          "expr": "rate(cardano_node_metrics_txsProcessedNum_int[1h])",
+          "expr": "rate(cardano_node_metrics_txsProcessedNum_int{instance!~\"otlp.*\"}[1h])",
           "interval": "",
           "legendFormat": "{{instance}}",
           "range": true,
           "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus_uid"
+          },
+          "editorMode": "code",
+          "expr": "rate(cardano_node_metrics_txsProcessedNum_int_total{job=\"amaru\"}[1h])",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "{{exported_job}}",
+          "range": true,
+          "refId": "B"
         }
       ],
       "title": "Transaction Rate",
@@ -4812,7 +4911,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
               },
               {
                 "color": "red",
@@ -4828,7 +4928,7 @@
         "h": 7,
         "w": 8,
         "x": 8,
-        "y": 77
+        "y": 86
       },
       "id": 41,
       "options": {
@@ -4844,7 +4944,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.2",
+      "pluginVersion": "12.1.0",
       "targets": [
         {
           "editorMode": "code",
@@ -4916,7 +5016,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
               },
               {
                 "color": "red",
@@ -4932,7 +5033,7 @@
         "h": 7,
         "w": 8,
         "x": 16,
-        "y": 77
+        "y": 86
       },
       "id": 43,
       "options": {
@@ -4948,7 +5049,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.2",
+      "pluginVersion": "12.1.0",
       "targets": [
         {
           "editorMode": "code",
@@ -4980,7 +5081,7 @@
         "h": 2,
         "w": 24,
         "x": 0,
-        "y": 84
+        "y": 93
       },
       "id": 91,
       "options": {
@@ -4992,7 +5093,7 @@
         "content": "<h1></h1>\n<h3 style=\"text-align: left\">Process</h3>",
         "mode": "html"
       },
-      "pluginVersion": "12.0.2",
+      "pluginVersion": "12.1.0",
       "title": "",
       "transparent": true,
       "type": "text"
@@ -5045,7 +5146,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
               },
               {
                 "color": "red",
@@ -5061,7 +5163,7 @@
         "h": 7,
         "w": 8,
         "x": 0,
-        "y": 86
+        "y": 95
       },
       "id": 67,
       "options": {
@@ -5077,11 +5179,11 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.2",
+      "pluginVersion": "12.1.0",
       "targets": [
         {
           "editorMode": "code",
-          "expr": "namedprocess_namegroup_oldest_start_time_seconds{groupname=\"cardano-node\"} * 1000",
+          "expr": "namedprocess_namegroup_oldest_start_time_seconds{groupname=~\"cardano-node|amaru\"} * 1000",
           "interval": "",
           "legendFormat": "{{instance}}",
           "range": true,
@@ -5148,7 +5250,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
               },
               {
                 "color": "red",
@@ -5164,7 +5267,7 @@
         "h": 7,
         "w": 8,
         "x": 8,
-        "y": 86
+        "y": 95
       },
       "id": 31,
       "options": {
@@ -5180,11 +5283,11 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.2",
+      "pluginVersion": "12.1.0",
       "targets": [
         {
           "editorMode": "code",
-          "expr": "namedprocess_namegroup_open_filedesc{groupname=\"cardano-node\"}",
+          "expr": "namedprocess_namegroup_open_filedesc{groupname=~\"cardano-node|amaru\"}",
           "interval": "",
           "legendFormat": "{{instance}}",
           "range": true,
@@ -5252,7 +5355,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
               },
               {
                 "color": "red",
@@ -5268,7 +5372,7 @@
         "h": 7,
         "w": 8,
         "x": 16,
-        "y": 86
+        "y": 95
       },
       "id": 40,
       "options": {
@@ -5284,7 +5388,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.2",
+      "pluginVersion": "12.1.0",
       "targets": [
         {
           "editorMode": "code",
@@ -5356,7 +5460,8 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green"
+                "color": "green",
+                "value": 0
               },
               {
                 "color": "red",
@@ -5372,7 +5477,7 @@
         "h": 7,
         "w": 8,
         "x": 0,
-        "y": 93
+        "y": 102
       },
       "id": 39,
       "options": {
@@ -5388,7 +5493,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.0.2",
+      "pluginVersion": "12.1.0",
       "targets": [
         {
           "editorMode": "code",
@@ -5444,7 +5549,7 @@
             "scaleDistribution": {
               "type": "linear"
             },
-            "showPoints": "auto",
+            "showPoints": "never",
             "spanNulls": false,
             "stacking": {
               "group": "A",
@@ -5476,7 +5581,7 @@
         "h": 7,
         "w": 8,
         "x": 8,
-        "y": 93
+        "y": 102
       },
       "id": 103,
       "options": {
@@ -5547,7 +5652,7 @@
             "scaleDistribution": {
               "type": "linear"
             },
-            "showPoints": "auto",
+            "showPoints": "never",
             "spanNulls": false,
             "stacking": {
               "group": "A",
@@ -5579,7 +5684,7 @@
         "h": 7,
         "w": 8,
         "x": 16,
-        "y": 93
+        "y": 102
       },
       "id": 102,
       "options": {
@@ -5650,7 +5755,7 @@
             "scaleDistribution": {
               "type": "linear"
             },
-            "showPoints": "auto",
+            "showPoints": "never",
             "spanNulls": false,
             "stacking": {
               "group": "A",
@@ -5682,7 +5787,7 @@
         "h": 7,
         "w": 8,
         "x": 0,
-        "y": 100
+        "y": 109
       },
       "id": 104,
       "options": {
@@ -5743,7 +5848,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 100
+        "y": 116
       },
       "id": 99,
       "panels": [
@@ -5775,7 +5880,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": 0
                   }
                 ]
               }
@@ -5786,7 +5892,7 @@
             "h": 2,
             "w": 24,
             "x": 0,
-            "y": 101
+            "y": 182
           },
           "id": 98,
           "options": {
@@ -5806,7 +5912,7 @@
             "textMode": "auto",
             "wideLayout": true
           },
-          "pluginVersion": "12.0.2",
+          "pluginVersion": "12.1.0",
           "targets": [
             {
               "editorMode": "code",
@@ -5858,7 +5964,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": 0
                   },
                   {
                     "color": "red",
@@ -5922,7 +6029,7 @@
             "h": 7,
             "w": 12,
             "x": 0,
-            "y": 103
+            "y": 184
           },
           "id": 97,
           "options": {
@@ -5937,7 +6044,7 @@
             },
             "showHeader": true
           },
-          "pluginVersion": "12.0.2",
+          "pluginVersion": "12.1.0",
           "targets": [
             {
               "datasource": {
@@ -5993,7 +6100,8 @@
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green"
+                    "color": "green",
+                    "value": 0
                   },
                   {
                     "color": "red",
@@ -6057,7 +6165,7 @@
             "h": 7,
             "w": 12,
             "x": 12,
-            "y": 103
+            "y": 184
           },
           "id": 96,
           "options": {
@@ -6072,7 +6180,7 @@
             },
             "showHeader": true
           },
-          "pluginVersion": "12.0.2",
+          "pluginVersion": "12.1.0",
           "targets": [
             {
               "datasource": {

@@ -115,7 +115,7 @@ start_node_exporter() {
 }
 
 start_process_exporter() {
-    process_exporter -procnames cardano-node,node_exporter,process_exporte
+    process_exporter -procnames amaru,node_exporter,process_exporte
 }
 
 generate_amaru_snapshots() {
