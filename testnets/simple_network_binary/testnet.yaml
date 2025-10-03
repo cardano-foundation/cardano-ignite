@@ -67,6 +67,7 @@ TraceLedgerPeers: false
 TraceLocalConnectionManager: false
 TraceLocalHandshake: false
 TraceLocalRootPeers: false
+TraceMempool: true
 TracePeerSelection: false
 TracePeerSelectionActions: false
 TracePublicRootPeers: false
