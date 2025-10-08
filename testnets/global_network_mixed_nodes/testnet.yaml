@@ -1,5 +1,5 @@
 --- # Required Testnet Parameters
-poolCount: 3
+poolCount: 6
 poolCost: 340000000
 poolMargin: 0.0
 poolPledge: 0
@@ -11,12 +11,12 @@ testnetDomain: example
 
 --- # Optional Byron Genesis Overide
 protocolConsts:
-  k: 90
+  k: 432
 
 --- # Optional Shelley Genesis Overide
 slotLength: 1
-epochLength: 17280
-securityParam: 90
+epochLength: 86400
+securityParam: 432
 maxLovelaceSupply: 45000000000000000
 protocolParams:
   maxBlockBodySize: 90112
@@ -40,36 +40,42 @@ MaxConcurrencyDeadline: 4
 MaxKnownMajorProtocolVersion: 2
 PeerSharing: true
 RequiresNetworkMagic: "RequiresMagic"
+SyncTargetNumberOfActivePeers: 2
+SyncTargetNumberOfEstablishedPeers: 2
+SyncTargetNumberOfKnownPeers: 2
+SyncTargetNumberOfRootPeers: 0
 TargetNumberOfActiveBigLedgerPeers: 2
-TargetNumberOfActivePeers: 3
+TargetNumberOfActivePeers: 5
 TargetNumberOfEstablishedBigLedgerPeers: 3
-TargetNumberOfEstablishedPeers: 3
-TargetNumberOfKnownBigLedgerPeers: 10
-TargetNumberOfKnownPeers: 30
-TargetNumberOfRootPeers: 10
+TargetNumberOfEstablishedPeers: 6
+TargetNumberOfKnownBigLedgerPeers: 5
+TargetNumberOfKnownPeers: 8
+TargetNumberOfRootPeers: 4
 TestAllegraHardForkAtEpoch: 0
 TestAlonzoHardForkAtEpoch: 0
 TestBabbageHardForkAtEpoch: 0
 TestConwayHardForkAtEpoch: 0
 TestMaryHardForkAtEpoch: 0
 TestShelleyHardForkAtEpoch: 0
-TraceConnectionManager: false
+TraceBlockFetchClient: true
+TraceChainSyncClient: true
+TraceConnectionManager: true
 TraceConnectionManagerTransitions: false
 TraceDNSResolver: false
 TraceDNSSubscription: false
 TraceDebugPeerSelection: false
-TraceForge: false
+TraceForge: true
 TraceForgeStateInfo: false
 TraceHandshake: false
-TraceInboundGovernor: false
+TraceInboundGovernor: true
 TraceIpSubscription: false
 TraceLedgerPeers: false
 TraceLocalConnectionManager: false
 TraceLocalHandshake: false
 TraceLocalRootPeers: false
 TraceMempool: true
-TracePeerSelection: false
-TracePeerSelectionActions: false
+TracePeerSelection: true
+TracePeerSelectionActions: true
 TracePublicRootPeers: false
-TraceServer: false
-TurnOnLogMetrics: false
+TraceServer: true
+TurnOnLogMetrics: true

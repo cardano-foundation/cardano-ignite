@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-
 set -o errexit
 set -o pipefail
 
@@ -132,10 +131,35 @@ EOF
     rm -rf "${temp_dir}"
 }
 
+insert_starting_row() {
+    local sql=$(cat <<EOF
+        INSERT INTO node_tips (pool_id, hash, block, slot, updated_at)
+        VALUES ('starting', NULL, NULL, NULL, NULL);
+EOF
+    )
+    ${PSQL_CMD} <<<"$sql"
+}
+
+delete_starting_row() {
+    local sql=$(cat <<EOF
+        DELETE FROM node_tips
+        WHERE pool_id = 'starting';
+EOF
+    )
+    ${PSQL_CMD} <<<"$sql"
+}
+
 # Main execution flow with dynamic sleep time
 main() {
     verify_environment_variables
     setup_database
+
+    insert_starting_row
+    while [ ! -f /opt/synth/start_time.unix_epoch ]; do
+        echo "Waiting for initialization to complete..."
+        sleep 1
+    done
+    delete_starting_row
 
     while true; do
         temp_directory=$(query_node_tips)

@@ -26,6 +26,7 @@ services:
     hostname: p1.example
     volumes:
       - p1:/opt/cardano-node/data
+      - synth:/opt/synth:ro
     environment:
       <<: *env
       POOL_ID: "1"
@@ -37,6 +38,7 @@ services:
     hostname: p2.example
     volumes:
       - p2:/opt/cardano-node/data
+      - synth:/opt/synth:ro
     environment:
       <<: *env
       POOL_ID: "2"
@@ -49,6 +51,7 @@ services:
     hostname: p3.example
     volumes:
       - p3:/opt/cardano-node/data
+      - synth:/opt/synth:ro
     environment:
       <<: *env
       POOL_ID: "3"
@@ -75,7 +78,23 @@ services:
       dockerfile: "sidecar/Dockerfile"
     environment:
       POOLS: "3"
+    volumes:
+      - synth:/opt/synth:ro
     profiles: [build, core]
+
+  synth:
+    image: ${testnet}_db-synthesizer:latest
+    container_name: synth
+    restart: no
+    environment:
+      SYSTEM_START: ${SYSTEM_START:-}
+      PRE_EPOCHS: ${PRE_EPOCHS:-0}
+    volumes:
+      - synth:/opt/cardano-node/data
+    build:
+      context: "../../"
+      dockerfile: "db-synthesizer/Dockerfile"
+    profiles: [build, core, mgmt]
 
   # Client 1
   # Used by cardano-db-sync
@@ -85,6 +104,7 @@ services:
     hostname: c1.example
     volumes:
       - c1:/opt/cardano-node
+      - synth:/opt/synth:ro
     environment:
       POOL_ID: "1"
       TYPE: "client"
@@ -213,3 +233,4 @@ volumes:
   prometheus:
   loki:
   grafana:
+  synth:

@@ -11,12 +11,12 @@ testnetDomain: example
 
 --- # Optional Byron Genesis Overide
 protocolConsts:
-  k: 90
+  k: 432
 
 --- # Optional Shelley Genesis Overide
 slotLength: 1
-epochLength: 17280
-securityParam: 90
+epochLength: 86400
+securityParam: 432
 maxLovelaceSupply: 45000000000000000
 protocolParams:
   maxBlockBodySize: 90112
@@ -58,7 +58,7 @@ TraceConnectionManagerTransitions: false
 TraceDNSResolver: false
 TraceDNSSubscription: false
 TraceDebugPeerSelection: false
-TraceForge: false
+TraceForge: true
 TraceForgeStateInfo: false
 TraceHandshake: false
 TraceInboundGovernor: false
