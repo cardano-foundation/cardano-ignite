@@ -834,6 +834,7 @@ services:
       TYPE: "client"
       UTXOHD: "false"
       SYSTEM_START: ${SYSTEM_START:-}
+      EXTRA_LOCALROOTS: "a1.example:3001,a2.example:3001"
     networks:
       eu_net:
         ipv4_address: 172.16.3.4

@@ -14,6 +14,7 @@ DB_SIDECAR_PASSWORD="${DB_SIDECAR_PASSWORD:-sidecar}"
 DB_SIDECAR_USERNAME="${DB_SIDECAR_USERNAME:-sidecar}"
 EGRESS_POLL_INTERVAL="${EGRESS_POLL_INTERVAL:-0}"
 EKG_PORT="${EKG_PORT:-12788}"
+EXTRA_LOCALROOTS="${EXTRA_LOCALROOTS:-}"
 NO_INTERPOOL_LOCALROOTS="${NO_INTERPOOL_LOCALROOTS:-false}"
 LOG_TO_CONSOLE="${LOG_TO_CONSOLE:-true}"
 LOG_TO_FILE="${LOG_TO_FILE:-true}"
@@ -125,6 +126,7 @@ config_config_json() {
 }
 
 record_edges() {
+    local topology_file="${CONFIG_PATH}/topology.json"
     local source_host=$(uname -n | cut -d. -f1)
     local sql_file="${DATA_PATH}/localroot_edges.sql"
 
@@ -140,12 +142,17 @@ DELETE FROM public.cn_edges WHERE source = '${source_host}';
 
 EOF
 
+    # Extract all target addresses from the JSON file
+    local targets
+    mapfile -t targets < <(jq -r '.localRoots[].accessPoints[].address' "${topology_file}")
+
     # Append INSERT commands for each target
-    for target in "$@"; do
-        local edge_id="${source_host}-${target}"
+    for target in "${targets[@]}"; do
+        local truncated_target="${target%%.*}"
+        local edge_id="${source_host}-${truncated_target}"
         cat <<EOF >> "${sql_file}"
 INSERT INTO public.cn_edges (id, source, target)
-VALUES ('$edge_id', '$source_host', '$target')
+VALUES ('$edge_id', '$source_host', '$truncated_target')
 ON CONFLICT(id) DO UPDATE SET
     source = EXCLUDED.source,
     target = EXCLUDED.target;
@@ -176,7 +183,6 @@ bp_config_topology_json() {
 }
 EOF
 
-    record_edges "p${POOL_ID}r1" "p${POOL_ID}r2" "p${POOL_ID}r3"
 }
 
 bprelay_config_topology_json() {
@@ -223,7 +229,6 @@ bprelay_config_topology_json() {
 }
 EOF
 
-    record_edges "p${prev}" "p${next}"
 }
 
 relay_config_topology_json() {
@@ -282,7 +287,6 @@ relay_config_topology_json() {
 }
 EOF
 
-        record_edges "p${POOL_ID}bp" ${sibling_base_address}
     else
         cat <<EOF > "${CONFIG_PATH}/topology.json"
 {
@@ -317,7 +321,6 @@ EOF
 }
 EOF
 
-        record_edges ${base_address} "p${POOL_ID}bp" ${sibling_base_address}
     fi
 }
 
@@ -342,7 +345,6 @@ privaterelay_config_topology_json() {
 }
 EOF
 
-    record_edges "p${POOL_ID}bp"
 }
 
 client_config_topology_json() {
@@ -356,32 +358,50 @@ client_config_topology_json() {
     "useLedgerAfterSlot": 0
 }
 EOF
-    record_edges
 }
 
 
 config_topology() {
-  case $TYPE in
-  "bp")
-    bp_config_topology_json
-    ;;
-  "bprelay")
-    bprelay_config_topology_json
-    ;;
-  "client" | "txg")
-    client_config_topology_json
-    ;;
-  "relay")
-    relay_config_topology_json
-    ;;
-  "privaterelay")
-    privaterelay_config_topology_json
-    ;;
-  *)
-    exit 1
-    ;;
-esac
+    case $TYPE in
+    "bp")
+      bp_config_topology_json
+      ;;
+    "bprelay")
+      bprelay_config_topology_json
+      ;;
+    "client" | "txg")
+      client_config_topology_json
+      ;;
+    "relay")
+      relay_config_topology_json
+      ;;
+    "privaterelay")
+      privaterelay_config_topology_json
+      ;;
+    *)
+      exit 1
+      ;;
+    esac
 
+    if [[ -n "${EXTRA_LOCALROOTS:-}" ]]; then
+        jq --arg hosts "${EXTRA_LOCALROOTS}" '
+          .localRoots += (
+            $hosts |
+            split(",") |
+            map(select(length > 0)) |
+            map(
+              split(":") as [$addr, $port] |
+              {
+                accessPoints: [ { address: $addr, port: ($port | tonumber) } ],
+                advertise: true,
+                trustable: true,
+                valency: 1
+              }
+            )
+          )
+        ' "${CONFIG_PATH}/topology.json" | write_file "${CONFIG_PATH}/topology.json"
+    fi
+    record_edges
 }
 
 set_start_time() {
