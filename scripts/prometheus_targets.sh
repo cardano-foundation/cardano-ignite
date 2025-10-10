@@ -15,7 +15,7 @@ if ! command -v yq &> /dev/null; then
 fi
 
 # Extract services with POOL_ID in their environment
-mapfile -t targets < <(yq -r '
+mapfile -t targets < <(yqg -r '
   .services
   | to_entries[]
   | select(.value.environment?.POOL_ID != null)
