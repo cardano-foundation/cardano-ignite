@@ -486,6 +486,10 @@ main() {
         done
 
         cp -r /opt/synth/db "${DATA_PATH}"
+
+	# Workaround for ouroboros-consensus bug #1708
+	rm -rf "${DATABASE_PATH}"/ledger
+
         cp /opt/synth/start_time.unix_epoch "${DATA_PATH}"
     fi
 
