@@ -79,6 +79,9 @@ config_config_json() {
     # .AlonzoGenesisHash, .ByronGenesisHash, .ConwayGenesisHash, .ShelleyGenesisHash
     jq "del(.AlonzoGenesisHash, .ByronGenesisHash, .ConwayGenesisHash, .ShelleyGenesisHash)" "${CONFIG_JSON}" | write_file "${CONFIG_JSON}"
 
+    # .minSeverity
+    jq ".DijkstraGenesisFile = \"/opt/cardano-node/config/dijkstra-genesis.json\"" "${CONFIG_JSON}" | write_file "${CONFIG_JSON}"
+
     # .hasEKG
     jq "del(.hasEKG)" "${CONFIG_JSON}" | write_file "${CONFIG_JSON}"
 

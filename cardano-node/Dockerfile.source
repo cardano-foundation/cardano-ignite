@@ -322,6 +322,8 @@ RUN echo 'permit setenv { PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr
 RUN echo 'permit nopass cardano as root cmd ip' >> /etc/doas.conf
 RUN echo 'permit nopass cardano as root cmd tc' >> /etc/doas.conf
 
+COPY cardano-node/dijkstra-genesis.json /opt/cardano-node/config
+
 COPY cardano-node/scripts/*.sh /
 COPY scripts/node_routes.sh /
 RUN chmod 0755 /*.sh
