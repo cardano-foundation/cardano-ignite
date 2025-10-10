@@ -6,21 +6,21 @@ if [ $# -ne 1 ]; then
     exit 1
 fi
 
-DOCKER_COMPOSE_FILE="$1"
-
 # Check for yq installation
 if ! command -v yq &> /dev/null; then
     echo "Error: yq is not installed. Please install mikefarah/yq."
     exit 1
 fi
 
+DOCKER_COMPOSE_FILE="$1"
+
 # Extract services with POOL_ID in their environment
-mapfile -t targets < <(yqg -r '
+mapfile -t targets < <(yq -r '
   .services
   | to_entries[]
   | select(.value.environment?.POOL_ID != null)
   | .value.hostname
-' "$DOCKER_COMPOSE_FILE")
+' "$DOCKER_COMPOSE_FILE" 2>/dev/null)
 
 # Check if any services were found
 if [ ${#targets[@]} -eq 0 ]; then

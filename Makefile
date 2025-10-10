@@ -52,7 +52,8 @@ testnets/%/graph_nodes.sql: scripts/graph_node.sh testnets/%/docker-compose.yaml
 example_zone: TESTNET testnets/${testnet}/coredns/example.zone
 
 testnets/%/coredns/example.zone: scripts/ns_zone.sh testnets/%/docker-compose.yaml
-	./scripts/ns_zone.sh testnets/$*/docker-compose.yaml testnets/$*/coredns/
+	mkdir -p testnets/${testnet}/coredns
+	./scripts/ns_zone.sh testnets/$*/docker-compose.yaml testnets/$*/coredns
 
 prometheus_target: TESTNET testnets/${testnet}/prometheus/prometheus.yml
 

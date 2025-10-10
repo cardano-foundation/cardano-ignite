@@ -13,6 +13,12 @@ if [[ $# -lt 1 ]]; then
     exit 1
 fi
 
+# Check for yq installation
+if ! command -v yq &> /dev/null; then
+    echo "Error: yq is not installed. Please install mikefarah/yq."
+    exit 1
+fi
+
 # Input Docker Compose file (first argument)
 YAML_FILE="$1"
 
@@ -44,15 +50,15 @@ CREATE TABLE ci_edges (
 SQL
 
 # Extract services using optimized yq call
-SERVICES=$(yqg eval '.services | keys | .[]' "$YAML_FILE" 2>/dev/null)
+SERVICES=$(yq eval '.services | keys | .[]' "$YAML_FILE")
 
 # Process each service
 while IFS= read -r SERVICE; do
     # Extract all required fields in one yq call
-    CONTAINER_NAME=$(yqg '.services.'"$SERVICE"'.container_name // "XXX"' "$YAML_FILE")
-    HOSTNAME=$(yqg '.services.'"$SERVICE"'.hostname // "XXX"' "$YAML_FILE")
-    TYPE=$(yqg '.services.'"$SERVICE"'.environment.TYPE // "XXX"' "$YAML_FILE")
-    NETWORKS=$(yqg '.services.'"$SERVICE"'.networks' "$YAML_FILE" | yqg 'keys | join(",")' -)
+    CONTAINER_NAME=$(yq '.services.'"$SERVICE"'.container_name // "XXX"' "$YAML_FILE" 2>/dev/null)
+    HOSTNAME=$(yq '.services.'"$SERVICE"'.hostname // "XXX"' "$YAML_FILE" 2>/dev/null)
+    TYPE=$(yq '.services.'"$SERVICE"'.environment.TYPE // "XXX"' "$YAML_FILE" 2>/dev/null)
+    NETWORKS=$(yq '.services.'"$SERVICE"'.networks' "$YAML_FILE" 2>/dev/null | yq 'keys | join(",")' - 2>/dev/null)
     if [ -z "$NETWORKS" ]; then
         NETWORKS="net"
     fi

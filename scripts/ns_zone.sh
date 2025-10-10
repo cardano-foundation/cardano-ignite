@@ -1,13 +1,10 @@
 #!/usr/bin/env bash
 
 # Validate exactly two arguments are provided
-if [ $# -ne 2 ]; then
-    echo "Usage: $0 <docker-compose-file> <target-directory>"
+if [ "$#" -ne 2 ]; then
+    echo "Usage: $0 <docker-compose.yaml> <output.zone>" >&2
     exit 1
 fi
-
-DOCKER_COMPOSE_FILE="$1"
-TARGET_DIR="$2"
 
 # Check for yq installation
 if ! command -v yq &> /dev/null; then
@@ -15,8 +12,13 @@ if ! command -v yq &> /dev/null; then
     exit 1
 fi
 
-# Create the target directory if it doesn't exist
-mkdir -p "$TARGET_DIR"
+COMPOSE_FILE="$1"
+TARGET_DIR="$2"
+
+if [ ! -f "$COMPOSE_FILE" ]; then
+    echo "Error: Docker compose file not found at '$COMPOSE_FILE'" >&2
+    exit 1
+fi
 
 # Create Corefile in the target directory
 cat <<EOF > "$TARGET_DIR/corefile"
@@ -28,43 +30,46 @@ example {
 }
 EOF
 
-# Generate the zone file content into example.zone in the target directory
-{
-    # Zone header
-    cat <<EOF
+SERIAL=$(date +%Y%m%d)01
+
+cat <<EOF > "$TARGET_DIR/example.zone"
 \$ORIGIN example.
 \$TTL 1D
 @ IN SOA ns.example. admin.example. (
-    $(date +%Y%m%d)01 ; serial
-    8H         ; refresh
-    4H         ; retry
-    4D         ; expire
-    1D         ; minimum TTL
+    $SERIAL ; serial
+    8H      ; refresh
+    4H      ; retry
+    4D      ; expire
+    1D      ; minimum TTL
 )
 @ IN NS ns.example.
 ; Host A records
 EOF
 
-    # Generate A records from Docker Compose
-    yq -r '
-    .services
-    | to_entries[]
-    | .value as $svc
-    | $svc | select(has("networks"))  # Filter out services without networks
-    | $svc.hostname as $hostname
-    | $svc.networks
-    | to_entries[]
-    | .value.ipv4_address as $ip
-    | select($ip != null)
-    | $hostname
-    | capture("(?<name>[^\\.]+)\\.(?<domain>.*)") as $cap
-    | $cap.name + "\tIN A\t" + $ip
-    ,
-    (if $svc.environment.TYPE == "relay" then
-        "p" + $svc.environment.POOL_ID + "\tIN A\t" + $ip + "\n_cardano._tcp.p" + $svc.environment.POOL_ID + "\tIN SRV 10 10 3001 " + $cap.name
-     else
-        empty
-     end)
-    ' "$DOCKER_COMPOSE_FILE"
+yq '.services[] | 
+    select(.hostname) | 
+    .hostname + "|" + 
+    (.networks | to_entries[] | .value.ipv4_address)
+' "$COMPOSE_FILE" 2>/dev/null | \
+grep -v 'null' | \
+sort | \
+while IFS='|' read -r HOSTNAME_FULL IP; do
+    HOST=$(echo "$HOSTNAME_FULL" | sed 's/\.example$//')
+    printf "%s\tIN A\t%s\n" "$HOST" "$IP" >> "$TARGET_DIR/example.zone"
+done
 
-} > "$TARGET_DIR/example.zone"
+echo "; Relay-specific A and SRV records" >> "$TARGET_DIR/example.zone"
+
+yq '.services[] | 
+    select(.environment.RELAY_ID | test("^[12]$")) | 
+    (.environment.POOL_ID | "p" + .) as $pool |
+    (.hostname | sub("\\.example$"; "")) as $hostname |
+    .networks | to_entries[] | 
+    select(.value.ipv4_address) |
+    "\($pool)|\($hostname)|\(.value.ipv4_address)"
+' "$COMPOSE_FILE" 2>/dev/null | \
+sort -u | \
+while IFS='|' read -r POOL HOST IP; do
+    printf "%s\tIN A\t%s\n" "$POOL" "$IP" >> "$TARGET_DIR/example.zone"
+    printf "_cardano._tcp.%s\tIN SRV\t%d %d %d %s\n" "$POOL" "10" "10" "3001" "$HOST" >> "$TARGET_DIR/example.zone"
+done
