@@ -16,4 +16,5 @@ This list outlines all software versions used in the Cardano Ignite project.
 |PostgreSQL           |Binary        |15.x                 |https://www.postgresql.org                                    |
 |Prometheus           |Image         |v3.5.0               |https://hub.docker.com/r/prom/prometheus/tags                 |
 |Yaci Store           |Image         |2.0.0-beta3          |https://github.com/bloxbean/yaci-store/releases               |
+|yq                   |Binary        |v4.47.2              |https://github.com/mikefarah/yq/releases                     |
 |Debian               |Image         |stable-20250721-slim |https://hub.docker.com/_/debian/tags                          |

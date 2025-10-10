@@ -42,6 +42,16 @@ help:
 	@echo
 
 prerequisites:
+	@command -v yq >/dev/null 2>&1 || { \
+		echo "Error: yq is not installed."; \
+		echo "Please install the mikefarah yq binary from https://github.com/mikefarah/yq/releases/"; \
+		exit 1; \
+	}
+	@yq --version 2>&1 | grep -q "mikefarah" || { \
+		echo "Error: The installed yq is not the mikefarah variant."; \
+		echo "Please uninstall the current yq and fetch the right yq binary from https://github.com/mikefarah/yq/releases/"; \
+		exit 1; \
+	}
 	docker plugin ls | grep 'loki' >/dev/null 2>&1 || docker plugin install grafana/loki-docker-driver --alias loki --grant-all-permissions
 
 node_graph: TESTNET testnets/${testnet}/graph_nodes.sql
@@ -52,7 +62,8 @@ testnets/%/graph_nodes.sql: scripts/graph_node.sh testnets/%/docker-compose.yaml
 example_zone: TESTNET testnets/${testnet}/coredns/example.zone
 
 testnets/%/coredns/example.zone: scripts/ns_zone.sh testnets/%/docker-compose.yaml
-	./scripts/ns_zone.sh testnets/$*/docker-compose.yaml testnets/$*/coredns/
+	mkdir -p testnets/${testnet}/coredns
+	./scripts/ns_zone.sh testnets/$*/docker-compose.yaml testnets/$*/coredns
 
 prometheus_target: TESTNET testnets/${testnet}/prometheus/prometheus.yml
 

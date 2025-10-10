@@ -44,21 +44,20 @@ CREATE TABLE ci_edges (
 SQL
 
 # Extract services using optimized yq call
-SERVICES=$(yq -r '(.services | keys_unsorted)[]' "$YAML_FILE" 2>/dev/null)
+SERVICES=$(yq eval '.services | keys | .[]' "$YAML_FILE")
 
 # Process each service
 while IFS= read -r SERVICE; do
     # Extract all required fields in one yq call
-    IFS=$'\t' read -r CONTAINER_NAME HOSTNAME TYPE NETWORKS <<< "$( \
-    yq -r ".services.$SERVICE |
-        [
-            .container_name // \"XXX\",
-            .hostname // \"XXX\",
-            .environment.TYPE // \"XXX\",
-            (.networks // {} | keys_unsorted | if (length == 0) then [\"net\"] else . end | join(\",\"))
-        ] | join(\"\t\")" "$YAML_FILE" \
-)"
-    # echo "DATA: CONTAINER_NAME \"$CONTAINER_NAME\" HOSTNAME \"$HOSTNAME\" NETWORKS \"$NETWORKS\""
+    CONTAINER_NAME=$(yq '.services.'"$SERVICE"'.container_name // "XXX"' "$YAML_FILE" 2>/dev/null)
+    HOSTNAME=$(yq '.services.'"$SERVICE"'.hostname // "XXX"' "$YAML_FILE" 2>/dev/null)
+    TYPE=$(yq '.services.'"$SERVICE"'.environment.TYPE // "XXX"' "$YAML_FILE" 2>/dev/null)
+    NETWORKS=$(yq '.services.'"$SERVICE"'.networks' "$YAML_FILE" 2>/dev/null | yq 'keys | join(",")' - 2>/dev/null)
+    if [ -z "$NETWORKS" ]; then
+        NETWORKS="net"
+    fi
+
+    #echo -e "$CONTAINER_NAME\t$HOSTNAME\t$TYPE\t$NETWORKS"
 
     case "$CONTAINER_NAME" in
         *gw)

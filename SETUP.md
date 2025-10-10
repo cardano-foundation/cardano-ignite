@@ -19,8 +19,19 @@ Please install the dependencies below. All commands are compatible with Debian 1
   sudo apt install --no-install-recommends -y ca-certificates curl git iproute2 make tar
   ```
 
-> [!NOTE]
-> If `yq` isn’t available in your package manager, you can download the binary [from GitHub](https://github.com/kislyuk/yq) and manually copy it to `/usr/local/bin/yq`.
+- Download `yq` archive
+
+  ```
+  curl --proto '=https' --tlsv1.2 \
+      --location https://github.com/mikefarah/yq/releases/download/v4.47.2/yq_linux_amd64.tar.gz \
+      --output /tmp/yq_linux_amd64.tar.gz
+  ```
+
+- Extract `yq` archive
+
+  ```
+  sudo tar --extract --gzip --file=/tmp/yq_linux_amd64.tar.gz --directory=/usr/local/bin ./yq_linux_amd64 --transform='s|yq_linux_amd64|yq|' --no-same-owner
+  ```
 
 ### Docker
 
