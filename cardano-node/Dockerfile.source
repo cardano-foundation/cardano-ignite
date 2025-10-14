@@ -1,48 +1,18 @@
 ARG TESTNET_BUILDER_IMAGE
+ARG HASKELL_BUILDER_IMAGE
 
 #---------------------------------------------------------------------
 
 FROM ${TESTNET_BUILDER_IMAGE} AS testnet_builder
-
 #---------------------------------------------------------------------
 
-FROM docker.io/debian:stable-20250721-slim AS build
+FROM ${HASKELL_BUILDER_IMAGE} AS build
+
+ARG NODE_EXPORTER_VERSION="${NODE_EXPORTER_VERSION:-1.9.1}"
+ARG PROCESS_EXPORTER_VERSION="${PROCESS_EXPORTER_VERSION:-0.8.7}"
 
 # NOTE:
 # Additional ARG definitions can be found further below in the Dockerfile.
-
-ARG BLST_VERSION="${BLST_VERSION:-0.3.11}"
-ARG JOBS="${JOBS:-8}"
-ARG LIBSODIUM_VERSION="${LIBSODIUM_VERSION:-dbb48cc}"
-ARG NODE_EXPORTER_VERSION="${NODE_EXPORTER_VERSION:-1.9.1}"
-ARG PROCESS_EXPORTER_VERSION="${PROCESS_EXPORTER_VERSION:-0.8.7}"
-ARG SECP256K1_VERSION="${SECP256K1_VERSION:-ac83be33}"
-
-ENV TZ="UTC"
-RUN ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime && \
-    echo ${TZ} > /etc/timezone
-
-RUN apt update && \
-    apt install -y --no-install-recommends \
-        autoconf \
-        automake \
-        build-essential \
-        ca-certificates \
-        curl \
-        g++ \
-        git \
-        gnupg \
-        libffi-dev \
-        libgmp-dev \
-        liblmdb-dev \
-        libncurses-dev \
-        libssl-dev \
-        libsystemd-dev \
-        libtinfo-dev \
-        libtool \
-        pkg-config \
-        tar \
-        zlib1g-dev
 
 # node_exporter
 
@@ -65,87 +35,12 @@ RUN chmod 0755 /usr/local/src/node_exporter/node_exporter-${NODE_EXPORTER_VERSIO
 
 RUN ln -s /usr/local/src/node_exporter/node_exporter-${NODE_EXPORTER_VERSION}.linux-amd64/node_exporter /usr/local/bin/node_exporter
 
-# libsodium
-
-WORKDIR /usr/local/src
-RUN git clone --branch master https://github.com/IntersectMBO/libsodium.git
-
-WORKDIR /usr/local/src/libsodium
-RUN git checkout ${LIBSODIUM_VERSION} && \
-    ./autogen.sh && \
-    ./configure && \
-    make && \
-    make check && \
-    make install -j${JOBS}
-
-# secp256k1
-
-WORKDIR /usr/local/src
-RUN git clone --branch master https://github.com/bitcoin-core/secp256k1.git
-
-WORKDIR /usr/local/src/secp256k1
-RUN git checkout ${SECP256K1_VERSION} && \
-    ./autogen.sh && \
-    ./configure --prefix=/usr --enable-module-schnorrsig --enable-experimental && \
-    make && \
-    make check && \
-    make install -j${JOBS}
-
-# blst
-
-WORKDIR /usr/local/src
-RUN git clone --branch master https://github.com/supranational/blst.git
-
-WORKDIR /usr/local/src/blst
-RUN git checkout v${BLST_VERSION} && \
-    ./build.sh
-RUN echo "prefix=/usr/local\n\
-exec_prefix=/usr/local\n\
-libdir=/usr/local/lib\n\
-includedir=/usr/local/include\n\
-\n\
-Name: libblst\n\
-Description: Multilingual BLS12-381 signature library\n\
-URL: https://github.com/supranational/blst\n\
-Version: ${BLST_VERSION}\n\
-Cflags: -I/usr/local/include\n\
-Libs: -L/usr/local/lib -lblst" >/usr/local/src/blst/libblst.pc
-
-RUN mv /usr/local/src/blst/libblst.pc /usr/local/lib/pkgconfig/ && \
-    mv /usr/local/src/blst/bindings/blst.h /usr/local/include/ && \
-    mv /usr/local/src/blst/bindings/blst.hpp /usr/local/include/ && \
-    mv /usr/local/src/blst/bindings/blst_aux.h /usr/local/include/ && \
-    mv /usr/local/src/blst/libblst.a /usr/local/lib
-
-ENV LD_LIBRARY_PATH="/usr/local/lib:$LD_LIBRARY_PATH" \
-    PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:$PKG_CONFIG_PATH"
-
 # cardano-cli
 
 ARG CARDANO_CLI_VERSION="${CARDANO_CLI_VERSION:-10.11.1.0}"
 
 WORKDIR /usr/local/src
-RUN git clone --branch master https://github.com/IntersectMBO/cardano-cli.git
-
-# GHCup
-
-ARG BOOTSTRAP_HASKELL_CABAL_VERSION="${BOOTSTRAP_HASKELL_CABAL_VERSION:-3.12.1.0}"
-ARG BOOTSTRAP_HASKELL_GHC_VERSION="${BOOTSTRAP_HASKELL_GHC_VERSION:-9.6.7}"
-ARG BOOTSTRAP_HASKELL_GHCUP_VERSION="${BOOTSTRAP_HASKELL_GHCUP_VERSION:-0.1.50.2}"
-
-RUN --mount=type=cache,target=/root/.ghcup,id=ghcup-cache \
-    curl -L https://downloads.haskell.org/~ghcup/${BOOTSTRAP_HASKELL_GHCUP_VERSION}/x86_64-linux-ghcup-${BOOTSTRAP_HASKELL_GHCUP_VERSION} -o /usr/local/bin/ghcup && \
-    chmod +x /usr/local/bin/ghcup
-
-ENV PATH="/root/.ghcup/bin:/root/.cabal/bin:${PATH}"
-
-RUN --mount=type=cache,target=/root/.ghcup,id=ghcup-cache \
-    ghcup install cabal ${BOOTSTRAP_HASKELL_CABAL_VERSION} && \
-    ghcup set cabal ${BOOTSTRAP_HASKELL_CABAL_VERSION} && \
-    ghcup install ghc ${BOOTSTRAP_HASKELL_GHC_VERSION} && \
-    ghcup set ghc ${BOOTSTRAP_HASKELL_GHC_VERSION}
-
-# cardano-cli
+RUN git clone --depth 1 --branch master https://github.com/IntersectMBO/cardano-cli.git
 
 WORKDIR /usr/local/src/cardano-cli
 RUN git fetch --all --recurse-submodules --tags && \
@@ -157,22 +52,10 @@ jobs: \$ncpus\n\
 semaphore: True" > /usr/local/src/cardano-cli/cabal.project.local
 
 WORKDIR /usr/local/src/cardano-cli/cardano-cli
-RUN --mount=type=cache,target=/root/.ghcup,id=ghcup-cache \
-    --mount=type=cache,target=/root/.local/state/cabal/store,id=cabal-store-cache \
-    --mount=type=cache,target=/root/.cache/cabal,id=cabal-cache \
-    --mount=type=cache,target=/root/.cabal,id=root-cabal-cache \
-    cabal update
 
-RUN --mount=type=cache,target=/root/.ghcup,id=ghcup-cache \
-    --mount=type=cache,target=/root/.local/state/cabal/store,id=cabal-store-cache \
-    --mount=type=cache,target=/root/.cache/cabal,id=cabal-cache \
-    --mount=type=cache,target=./dist-newstyle,id=cardano-cli-cache \
-    --mount=type=cache,target=/root/.cabal,id=root-cabal-cache \
-    cabal build exe:cardano-cli
-
-RUN chmod 0755 /usr/local/src/cardano-cli/dist-newstyle/build/x86_64-linux/ghc-*/cardano-cli-*/x/cardano-cli/build/cardano-cli/cardano-cli
-
-RUN ln -s /usr/local/src/cardano-cli/dist-newstyle/build/x86_64-linux/ghc-*/cardano-cli-*/x/cardano-cli/build/cardano-cli/cardano-cli /usr/local/bin/cardano-cli
+RUN cabal update && \
+    cabal install exe:cardano-cli --disable-test --install-method=copy \
+      --installdir=/usr/local/bin --overwrite-policy=always
 
 # cardano-node
 
@@ -207,30 +90,15 @@ jobs: \$ncpus\n\
 semaphore: True" > /usr/local/src/cardano-node/cabal.project.local
 
 WORKDIR /usr/local/src/cardano-node/cardano-node
-RUN --mount=type=cache,target=/root/.ghcup,id=ghcup-cache \
-    --mount=type=cache,target=/root/.local/state/cabal/store,id=cabal-store-cache \
-    --mount=type=cache,target=/root/.cache/cabal,id=cabal-cache \
-    --mount=type=cache,target=/root/.cabal,id=root-cabal-cache \
-    cabal update
 
-
-RUN --mount=type=cache,target=/root/.ghcup,id=ghcup-cache \
-    --mount=type=cache,target=/root/.local/state/cabal/store,id=cabal-store-cache \
-    --mount=type=cache,target=/root/.cache/cabal,id=cabal-cache \
-    --mount=type=cache,target=./dist-newstyle,id=cardano-node-cache \
-    --mount=type=cache,target=/root/.cabal,id=root-cabal-cache \
-    cabal build exe:cardano-node
-RUN ln -s /usr/local/src/cardano-node/dist-newstyle/build/x86_64-linux/ghc-${BOOTSTRAP_HASKELL_GHC_VERSION}/cardano-node-*/x/cardano-node/build/cardano-node/cardano-node /usr/local/bin/cardano-node
+RUN cabal update && \
+    cabal install exe:cardano-node --disable-test --install-method=copy \
+      --installdir=/usr/local/bin --overwrite-policy=always
 
 # tx-generator
 
-RUN --mount=type=cache,target=/root/.ghcup,id=ghcup-cache \
-    --mount=type=cache,target=/root/.local/state/cabal/store,id=cabal-store-cache \
-    --mount=type=cache,target=/root/.cache/cabal,id=cabal-cache \
-    --mount=type=cache,target=./dist-newstyle,id=cardano-node-cache \
-    --mount=type=cache,target=/root/.cabal,id=root-cabal-cache \
-    cabal build exe:tx-generator
-RUN ln -s /usr/local/src/cardano-node/dist-newstyle/build/x86_64-linux/ghc-${BOOTSTRAP_HASKELL_GHC_VERSION}/tx-generator-*/x/tx-generator/build/tx-generator/tx-generator /usr/local/bin/tx-generator
+RUN cabal install exe:tx-generator --disable-test --install-method=copy \
+      --installdir=/usr/local/bin --overwrite-policy=always
 
 # process_exporter
 
@@ -263,8 +131,8 @@ ENV TZ="UTC"
 RUN ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime && \
     echo ${TZ} > /etc/timezone
 
-RUN apt update && \
-    apt install -y --no-install-recommends \
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
         bc \
         curl \
         dnsutils \
