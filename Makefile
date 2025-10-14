@@ -82,8 +82,9 @@ build: TESTNET prerequisites testnets/${testnet}/graph_nodes.sql testnets/${test
 	ln -snf testnets/${testnet}/testnet.yaml .testnet.yaml && \
 	$(HOST_INTERFACE_SETUP) && \
 	docker build -t ${testnet}-testnet_builder -f testnet-generation-tool/Dockerfile . && \
+	docker build -t ${testnet}-haskell_builder -f haskell-builder/Dockerfile . && \
 	cd testnets/${testnet} && \
-	docker compose --profile build build --build-arg GRAPHNODES="testnets/${testnet}/graph_nodes.sql" --build-arg TESTNET_BUILDER_IMAGE="${testnet}-testnet_builder"
+	docker compose --profile build build --build-arg GRAPHNODES="testnets/${testnet}/graph_nodes.sql" --build-arg TESTNET_BUILDER_IMAGE="${testnet}-testnet_builder" --build-arg HASKELL_BUILDER_IMAGE="${testnet}-haskell_builder"
 
 cibuild: TESTNET prerequisites testnets/${testnet}/graph_nodes.sql testnets/${testnet}/coredns/example.zone testnets/${testnet}/prometheus/prometheus.yml ## Build testnet
 	ln -snf testnets/${testnet}/testnet.yaml .testnet.yaml && \
