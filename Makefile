@@ -147,7 +147,7 @@ pools: ## Run Blockfrost query on '/pools/extended'
 	docker exec -ti blockfrost curl --silent http://127.0.0.1:3000/pools/extended | jq
 
 TESTNET: ;
-	@if [ -z "${testnet}" ]; then echo "* Please define the testnet argument:"; echo "testnet=simple_network_binary"; echo; exit 1; else export "testnet=${testnet}"; fi
+	@if [ -z "${testnet}" ]; then echo "* Please define the testnet argument:"; echo "testnet=simple_network_binary"; echo; exit 1; else export testnet=${testnet}; fi
 
 clean:
 	rm -f .testnet.yaml
