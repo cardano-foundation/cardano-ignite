@@ -131,7 +131,7 @@ query: TESTNET ## Query tip of all pools
 	docker exec -ti c1 timeout 0.05 cardano-cli ping --magic 42 --host 127.0.0.1 --port 3001 --tip --quiet -c1 ; true
 
 validate: ## Check for consensus among all pools
-	docker exec -ti sidecar /opt/scripts/eventually_converged.sh
+	docker exec sidecar /opt/scripts/eventually_converged.sh
 
 dbsync: ## Run SQL query in cardano-db-sync
 	docker exec -ti dbsync /usr/bin/psql --host db.example --dbname dbsync --user dbsync --command="SELECT time,block_no,slot_no FROM block WHERE block_no=(SELECT MAX(block_no) FROM block);"
