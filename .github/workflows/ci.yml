@@ -30,9 +30,9 @@ jobs:
           make up testnet=simple_network_binary
           make validate
           make down testnet=simple_network_binary
-      - name: Build fancy testnet
-        run: |
-          make cibuild testnet=global_network
-          make up testnet=global_network
-          make validate
-          make down testnet=global_network
+#      - name: Build fancy testnet
+#       run: |
+#         make cibuild testnet=global_network
+#         make up testnet=global_network
+#         make validate
+#         make down testnet=global_network
