@@ -1,0 +1,81 @@
+--- # Required Testnet Parameters
+poolCount: 25
+poolCost: 340000000
+poolMargin: 0.0
+poolPledge: 0
+delegatedSupply: 600000000000000
+systemStart: 'now'
+systemStartDelay: 5
+networkMagic: 42
+testnetDomain: example
+
+--- # Optional Byron Genesis Overide
+protocolConsts:
+  k: 90
+
+--- # Optional Shelley Genesis Overide
+slotLength: 1
+epochLength: 17280
+securityParam: 90
+maxLovelaceSupply: 45000000000000000
+protocolParams:
+  maxBlockBodySize: 90112
+  decentralisationParam: 0
+  protocolVersion:
+    major: 10
+    minor: 0
+
+--- # Optional Alonzo Genesis Overide
+
+--- # Optional Conway Genesis Overide
+
+--- # Optional Node Config Overide
+ExperimentalHardForksEnabled: true
+ExperimentalProtocolsEnabled: true
+LastKnownBlockVersion-Alt: 0
+LastKnownBlockVersion-Major: 6
+LastKnownBlockVersion-Minor: 0
+MaxConcurrencyBulkSync: 2
+MaxConcurrencyDeadline: 4
+MaxKnownMajorProtocolVersion: 2
+PeerSharing: true
+RequiresNetworkMagic: "RequiresMagic"
+SyncTargetNumberOfActivePeers: 2
+SyncTargetNumberOfEstablishedPeers: 2
+SyncTargetNumberOfKnownPeers: 2
+SyncTargetNumberOfRootPeers: 0
+TargetNumberOfActiveBigLedgerPeers: 2
+TargetNumberOfActivePeers: 5
+TargetNumberOfEstablishedBigLedgerPeers: 3
+TargetNumberOfEstablishedPeers: 6
+TargetNumberOfKnownBigLedgerPeers: 5
+TargetNumberOfKnownPeers: 8
+TargetNumberOfRootPeers: 4
+TestAllegraHardForkAtEpoch: 0
+TestAlonzoHardForkAtEpoch: 0
+TestBabbageHardForkAtEpoch: 0
+TestConwayHardForkAtEpoch: 0
+TestMaryHardForkAtEpoch: 0
+TestShelleyHardForkAtEpoch: 0
+TraceBlockFetchClient: true
+TraceChainSyncClient: true
+TraceConnectionManager: true
+TraceConnectionManagerTransitions: false
+TraceDNSResolver: false
+TraceDNSSubscription: false
+TraceDebugPeerSelection: false
+TraceForge: true
+TraceForgeStateInfo: false
+TraceHandshake: false
+TraceInboundGovernor: true
+TraceIpSubscription: false
+TraceLedgerPeers: false
+TraceLocalConnectionManager: false
+TraceLocalHandshake: false
+TraceLocalRootPeers: false
+TraceMempool: true
+TracePeerSelection: true
+TracePeerSelectionActions: true
+TracePublicRootPeers: false
+TraceServer: true
+TurnOnLogMetrics: true
