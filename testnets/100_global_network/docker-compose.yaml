@@ -1903,7 +1903,7 @@ services:
       dockerfile: "sidecar/Dockerfile"
     environment:
       TOPOLOGY: "fancy"
-      POOLS: "24"  # Updated from 6 to 24
+      POOLS: "25"
     volumes:
       - synth:/opt/synth:ro
     cap_add:
