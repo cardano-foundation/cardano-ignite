@@ -1,0 +1,38 @@
+name: Build All Testnets
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-all-testnets:
+    runs-on: arc-infra-public
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Docker Compose
+        uses: docker/setup-compose-action@v1
+
+      - name: Build simple testnet
+        run: |
+          sudo apt update
+          sudo apt install --no-install-recommends -y ca-certificates curl iproute2 make tar
+          curl --proto '=https' --tlsv1.2 --location https://github.com/mikefarah/yq/releases/download/v4.47.2/yq_linux_amd64.tar.gz --output /tmp/yq_linux_amd64.tar.gz
+          sudo tar --extract --gzip --file=/tmp/yq_linux_amd64.tar.gz --directory=/usr/local/bin ./yq_linux_amd64 --transform='s|yq_linux_amd64|yq|' --no-same-owner
+          make cibuild testnet=simple_network_binary
+          make up testnet=simple_network_binary
+          make validate
+          make down testnet=simple_network_binary
+#      - name: Build fancy testnet
+#       run: |
+#         make cibuild testnet=global_network
+#         make up testnet=global_network
+#         make validate
+#         make down testnet=global_network

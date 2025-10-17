@@ -42,6 +42,16 @@ help:
 	@echo
 
 prerequisites:
+	@command -v yq >/dev/null 2>&1 || { \
+		echo "Error: yq is not installed."; \
+		echo "Please install the mikefarah yq binary from https://github.com/mikefarah/yq/releases/"; \
+		exit 1; \
+	}
+	@yq --version 2>&1 | grep -q "mikefarah" || { \
+		echo "Error: The installed yq is not the mikefarah variant."; \
+		echo "Please uninstall the current yq and fetch the right yq binary from https://github.com/mikefarah/yq/releases/"; \
+		exit 1; \
+	}
 	docker plugin ls | grep 'loki' >/dev/null 2>&1 || docker plugin install grafana/loki-docker-driver --alias loki --grant-all-permissions
 
 node_graph: TESTNET testnets/${testnet}/graph_nodes.sql
@@ -52,7 +62,8 @@ testnets/%/graph_nodes.sql: scripts/graph_node.sh testnets/%/docker-compose.yaml
 example_zone: TESTNET testnets/${testnet}/coredns/example.zone
 
 testnets/%/coredns/example.zone: scripts/ns_zone.sh testnets/%/docker-compose.yaml
-	./scripts/ns_zone.sh testnets/$*/docker-compose.yaml testnets/$*/coredns/
+	mkdir -p testnets/${testnet}/coredns
+	./scripts/ns_zone.sh testnets/$*/docker-compose.yaml testnets/$*/coredns
 
 prometheus_target: TESTNET testnets/${testnet}/prometheus/prometheus.yml
 
@@ -71,8 +82,21 @@ build: TESTNET prerequisites testnets/${testnet}/graph_nodes.sql testnets/${test
 	ln -snf testnets/${testnet}/testnet.yaml .testnet.yaml && \
 	$(HOST_INTERFACE_SETUP) && \
 	docker build -t ${testnet}-testnet_builder -f testnet-generation-tool/Dockerfile . && \
+	docker build -t ${testnet}-haskell_builder -f haskell-builder/Dockerfile . && \
 	cd testnets/${testnet} && \
-	docker compose --profile build build --build-arg GRAPHNODES="testnets/${testnet}/graph_nodes.sql" --build-arg TESTNET_BUILDER_IMAGE="${testnet}-testnet_builder"
+	docker compose --profile build build --build-arg GRAPHNODES="testnets/${testnet}/graph_nodes.sql" --build-arg TESTNET_BUILDER_IMAGE="${testnet}-testnet_builder" --build-arg HASKELL_BUILDER_IMAGE="${testnet}-haskell_builder"
+
+cibuild: TESTNET prerequisites testnets/${testnet}/graph_nodes.sql testnets/${testnet}/coredns/example.zone testnets/${testnet}/prometheus/prometheus.yml ## Build testnet
+	ln -snf testnets/${testnet}/testnet.yaml .testnet.yaml && \
+	$(HOST_INTERFACE_SETUP) && \
+	docker buildx create --use && \
+	docker buildx build -t ${testnet}-testnet_builder -f testnet-generation-tool/Dockerfile --load . && \
+	docker buildx build -t ${testnet}-haskell_builder -f haskell-builder/Dockerfile --load . && \
+	docker buildx use default && \
+	cd testnets/${testnet} && \
+	docker compose --profile build build --build-arg GRAPHNODES="testnets/${testnet}/graph_nodes.sql" --build-arg TESTNET_BUILDER_IMAGE="${testnet}-testnet_builder" --build-arg HASKELL_BUILDER_IMAGE="${testnet}-haskell_builder"
+
+
 
 all:
 	for dir in testnets/*; do \
@@ -107,7 +131,7 @@ query: TESTNET ## Query tip of all pools
 	docker exec -ti c1 timeout 0.05 cardano-cli ping --magic 42 --host 127.0.0.1 --port 3001 --tip --quiet -c1 ; true
 
 validate: ## Check for consensus among all pools
-	docker exec -ti sidecar /opt/scripts/eventually_converged.sh
+	docker exec sidecar /opt/scripts/eventually_converged.sh
 
 dbsync: ## Run SQL query in cardano-db-sync
 	docker exec -ti dbsync /usr/bin/psql --host db.example --dbname dbsync --user dbsync --command="SELECT time,block_no,slot_no FROM block WHERE block_no=(SELECT MAX(block_no) FROM block);"
@@ -123,7 +147,7 @@ pools: ## Run Blockfrost query on '/pools/extended'
 	docker exec -ti blockfrost curl --silent http://127.0.0.1:3000/pools/extended | jq
 
 TESTNET: ;
-	@if [ -z "${testnet}" ]; then echo "* Please define the testnet argument:"; echo "testnet=simple_network_binary"; echo; exit 1; else export "testnet=${testnet}"; fi
+	@if [ -z "${testnet}" ]; then echo "* Please define the testnet argument:"; echo "testnet=simple_network_binary"; echo; exit 1; else export testnet=${testnet}; fi
 
 clean:
 	rm -f .testnet.yaml
