@@ -63,7 +63,7 @@ The following applications are required:
 - [Docker Plugin Loki](https://grafana.com/docs/loki/latest/send-data/docker-driver)
 - [Git](https://git-scm.com)
 - [Make](https://www.gnu.org/software/make)
-- [yq](https://github.com/kislyuk/yq)
+- [yq](https://github.com/mikefarah/yq)
 
 ## Installation
 
