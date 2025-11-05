@@ -7,7 +7,7 @@ SHELL="/bin/bash"
 PATH="/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin"
 
 # Environment variables
-TPS="${TSP:-1}"
+TPS="${TPS:-1}"
 TX_GEN_MODE="${TX_GEN_MODE:-plain}"
 
 # Check if required environment variables are set
