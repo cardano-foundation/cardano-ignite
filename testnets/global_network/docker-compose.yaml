@@ -804,6 +804,7 @@ services:
       context: "../../"
       dockerfile: "postgresql/Dockerfile"
     networks:
+      default:
       net_eu:
         ipv4_address: 172.16.3.5
       net_na:
@@ -814,6 +815,8 @@ services:
         ipv4_address: 172.16.7.5
     dns:
       - 172.16.7.2
+    ports:
+      - "${PSQL_HOST:-5432}:5432"
     profiles: [build, core, mgmt]
 
   dbsync:
