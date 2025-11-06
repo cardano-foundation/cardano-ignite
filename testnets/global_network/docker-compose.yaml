@@ -30,7 +30,7 @@ x-base_eu: &base_eu
   dns:
     - 172.16.3.2
   networks:
-    - eu_net
+    - net_eu
 
 x-base_na: &base_na
   <<: *base
@@ -39,7 +39,7 @@ x-base_na: &base_na
   dns:
     - 172.16.1.2
   networks:
-    - na_net
+    - net_na
 
 x-base_as: &base_as
   <<: *base
@@ -48,7 +48,7 @@ x-base_as: &base_as
   dns:
     - 172.16.4.2
   networks:
-    - as_net
+    - net_as
 
 x-base_gw: &base_gw
     image: ${testnet}_gateway:latest
@@ -70,7 +70,7 @@ networks:
     driver: bridge
 
   # North America Network
-  na_net:
+  net_na:
     driver: macvlan
     driver_opts:
       parent: ${HOST_INTERFACE}.10
@@ -81,7 +81,7 @@ networks:
         - subnet: 172.16.1.0/24
 
   # Link between Europe and North America
-  eu_na_net:
+  net_eu_na:
     driver: macvlan
     driver_opts:
       parent: ${HOST_INTERFACE}.20
@@ -92,7 +92,7 @@ networks:
         - subnet: 172.16.2.0/24
 
   # Europe Network
-  eu_net:
+  net_eu:
     driver: macvlan
     driver_opts:
       parent: ${HOST_INTERFACE}.30
@@ -103,7 +103,7 @@ networks:
         - subnet: 172.16.3.0/24
 
   # Asia Network
-  as_net:
+  net_as:
     driver: macvlan
     driver_opts:
       parent: ${HOST_INTERFACE}.40
@@ -114,7 +114,7 @@ networks:
         - subnet: 172.16.4.0/24
 
   # Asia Europe Link
-  as_eu_net:
+  net_as_eu:
     driver: macvlan
     driver_opts:
       parent: ${HOST_INTERFACE}.50
@@ -125,7 +125,7 @@ networks:
         - subnet: 172.16.5.0/24
 
   # Asia North America Link
-  as_na_net:
+  net_as_na:
     driver: macvlan
     driver_opts:
       parent: ${HOST_INTERFACE}.60
@@ -136,7 +136,7 @@ networks:
         - subnet: 172.16.6.0/24
 
   # Management Network
-  mgmt_net:
+  net_mgmt:
     driver: macvlan
     driver_opts:
       parent: ${HOST_INTERFACE}.70
@@ -147,7 +147,7 @@ networks:
         - subnet: 172.16.7.0/24
 
   # Management Asia Link
-  ad_as_net:
+  net_ad_as:
     driver: macvlan
     driver_opts:
       parent: ${HOST_INTERFACE}.80
@@ -158,7 +158,7 @@ networks:
         - subnet: 172.16.8.0/24
 
   # Management Europe Link
-  ad_eu_net:
+  net_ad_eu:
     driver: macvlan
     driver_opts:
       parent: ${HOST_INTERFACE}.90
@@ -169,7 +169,7 @@ networks:
         - subnet: 172.16.9.0/24
 
   # Management North America Link
-  ad_na_net:
+  net_ad_na:
     driver: macvlan
     driver_opts:
       parent: ${HOST_INTERFACE}.100
@@ -197,7 +197,7 @@ services:
       PEER_SHARING: "false"
       EGRESS_POLL_INTERVAL: 0.001
     networks:
-      na_net:
+      net_na:
         ipv4_address: 172.16.1.101
     profiles: [build, core, na, p1]
 
@@ -215,7 +215,7 @@ services:
       TYPE: relay
       EGRESS_POLL_INTERVAL: 0.001
     networks:
-      na_net:
+      net_na:
         ipv4_address: 172.16.1.102
     profiles: [build, core, na, p1, p1relays]
 
@@ -233,7 +233,7 @@ services:
       TYPE: relay
       EGRESS_POLL_INTERVAL: 0.001
     networks:
-      na_net:
+      net_na:
         ipv4_address: 172.16.1.103
     profiles: [build, core, na, p1, p1relays]
 
@@ -251,7 +251,7 @@ services:
       TYPE: privaterelay
       EGRESS_POLL_INTERVAL: 0.001
     networks:
-      na_net:
+      net_na:
         ipv4_address: 172.16.1.104
     profiles: [na, p1, p1relays, privaterelays]
 
@@ -270,7 +270,7 @@ services:
       TYPE: bp
       PEER_SHARING: "false"
     networks:
-      eu_net:
+      net_eu:
         ipv4_address: 172.16.3.101
     profiles: [build, core, eu, p2]
 
@@ -287,7 +287,7 @@ services:
       RELAY_ID: "1"
       TYPE: relay
     networks:
-      eu_net:
+      net_eu:
         ipv4_address: 172.16.3.102
     profiles: [build, core, eu, p2, p2relays]
 
@@ -304,7 +304,7 @@ services:
       RELAY_ID: "2"
       TYPE: relay
     networks:
-      eu_net:
+      net_eu:
         ipv4_address: 172.16.3.103
     profiles: [build, core, eu, p2, p2relays]
 
@@ -321,7 +321,7 @@ services:
       RELAY_ID: "3"
       TYPE: privaterelay
     networks:
-      eu_net:
+      net_eu:
         ipv4_address: 172.16.3.104
     profiles: [eu, p2, p2relays, privaterelays]
 
@@ -340,7 +340,7 @@ services:
       TYPE: bp
       PEER_SHARING: "false"
     networks:
-      as_net:
+      net_as:
         ipv4_address: 172.16.4.101
     profiles: [build, core, as, p3]
 
@@ -357,7 +357,7 @@ services:
       RELAY_ID: "1"
       TYPE: relay
     networks:
-      as_net:
+      net_as:
         ipv4_address: 172.16.4.102
     profiles: [build, core, as, p3, p3relays]
 
@@ -374,7 +374,7 @@ services:
       RELAY_ID: "2"
       TYPE: relay
     networks:
-      as_net:
+      net_as:
         ipv4_address: 172.16.4.103
     profiles: [build, core, as, p3, p3relays]
 
@@ -391,7 +391,7 @@ services:
       RELAY_ID: "3"
       TYPE: privaterelay
     networks:
-      as_net:
+      net_as:
         ipv4_address: 172.16.4.104
     profiles: [p3, p3relays, privaterelays]
 
@@ -410,7 +410,7 @@ services:
       TYPE: bp
       PEER_SHARING: "false"
     networks:
-      eu_net:
+      net_eu:
         ipv4_address: 172.16.3.111
     profiles: [build, core, eu, p4]
 
@@ -427,7 +427,7 @@ services:
       RELAY_ID: "1"
       TYPE: relay
     networks:
-      eu_net:
+      net_eu:
         ipv4_address: 172.16.3.112
     profiles: [build, core, eu, p4, p4relays]
 
@@ -444,7 +444,7 @@ services:
       RELAY_ID: "2"
       TYPE: relay
     networks:
-      eu_net:
+      net_eu:
         ipv4_address: 172.16.3.113
     profiles: [build, core, eu, p4, p4relays]
 
@@ -461,7 +461,7 @@ services:
       RELAY_ID: "3"
       TYPE: privaterelay
     networks:
-      eu_net:
+      net_eu:
         ipv4_address: 172.16.3.114
     profiles: [eu, p4, p4relays, privaterelays]
 
@@ -480,7 +480,7 @@ services:
       TYPE: bp
       PEER_SHARING: "false"
     networks:
-      na_net:
+      net_na:
         ipv4_address: 172.16.1.111
     profiles: [build, core, na, p5]
 
@@ -497,7 +497,7 @@ services:
       RELAY_ID: "1"
       TYPE: relay
     networks:
-      na_net:
+      net_na:
         ipv4_address: 172.16.1.112
     profiles: [build, core, na, p5, p5relays]
 
@@ -514,7 +514,7 @@ services:
       RELAY_ID: "2"
       TYPE: relay
     networks:
-      na_net:
+      net_na:
         ipv4_address: 172.16.1.123
     profiles: [build, core, na, p5, p5relays]
 
@@ -531,7 +531,7 @@ services:
       RELAY_ID: "3"
       TYPE: privaterelay
     networks:
-      na_net:
+      net_na:
         ipv4_address: 172.16.1.124
     profiles: [na, p5, p5relays, privaterelays]
 
@@ -550,7 +550,7 @@ services:
       TYPE: bp
       PEER_SHARING: "false"
     networks:
-      eu_net:
+      net_eu:
         ipv4_address: 172.16.3.121
     profiles: [build, core, eu, p6]
 
@@ -567,7 +567,7 @@ services:
       RELAY_ID: "1"
       TYPE: relay
     networks:
-      eu_net:
+      net_eu:
         ipv4_address: 172.16.3.122
     profiles: [build, core, eu, p6, p6relays]
 
@@ -584,7 +584,7 @@ services:
       RELAY_ID: "2"
       TYPE: relay
     networks:
-      eu_net:
+      net_eu:
         ipv4_address: 172.16.3.123
     profiles: [build, core, eu, p6, p6relays]
 
@@ -601,7 +601,7 @@ services:
       RELAY_ID: "3"
       TYPE: privaterelay
     networks:
-      eu_net:
+      net_eu:
         ipv4_address: 172.16.3.124
     profiles: [eu, p6, p6relays, privaterelays]
 
@@ -613,15 +613,15 @@ services:
     environment:
       GATEWAY_ID: "nagw"
     networks:
-      na_net:
+      net_na:
         ipv4_address: 172.16.1.11
-      eu_na_net:
+      net_eu_na:
         interface_name: eunax0
         ipv4_address: 172.16.2.11
-      as_na_net:
+      net_as_na:
         interface_name: asnax0
         ipv4_address: 172.16.6.11
-      ad_na_net:
+      net_ad_na:
         ipv4_address: 172.16.10.11
     dns:
       - 172.16.1.2
@@ -635,15 +635,15 @@ services:
     environment:
       GATEWAY_ID: "eugw"
     networks:
-      eu_net:
+      net_eu:
         ipv4_address: 172.16.3.12
-      eu_na_net:
+      net_eu_na:
         interface_name: eunax0
         ipv4_address: 172.16.2.12
-      as_eu_net:
+      net_as_eu:
         interface_name: aseux0
         ipv4_address: 172.16.5.12
-      ad_eu_net:
+      net_ad_eu:
         ipv4_address: 172.16.9.12
     dns:
       - 172.16.2.2
@@ -657,15 +657,15 @@ services:
     environment:
       GATEWAY_ID: "asgw"
     networks:
-      as_net:
+      net_as:
         ipv4_address: 172.16.4.13
-      as_eu_net:
+      net_as_eu:
         interface_name: aseux0
         ipv4_address: 172.16.5.13
-      as_na_net:
+      net_as_na:
         interface_name: asnax0
         ipv4_address: 172.16.6.13
-      ad_as_net:
+      net_ad_as:
         ipv4_address: 172.16.8.13
     dns:
       - 172.16.4.2
@@ -679,13 +679,13 @@ services:
     environment:
       GATEWAY_ID: "adgw"
     networks:
-      mgmt_net:
+      net_mgmt:
         ipv4_address: 172.16.7.14
-      ad_as_net:
+      net_ad_as:
         ipv4_address: 172.16.8.14
-      ad_eu_net:
+      net_ad_eu:
         ipv4_address: 172.16.9.14
-      ad_na_net:
+      net_ad_na:
         ipv4_address: 172.16.10.14
     dns:
       - 172.16.7.2
@@ -701,15 +701,15 @@ services:
     volumes:
       - ./coredns:/etc/coredns # Mount custom corefile
     networks:
-      na_net:
+      net_na:
         ipv4_address: 172.16.1.2
-      eu_na_net:
+      net_eu_na:
         ipv4_address: 172.16.2.2
-      eu_net:
+      net_eu:
         ipv4_address: 172.16.3.2
-      as_net:
+      net_as:
         ipv4_address: 172.16.4.2
-      mgmt_net:
+      net_mgmt:
         ipv4_address: 172.16.7.2
     profiles: [build, core, mgmt]
 
@@ -729,7 +729,7 @@ services:
     cap_add:
       - NET_ADMIN
     networks:
-      mgmt_net:
+      net_mgmt:
         ipv4_address: 172.16.7.3
     dns:
       - 172.16.7.2
@@ -767,7 +767,7 @@ services:
       UTXOHD: "true"
       SYSTEM_START: ${SYSTEM_START:-}
     networks:
-      eu_net:
+      net_eu:
         ipv4_address: 172.16.3.4
     profiles: [build, core, eu]
 
@@ -788,7 +788,7 @@ services:
       UTXOHD: "true"
       SYSTEM_START: ${SYSTEM_START:-}
     networks:
-      na_net:
+      net_na:
         ipv4_address: 172.16.1.12
     profiles: [build, na, optional, tx-generators]
 
@@ -804,13 +804,13 @@ services:
       context: "../../"
       dockerfile: "postgresql/Dockerfile"
     networks:
-      eu_net:
+      net_eu:
         ipv4_address: 172.16.3.5
-      na_net:
+      net_na:
         ipv4_address: 172.16.1.5
-      as_net:
+      net_as:
         ipv4_address: 172.16.4.5
-      mgmt_net:
+      net_mgmt:
         ipv4_address: 172.16.7.5
     dns:
       - 172.16.7.2
@@ -830,7 +830,7 @@ services:
       context: "../../"
       dockerfile: "cardano-db-sync/Dockerfile.binary"
     networks:
-      mgmt_net:
+      net_mgmt:
         ipv4_address: 172.16.7.6
     dns:
       - 172.16.7.2
@@ -852,7 +852,7 @@ services:
       context: "../../"
       dockerfile: "blockfrost/Dockerfile"
     networks:
-      mgmt_net:
+      net_mgmt:
         ipv4_address: 172.16.7.7
     profiles: [build, optional, mgmt]
 
@@ -865,13 +865,13 @@ services:
       - prometheus:/prometheus
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
     networks:
-      eu_net:
+      net_eu:
         ipv4_address: 172.16.3.8
-      na_net:
+      net_na:
         ipv4_address: 172.16.1.8
-      as_net:
+      net_as:
         ipv4_address: 172.16.4.8
-      mgmt_net:
+      net_mgmt:
         ipv4_address: 172.16.7.8
     dns:
       - 172.16.7.2
@@ -892,13 +892,13 @@ services:
       - NET_ADMIN
       - NET_RAW
     networks:
-      eu_net:
+      net_eu:
         ipv4_address: 172.16.3.9
-      na_net:
+      net_na:
         ipv4_address: 172.16.1.9
-      as_net:
+      net_as:
         ipv4_address: 172.16.4.9
-      mgmt_net:
+      net_mgmt:
         ipv4_address: 172.16.7.9
     dns:
       - 172.16.7.2
@@ -916,7 +916,7 @@ services:
       - loki:/loki
     networks:
       default:
-      mgmt_net:
+      net_mgmt:
         ipv4_address: 172.16.7.10
     dns:
       - 172.16.7.2
@@ -937,7 +937,7 @@ services:
       GF_SECURITY_ADMIN_PASSWORD: cardano
     networks:
       default:
-      mgmt_net:
+      net_mgmt:
         ipv4_address: 172.16.7.11
     dns:
       - 172.16.7.2
@@ -960,7 +960,7 @@ services:
     cap_add:
       - NET_ADMIN
     networks:
-      eu_net:
+      net_eu:
         ipv4_address: 172.16.3.22
     dns:
       - 172.16.3.2
