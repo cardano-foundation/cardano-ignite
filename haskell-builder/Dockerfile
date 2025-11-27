@@ -5,7 +5,7 @@ ARG BASE_IMAGE=docker.io/debian:stable-20250721-slim
 FROM ${BASE_IMAGE} AS haskell-builder
 
 # ── Common ARGs (keep the defaults from the originals) ──
-ARG BLST_VERSION="${BLST_VERSION:-0.3.11}"
+ARG BLST_VERSION="${BLST_VERSION:-0.3.14}"
 ARG JOBS="${JOBS:-8}"
 ARG LIBSODIUM_VERSION="${LIBSODIUM_VERSION:-dbb48cc}"
 ARG SECP256K1_VERSION="${SECP256K1_VERSION:-ac83be33}"

@@ -59,7 +59,7 @@ RUN cabal update && \
 
 # cardano-node
 
-ARG CARDANO_NODE_REF="${CARDANO_NODE_REF:-10.4.1}"
+ARG CARDANO_NODE_REF="${CARDANO_NODE_REF:-10.5.3}"
 ARG CARDANO_NODE_REPO="${CARDANO_NODE_REPO:-https://github.com/IntersectMBO/cardano-node.git}"
 
 WORKDIR /usr/local/src
