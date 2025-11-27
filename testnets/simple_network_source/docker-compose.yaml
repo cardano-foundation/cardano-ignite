@@ -13,7 +13,7 @@ x-base: &base
     context: "../../"
     dockerfile: "cardano-node/Dockerfile.source"
     args:
-      CARDANO_NODE_REF: "10.4.1"
+      CARDANO_NODE_REF: "10.5.3"
 
 x-env: &env
   POOL_ID: "0" # Placeholder required for override

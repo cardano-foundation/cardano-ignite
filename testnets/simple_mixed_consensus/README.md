@@ -5,8 +5,8 @@ Testing in-memory and disk-based UTXO HD.
 
 ## Cardano-Node
 
-- **Version**: 10.4.1
-- **Branch**: jordan/bump-dependencies-20250515
+- **Version**: 10.5.3
+- **Branch**: 10.5.3
 - **Binary/Source**: Source
 
 ## Testnet

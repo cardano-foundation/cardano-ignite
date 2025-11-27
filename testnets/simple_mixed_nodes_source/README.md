@@ -4,7 +4,7 @@ Simple testnet with cardano-node and amaru built from source.
 
 ## Cardano-Node
 
-- **Version**: 10.4.1
+- **Version**: 10.5.3
 - **Branch**: -
 - **Binary/Source**: Source
 
