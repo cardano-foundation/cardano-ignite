@@ -6,12 +6,12 @@ FROM ${TESTNET_BUILDER_IMAGE} AS testnet_builder
 
 #---------------------------------------------------------------------
 
-FROM docker.io/debian:stable-20250630-slim AS build
+FROM docker.io/debian:stable-20251117-slim AS build
 
 ARG CARDANO_NODE_VERSION="${CARDANO_NODE_VERSION:-10.5.3}"
-ARG NODE_EXPORTER_VERSION="${NODE_EXPORTER_VERSION:-1.9.1}"
+ARG NODE_EXPORTER_VERSION="${NODE_EXPORTER_VERSION:-1.10.2}"
 ARG PROCESS_EXPORTER_VERSION="${PROCESS_EXPORTER_VERSION:-0.8.7}"
-ARG YACI_STORE_VERSION="${YACI_STORE_VERSION:-2.0.0-beta3}"
+ARG YACI_STORE_VERSION="${YACI_STORE_VERSION:-2.0.0-beta5}"
 
 ENV TZ="UTC"
 RUN ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime && \
@@ -94,7 +94,7 @@ RUN ln -s /usr/local/src/process_exporter/process-exporter-${PROCESS_EXPORTER_VE
 
 #---------------------------------------------------------------------
 
-FROM docker.io/debian:stable-20250630-slim AS main
+FROM docker.io/debian:stable-20251117-slim AS main
 
 ENV TZ="UTC"
 RUN ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime && \
@@ -126,7 +126,8 @@ COPY --from=build --chown=root:root /usr/local/bin/process_exporter /usr/local/b
 RUN groupadd --gid 10000 cardano && \
     useradd --comment 'cardano' --create-home --gid 10000 --password '!' --shell '/bin/bash' --uid 10000 cardano
 
-RUN install --directory --owner=cardano --group=cardano --mode=0750 /opt/yaci/config
+RUN install --directory --owner=cardano --group=cardano --mode=0750 /opt/yaci && \
+    install --directory --owner=cardano --group=cardano --mode=0750 /opt/yaci/config
 
 COPY --from=build --chown=root:root /usr/local/bin/yaci-store /opt/yaci/yaci-store
 COPY --from=testnet_builder --chown=cardano:cardano /tmp/testnet/pools/1/configs/alonzo-genesis.json /opt/yaci/config

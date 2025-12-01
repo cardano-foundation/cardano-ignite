@@ -8,7 +8,7 @@ FROM ${TESTNET_BUILDER_IMAGE} AS testnet_builder
 
 FROM ${HASKELL_BUILDER_IMAGE} AS build
 
-ARG NODE_EXPORTER_VERSION="${NODE_EXPORTER_VERSION:-1.9.1}"
+ARG NODE_EXPORTER_VERSION="${NODE_EXPORTER_VERSION:-1.10.2}"
 ARG PROCESS_EXPORTER_VERSION="${PROCESS_EXPORTER_VERSION:-0.8.7}"
 
 # NOTE:
@@ -123,7 +123,7 @@ RUN ln -s /usr/local/src/process_exporter/process-exporter-${PROCESS_EXPORTER_VE
 
 #---------------------------------------------------------------------
 
-FROM docker.io/debian:stable-20250721-slim AS main
+FROM docker.io/debian:stable-20251117-slim AS main
 
 ENV CARDANO_NODE_SOCKET_PATH="/opt/cardano-node/data/db/node.socket"
 

@@ -30,11 +30,11 @@ WAL_BUFFERS="${WAL_BUFFERS:-64MB}"
 WORK_MEM="${WORK_MEM:-16MB}"
 
 # Configuration files
-CONFIG_DST="/opt/postgresql/db"
+CONFIG_DST="/var/lib/postgresql/17/main"
 
 # PGSQL
 PGSQL_BIN="/usr/lib/postgresql/17/bin"
-PGSQL_DB="/opt/postgresql/db"
+PGSQL_DB="/var/lib/postgresql/17/main"
 
 initialize_database() {
     if [ ! -d "${PGSQL_DB}/base" ]; then
@@ -60,7 +60,8 @@ initialize_database() {
         sleep 2
 
         # Stop PostgreSQL
-        "${PGSQL_BIN}/pg_ctl" stop --pgdata="${PGSQL_DB}" --options="--port=5433"
+        "${PGSQL_BIN}/pg_ctl" stop --mode fast --pgdata="${PGSQL_DB}" --options="--port=5433"
+
     fi
 }
 
@@ -87,9 +88,11 @@ config_postgresql_conf() {
     (
         cat <<EOF
 # FILE LOCATIONS
+cluster_name = '17/main'
 data_directory = '${PGSQL_DB}'
 hba_file = '${PGSQL_DB}/pg_hba.conf'
 ident_file = '${PGSQL_DB}/pg_ident.conf'
+external_pid_file = '${PGSQL_DB}/17-main.pid'
 
 # CONNECTIONS AND AUTHENTICATION
 listen_addresses = '*'
