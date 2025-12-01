@@ -178,7 +178,7 @@ services:
 
   # DNS Server
   ns:
-    image: coredns/coredns:1.12.2
+    image: coredns/coredns:1.13.1
     container_name: ns
     hostname: ns.example
     restart: unless-stopped
@@ -292,7 +292,7 @@ services:
     profiles: [optional]
 
   prometheus:
-    image: prom/prometheus:v3.5.0
+    image: prom/prometheus:v3.7.3
     container_name: prometheus
     hostname: prometheus.example
     restart: unless-stopped
@@ -318,7 +318,7 @@ services:
     profiles: [build, core]
 
   loki:
-    image: grafana/loki:3.5.3
+    image: grafana/loki:3.6.2
     container_name: loki
     hostname: loki.example
     restart: unless-stopped
@@ -330,7 +330,7 @@ services:
     profiles: [build, core]
 
   grafana:
-    image: grafana/grafana:12.1.0
+    image: grafana/grafana:12.3.0
     container_name: grafana
     hostname: grafana.example
     restart: unless-stopped

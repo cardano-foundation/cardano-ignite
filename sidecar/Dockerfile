@@ -1,4 +1,4 @@
-FROM docker.io/debian:stable-20250721-slim AS build
+FROM docker.io/debian:stable-20251117-slim AS build
 
 ARG CARDANO_CLI_VERSION="10.11.1.0"
 ARG PROCESS_EXPORTER_VERSION="${PROCESS_EXPORTER_VERSION:-0.8.7}"
@@ -56,7 +56,7 @@ RUN ln -s /usr/local/src/process_exporter/process-exporter-${PROCESS_EXPORTER_VE
 
 #---------------------------------------------------------------------
 
-FROM docker.io/debian:stable-20250721-slim AS main
+FROM docker.io/debian:stable-20251117-slim AS main
 
 ARG GRAPHNODES
 
