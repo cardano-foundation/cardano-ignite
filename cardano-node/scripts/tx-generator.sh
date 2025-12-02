@@ -7,7 +7,7 @@ SHELL="/bin/bash"
 PATH="/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin"
 
 # Environment variables
-TPS="${TSP:-1}"
+TPS="${TPS:-1}"
 TX_GEN_MODE="${TX_GEN_MODE:-plain}"
 
 # Check if required environment variables are set
@@ -31,7 +31,7 @@ cd "$TMP_DIR" || {
 # Generate the JSON configuration file
 cat <<EOF > tx-generator.json
 {
-  "add_tx_size": 100,
+  "add_tx_size": 940,
   "debugMode": false,
   "era": "Conway",
   "init_cooldown": 5,
@@ -44,13 +44,24 @@ cat <<EOF > tx-generator.json
   "sigKey": "/opt/cardano-node/utxos/keys/genesis.${POOL_ID}.skey",
   "targetNodes": [
     {
-      "addr": "127.0.0.1",
-      "name": "node-0",
+      "addr": "172.16.1.102",
+      "name": "node-1",
+      "port": 3001
+    },
+    {
+      "addr": "172.16.3.102",
+      "name": "node-2",
+      "port": 3001
+    },
+    {
+      "addr": "172.16.4.102",
+      "name": "node-2",
       "port": 3001
     }
+
   ],
   "tps": ${TPS},
-  "tx_count": 172800,
+  "tx_count": 229824,
   "tx_fee": 1000000
 }
 EOF

@@ -469,6 +469,7 @@ assemble_command() {
     cmd+=(--config ${CONFIG_JSON})
     cmd+=(--port ${PORT})
     cmd+=(--topology ${CONFIG_PATH}/topology.json)
+    cmd+=(+RTS -N4 -RTS)
 }
 
 # Establish run order
