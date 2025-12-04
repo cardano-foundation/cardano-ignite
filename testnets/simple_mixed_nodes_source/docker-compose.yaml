@@ -1,7 +1,6 @@
 ---
 
 x-base: &base
-  image: ${testnet}:latest
   restart: unless-stopped
   logging:
     driver: "loki"
@@ -9,6 +8,17 @@ x-base: &base
       mode: non-blocking
       loki-url: "http://127.0.0.1:3100/loki/api/v1/push"
       loki-retries: "5"
+
+x-cardano_node_10_5_1: &cardano_node_10_5_1
+  image: ${testnet}-10.5.1:latest
+  build:
+    context: "../../"
+    dockerfile: "cardano-node/Dockerfile.source"
+    args:
+      CARDANO_NODE_REF: "10.5.1"
+
+x-cardano_node_10_5_3: &cardano_node_10_5_3
+  image: ${testnet}-10.5.3:latest
   build:
     context: "../../"
     dockerfile: "cardano-node/Dockerfile.source"
@@ -21,7 +31,7 @@ x-env: &env
 
 services:
   p1:
-    <<: *base
+    <<: [*base, *cardano_node_10_5_3]
     container_name: p1
     hostname: p1.example
     volumes:
@@ -33,7 +43,7 @@ services:
     profiles: [build, core, pools]
 
   p2:
-    <<: *base
+    <<: [*base, *cardano_node_10_5_3]
     container_name: p2
     hostname: p2.example
     volumes:
@@ -46,7 +56,7 @@ services:
     profiles: [build, core, pools]
 
   p3:
-    <<: *base
+    <<: [*base, *cardano_node_10_5_3]
     container_name: p3
     hostname: p3.example
     volumes:
@@ -150,7 +160,7 @@ services:
   # Client 1
   # Used by cardano-db-sync
   c1:
-    <<: *base
+    <<: [*base, *cardano_node_10_5_3]
     container_name: c1
     hostname: c1.example
     volumes:
@@ -164,7 +174,7 @@ services:
 
   # TX generator 1
   c2:
-    <<: *base
+    <<: [*base, *cardano_node_10_5_3]
     container_name: c2
     hostname: c2.example
     volumes:

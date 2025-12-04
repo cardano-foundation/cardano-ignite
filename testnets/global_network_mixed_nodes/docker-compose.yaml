@@ -1,7 +1,6 @@
 ---
 
 x-base: &base
-  image: ${testnet}:latest
   restart: unless-stopped
   cap_add:
     - NET_ADMIN
@@ -11,14 +10,19 @@ x-base: &base
       mode: non-blocking
       loki-url: "http://127.0.0.1:3100/loki/api/v1/push"
       loki-retries: "5"
+
+x-cardano_node_10_5_1: &cardano_node_10_5_1
+  image: ${testnet}-10.5.1:latest
   build:
     context: "../../"
-    # Binary version
-    #dockerfile: "cardano-node/Dockerfile.binary"
-    #args:
-    #  CARDANO_NODE_VERSION: "10.5.3"
+    dockerfile: "cardano-node/Dockerfile.source"
+    args:
+      CARDANO_NODE_REF: "10.5.1"
 
-    # Source version
+x-cardano_node_10_5_3: &cardano_node_10_5_3
+  image: ${testnet}-10.5.3:latest
+  build:
+    context: "../../"
     dockerfile: "cardano-node/Dockerfile.source"
     args:
       CARDANO_NODE_REF: "10.5.3"
@@ -185,7 +189,7 @@ services:
 
   # Block Producer
   p1bp:
-    <<: *base_na
+    <<: [*base_na, *cardano_node_10_5_3]
     container_name: p1bp
     hostname: p1bp.example
     volumes:
@@ -203,7 +207,7 @@ services:
 
   # Relay
   p1r1:
-    <<: *base_na
+    <<: [*base_na, *cardano_node_10_5_3]
     container_name: p1r1
     hostname: p1r1.example
     volumes:
@@ -221,7 +225,7 @@ services:
 
   # Relay
   p1r2:
-    <<: *base_na
+    <<: [*base_na, *cardano_node_10_5_3]
     container_name: p1r2
     hostname: p1r2.example
     volumes:
@@ -239,7 +243,7 @@ services:
 
   # Relay
   p1r3:
-    <<: *base_na
+    <<: [*base_na, *cardano_node_10_5_3]
     container_name: p1r3
     hostname: p1r3.example
     volumes:
@@ -259,7 +263,7 @@ services:
 
   # Block Producer
   p2bp:
-    <<: *base_eu
+    <<: [*base_eu, *cardano_node_10_5_3]
     container_name: p2bp
     hostname: p2bp.example
     volumes:
@@ -276,7 +280,7 @@ services:
 
   # Relay
   p2r1:
-    <<: *base_eu
+    <<: [*base_eu, *cardano_node_10_5_3]
     container_name: p2r1
     hostname: p2r1.example
     volumes:
@@ -293,7 +297,7 @@ services:
 
   # Relay
   p2r2:
-    <<: *base_eu
+    <<: [*base_eu, *cardano_node_10_5_3]
     container_name: p2r2
     hostname: p2r2.example
     volumes:
@@ -310,7 +314,7 @@ services:
 
   # Relay
   p2r3:
-    <<: *base_eu
+    <<: [*base_eu, *cardano_node_10_5_3]
     container_name: p2r3
     hostname: p2r3.example
     volumes:
@@ -329,7 +333,7 @@ services:
 
   # Block Producer
   p3bp:
-    <<: *base_as
+    <<: [*base_as, *cardano_node_10_5_3]
     container_name: p3bp
     hostname: p3bp.example
     volumes:
@@ -346,7 +350,7 @@ services:
 
   # Relay
   p3r1:
-    <<: *base_as
+    <<: [*base_as, *cardano_node_10_5_3]
     container_name: p3r1
     hostname: p3r1.example
     volumes:
@@ -363,7 +367,7 @@ services:
 
   # Relay
   p3r2:
-    <<: *base_as
+    <<: [*base_as, *cardano_node_10_5_3]
     container_name: p3r2
     hostname: p3r2.example
     volumes:
@@ -380,7 +384,7 @@ services:
 
   # Relay
   p3r3:
-    <<: *base_as
+    <<: [*base_as, *cardano_node_10_5_3]
     container_name: p3r3
     hostname: p3r3.example
     volumes:
@@ -399,7 +403,7 @@ services:
 
   # Block Producer
   p4bp:
-    <<: *base_eu
+    <<: [*base_eu, *cardano_node_10_5_3]
     container_name: p4bp
     hostname: p4bp.example
     volumes:
@@ -416,7 +420,7 @@ services:
 
   # Relay
   p4r1:
-    <<: *base_eu
+    <<: [*base_eu, *cardano_node_10_5_3]
     container_name: p4r1
     hostname: p4r1.example
     volumes:
@@ -433,7 +437,7 @@ services:
 
   # Relay
   p4r2:
-    <<: *base_eu
+    <<: [*base_eu, *cardano_node_10_5_3]
     container_name: p4r2
     hostname: p4r2.example
     volumes:
@@ -450,7 +454,7 @@ services:
 
   # Relay
   p4r3:
-    <<: *base_eu
+    <<: [*base_eu, *cardano_node_10_5_3]
     container_name: p4r3
     hostname: p4r3.example
     volumes:
@@ -469,7 +473,7 @@ services:
 
   # Block Producer
   p5bp:
-    <<: *base_na
+    <<: [*base_na, *cardano_node_10_5_3]
     container_name: p5bp
     hostname: p5bp.example
     volumes:
@@ -486,7 +490,7 @@ services:
 
   # Relay
   p5r1:
-    <<: *base_na
+    <<: [*base_na, *cardano_node_10_5_3]
     container_name: p5r1
     hostname: p5r1.example
     volumes:
@@ -503,7 +507,7 @@ services:
 
   # Relay
   p5r2:
-    <<: *base_na
+    <<: [*base_na, *cardano_node_10_5_3]
     container_name: p5r2
     hostname: p5r2.example
     volumes:
@@ -520,7 +524,7 @@ services:
 
   # Relay
   p5r3:
-    <<: *base_na
+    <<: [*base_na, *cardano_node_10_5_3]
     container_name: p5r3
     hostname: p5r3.example
     volumes:
@@ -539,7 +543,7 @@ services:
 
   # Block Producer
   p6bp:
-    <<: *base_eu
+    <<: [*base_eu, *cardano_node_10_5_3]
     container_name: p6bp
     hostname: p6bp.example
     volumes:
@@ -556,7 +560,7 @@ services:
 
   # Relay
   p6r1:
-    <<: *base_eu
+    <<: [*base_eu, *cardano_node_10_5_3]
     container_name: p6r1
     hostname: p6r1.example
     volumes:
@@ -573,7 +577,7 @@ services:
 
   # Relay
   p6r2:
-    <<: *base_eu
+    <<: [*base_eu, *cardano_node_10_5_3]
     container_name: p6r2
     hostname: p6r2.example
     volumes:
@@ -590,7 +594,7 @@ services:
 
   # Relay
   p6r3:
-    <<: *base_eu
+    <<: [*base_eu, *cardano_node_10_5_3]
     container_name: p6r3
     hostname: p6r3.example
     volumes:
@@ -823,7 +827,7 @@ services:
   # Client 1
   # Used by cardano-db-sync
   c1:
-    <<: *base_eu
+    <<: [*base_eu, *cardano_node_10_5_3]
     container_name: c1
     hostname: c1.example
     volumes:
@@ -842,7 +846,7 @@ services:
 
   # TX generator 1
   c2:
-    <<: *base_na
+    <<: [*base_na, *cardano_node_10_5_3]
     container_name: c2
     hostname: c2.example
     volumes:

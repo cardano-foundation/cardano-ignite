@@ -8,7 +8,7 @@ This list outlines all software versions used in the Cardano Ignite project.
 |Blockfrost           |Binary        |4.3.0                |https://github.com/blockfrost/blockfrost-backend-ryo/releases |
 |Cardano CLI          |Binary/Source |10.11.1.0            |https://github.com/IntersectMBO/cardano-cli/releases          |
 |Cardano DB Sync      |Binary        |13.6.0.4             |https://github.com/IntersectMBO/cardano-db-sync/releases      |
-|Cardano Node         |Binary/Source |10.5.3               |https://github.com/IntersectMBO/cardano-node/releases         |
+|Cardano Node         |Binary/Source |10.5.1,10.5.3        |https://github.com/IntersectMBO/cardano-node/releases         |
 |Cardano TX Generator |Source        |10.5.3               |https://github.com/IntersectMBO/cardano-node/releases         |
 |CoreDNS              |Image         |1.13.1               |https://hub.docker.com/r/coredns/coredns/tags                 |
 |Grafana              |Image         |12.3.0               |https://hub.docker.com/r/grafana/grafana/tags                 |
