@@ -45,10 +45,7 @@ RUN git clone --depth 1 --branch master https://github.com/IntersectMBO/cardano-
 WORKDIR /usr/local/src/cardano-cli
 RUN git fetch --all --recurse-submodules --tags && \
     git checkout cardano-cli-${CARDANO_CLI_VERSION}
-RUN echo "package *\n\
-  ghc-options: +RTS -A128m -n2m -RTS\n\
-\n\
-jobs: \$ncpus\n\
+RUN echo "jobs: 2\n\
 semaphore: True" > /usr/local/src/cardano-cli/cabal.project.local
 
 WORKDIR /usr/local/src/cardano-cli/cardano-cli
@@ -68,10 +65,7 @@ RUN git clone --branch master ${CARDANO_NODE_REPO}
 WORKDIR /usr/local/src/cardano-node
 RUN git fetch --all --recurse-submodules --tags && \
     git checkout ${CARDANO_NODE_REF}
-RUN echo "package *\n\
-  ghc-options: +RTS -A128m -n2m -RTS\n\
-\n\
-package ouroboros-network\n\
+RUN echo "package ouroboros-network\n\
   ghc-options: -fno-ignore-asserts\n\
 \n\
 package ouroboros-network-framework\n\
@@ -86,7 +80,7 @@ package ouroboros-network-protocols\n\
 package network-mux\n\
   ghc-options: -fno-ignore-asserts\n\
 \n\
-jobs: \$ncpus\n\
+jobs: 2\n\
 semaphore: True" > /usr/local/src/cardano-node/cabal.project.local
 
 WORKDIR /usr/local/src/cardano-node/cardano-node
