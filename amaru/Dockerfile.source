@@ -27,10 +27,7 @@ RUN git clone ${DB_SERVER_REPO}
 WORKDIR /usr/local/src/db-server
 RUN git fetch --all --recurse-submodules --tags && \
     git checkout ${DB_SERVER_REF}
-RUN printf "package *\n\
-  ghc-options: +RTS -A128m -n2m -RTS\n\
-\n\
-jobs: \$ncpus\n\
+RUN printf "jobs: 2\n\
 semaphore: True" > /usr/local/src/db-server/cabal.project.local
 
 WORKDIR /usr/local/src/db-server
