@@ -28,7 +28,7 @@ WORKDIR /usr/local/src/ouroboros-consensus/ouroboros-consensus-cardano
 
 RUN cabal update && \
     cabal install db-synthesizer --disable-test --install-method=copy \
-      --installdir=/usr/local/bin --overwrite-policy=always
+      --installdir=/usr/local/bin --overwrite-policy=always --jobs=2
 
 RUN strip --strip-unneeded /usr/local/bin/db-synthesizer
 
