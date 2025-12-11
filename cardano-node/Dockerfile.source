@@ -52,7 +52,7 @@ WORKDIR /usr/local/src/cardano-cli/cardano-cli
 
 RUN cabal update && \
     cabal install exe:cardano-cli --disable-test --install-method=copy \
-      --installdir=/usr/local/bin --overwrite-policy=always
+      --installdir=/usr/local/bin --overwrite-policy=always --jobs=2
 
 # cardano-node
 

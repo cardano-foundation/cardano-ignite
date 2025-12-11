@@ -34,7 +34,7 @@ WORKDIR /usr/local/src/db-server
 
 RUN cabal update && \
     cabal install exe:db-server --install-method=copy \
-      --installdir=/usr/local/bin --overwrite-policy=always
+      --installdir=/usr/local/bin --overwrite-policy=always --jobs=2
 
 RUN strip --strip-unneeded /usr/local/bin/db-server
 
