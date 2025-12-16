@@ -3,7 +3,6 @@ ARG HASKELL_BUILDER_IMAGE
 
 #---------------------------------------------------------------------
 
-FROM ${TESTNET_BUILDER_IMAGE} AS testnet_builder
 #---------------------------------------------------------------------
 
 FROM ${HASKELL_BUILDER_IMAGE} AS build
@@ -121,6 +120,8 @@ RUN chmod 0755 /usr/local/src/process_exporter/process-exporter-${PROCESS_EXPORT
 
 RUN ln -s /usr/local/src/process_exporter/process-exporter-${PROCESS_EXPORTER_VERSION}.linux-amd64/process-exporter /usr/local/bin/process_exporter
 
+FROM ${TESTNET_BUILDER_IMAGE} AS testnet_builder
+
 #---------------------------------------------------------------------
 
 FROM docker.io/debian:stable-20251117-slim AS main
@@ -141,6 +142,7 @@ RUN apt-get update && \
         iputils-ping \
         jq \
         less \
+        locales \
         lsof \
         netbase \
         netcat-openbsd \
@@ -150,6 +152,13 @@ RUN apt-get update && \
         tcpdump \
         telnet \
         vim
+
+RUN sed -i 's/^# *en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen \
+ && locale-gen
+
+ENV LANG=en_US.UTF-8 \
+    LANGUAGE=en_US:en \
+    LC_ALL=en_US.UTF-8
 
 COPY --from=build --chown=root:root /usr/local/lib/libsodium.so /usr/local/lib
 RUN ln -snf /usr/local/lib/libsodium.so /usr/local/lib/libsodium.so.23 && \
