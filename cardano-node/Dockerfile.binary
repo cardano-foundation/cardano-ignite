@@ -103,6 +103,7 @@ RUN apt update && \
         iputils-ping \
         jq \
         less \
+        locales \
         lsof \
         netbase \
         netcat-openbsd \
@@ -112,6 +113,13 @@ RUN apt update && \
         tcpdump \
         telnet \
         vim
+
+RUN sed -i 's/^# *en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen \
+ && locale-gen
+
+ENV LANG=en_US.UTF-8 \
+    LANGUAGE=en_US:en \
+    LC_ALL=en_US.UTF-8
 
 COPY --from=build --chown=root:root /usr/local/bin/cardano-cli /usr/local/bin/cardano-cli
 COPY --from=build --chown=root:root /usr/local/bin/cardano-node /usr/local/bin/cardano-node
