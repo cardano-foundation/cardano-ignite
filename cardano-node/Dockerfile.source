@@ -3,7 +3,6 @@ ARG HASKELL_BUILDER_IMAGE
 
 #---------------------------------------------------------------------
 
-FROM ${TESTNET_BUILDER_IMAGE} AS testnet_builder
 #---------------------------------------------------------------------
 
 FROM ${HASKELL_BUILDER_IMAGE} AS build
@@ -120,6 +119,8 @@ RUN tar --extract --gzip --file=/usr/local/src/process_exporter/process-exporter
 RUN chmod 0755 /usr/local/src/process_exporter/process-exporter-${PROCESS_EXPORTER_VERSION}.linux-amd64/process-exporter
 
 RUN ln -s /usr/local/src/process_exporter/process-exporter-${PROCESS_EXPORTER_VERSION}.linux-amd64/process-exporter /usr/local/bin/process_exporter
+
+FROM ${TESTNET_BUILDER_IMAGE} AS testnet_builder
 
 #---------------------------------------------------------------------
 
