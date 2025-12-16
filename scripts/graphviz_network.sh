@@ -1,19 +1,44 @@
 #!/usr/bin/env bash
 
+get_region() {
+    local ip=$1
+    # Extract first 3 octets (for /24 network)
+    local network_prefix=$(echo "$ip" | cut -d'.' -f1-3)
+    
+    case "$network_prefix" in
+        "172.16.1")
+            echo "North America"
+            ;;
+        "172.16.3")
+            echo "Europe"
+            ;;
+        "172.16.4")
+            echo "Asia"
+            ;;
+        *)
+            echo "Unknown"
+            ;;
+    esac
+}
+
 # Step 1: Get all running container IDs
 containers=$(docker ps -q)
 
 # Step 2: Map container IDs to names and IPs
-declare -A id_to_name ip_to_name
+declare -A id_to_name ip_to_name ip_to_region name_to_region
 
 for container in $containers; do
     name=$(docker inspect $container --format='{{.Name}}' | sed 's/\///')  # Remove leading slash
-    #ip=$(docker inspect $container --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}')
     ip=$(docker inspect $container --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' | head -n 1 | tr -d '[:space:]')
 
     if [[ -n "$name" && -n "$ip" ]]; then
         id_to_name[$container]=$name
         ip_to_name[$ip]=$name
+        
+        # Get and store region
+        region=$(get_region "$ip")
+        ip_to_region[$ip]=$region
+        name_to_region[$name]=$region
     fi
 done
 
@@ -127,8 +152,26 @@ black_sorted=($(sort_edges "${black_edges[@]}"))
 blue_sorted=($(sort_edges "${blue_edges[@]}"))
 red_sorted=($(sort_edges "${red_edges[@]}"))
 
-# Step 7: Output DOT format with color-coded edges
+# Step 7: Output DOT format with color-coded edges and region info for nodes
 echo "digraph cardano_connections {"
+echo "  node [shape=box];"  # Optional: Set a default shape for all nodes
+
+# Collect all unique node names from edges
+declare -A node_names
+for edge in "${black_edges[@]}" "${blue_edges[@]}" "${red_edges[@]}"; do
+    [[ -z "$edge" ]] && continue
+    read src dst _ <<< "$edge"
+    node_names["$src"]=1
+    node_names["$dst"]=1
+done
+
+# Define nodes with custom labels
+for name in "${!node_names[@]}"; do
+    region=${name_to_region[$name]}
+    echo "  \"$name\" [label=\"$name\\n($region)\"];"
+done
+
+# Output the edges
 for edge in "${black_edges[@]}"; do
     [[ -z "$edge" ]] && continue
     read src dst color <<< "$edge"

@@ -4,6 +4,7 @@
 # Required for builds on OSX ARM
 export DOCKER_DEFAULT_PLATFORM?=linux/amd64
 
+export COMPOSE_PARALLEL_LIMIT=1
 export DOCKER_BUILDKIT=1
 export COMPOSE_DOCKER_CLI_BUILD=1
 
@@ -78,13 +79,52 @@ testnets/%/.env.tmp: TESTNET
 		echo "NO_INTERPOOL_LOCALROOTS=$${NO_INTERPOOL_LOCALROOTS}" >> testnets/$*/.env.tmp; \
 	fi
 
+buildx: TESTNET prerequisites testnets/${testnet}/graph_nodes.sql testnets/${testnet}/coredns/example.zone testnets/${testnet}/prometheus/prometheus.yml ## Build testnet
+	ln -snf testnets/${testnet}/testnet.yaml .testnet.yaml && \
+	$(HOST_INTERFACE_SETUP) && \
+	mkdir -p .buildx-cache && \
+	if ! docker network inspect buildkit-net >/dev/null 2>&1; then \
+		docker network create buildkit-net; \
+	fi && \
+	if ! docker ps | grep -q 'buildkit-registry'; then \
+		docker run -d --restart=always --network buildkit-net --name buildkit-registry registry:2; \
+	fi && \
+	if ! docker buildx inspect buildx-builder >/dev/null 2>&1; then \
+		docker buildx create --name buildx-builder \
+			--driver docker-container \
+			--config ./buildkitd.toml \
+			--driver-opt network=buildkit-net \
+			--use; \
+	else \
+		docker buildx use buildx-builder; \
+	fi && \
+	normalized_testnet=$$(echo ${testnet} | sed -E 's/[^a-zA-Z0-9.-]+/-/g' | tr 'A-Z' 'a-z') && \
+	docker buildx build \
+		--cache-from type=local,src=.buildx-cache \
+		--cache-to type=local,dest=.buildx-cache,mode=max \
+		-t buildkit-registry:5000/$${normalized_testnet}-testnet-builder:latest \
+		-f testnet-generation-tool/Dockerfile \
+		--push . && \
+	docker buildx build \
+		--cache-from type=local,src=.buildx-cache \
+		--cache-to type=local,dest=.buildx-cache,mode=max \
+		-t buildkit-registry:5000/$${normalized_testnet}-haskell-builder:latest \
+		-f haskell-builder/Dockerfile \
+		--push . && \
+	cd testnets/${testnet} && \
+	DOCKER_BUILDKIT=1 COMPOSE_DOCKER_CLI_BUILD=1 \
+	docker compose --profile build build \
+		--build-arg GRAPHNODES="testnets/${testnet}/graph_nodes.sql" \
+		--build-arg TESTNET_BUILDER_IMAGE="buildkit-registry:5000/$${normalized_testnet}-testnet-builder:latest" \
+		--build-arg HASKELL_BUILDER_IMAGE="buildkit-registry:5000/$${normalized_testnet}-haskell-builder:latest"
+
 build: TESTNET prerequisites testnets/${testnet}/graph_nodes.sql testnets/${testnet}/coredns/example.zone testnets/${testnet}/prometheus/prometheus.yml ## Build testnet
 	ln -snf testnets/${testnet}/testnet.yaml .testnet.yaml && \
 	$(HOST_INTERFACE_SETUP) && \
 	docker build -t ${testnet}-testnet_builder -f testnet-generation-tool/Dockerfile . && \
 	docker build -t ${testnet}-haskell_builder -f haskell-builder/Dockerfile . && \
 	cd testnets/${testnet} && \
-	docker compose --profile build build --build-arg GRAPHNODES="testnets/${testnet}/graph_nodes.sql" --build-arg TESTNET_BUILDER_IMAGE="${testnet}-testnet_builder" --build-arg HASKELL_BUILDER_IMAGE="${testnet}-haskell_builder"
+	docker compose --profile build build --parallel=false --no-parallel --build-arg GRAPHNODES="testnets/${testnet}/graph_nodes.sql" --build-arg TESTNET_BUILDER_IMAGE="${testnet}-testnet_builder" --build-arg HASKELL_BUILDER_IMAGE="${testnet}-haskell_builder"
 
 cibuild: TESTNET prerequisites testnets/${testnet}/graph_nodes.sql testnets/${testnet}/coredns/example.zone testnets/${testnet}/prometheus/prometheus.yml ## Build testnet
 	ln -snf testnets/${testnet}/testnet.yaml .testnet.yaml && \

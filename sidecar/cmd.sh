@@ -125,6 +125,7 @@ main() {
     start_process_exporter &
     /opt/scripts/grafana_graph_nodes.sh >/dev/null 2>&1 &
     /opt/scripts/grafana_consensus.sh >/dev/null 2>&1 &
+    /opt/scripts/blockperf.sh >/dev/null 2>&1 &
     /opt/scripts/pots.sh >/dev/null 2>&1
 }
 
