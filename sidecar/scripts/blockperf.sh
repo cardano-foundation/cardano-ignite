@@ -57,7 +57,7 @@ DB_SIDECAR_USERNAME="${DB_SIDECAR_USERNAME:-sidecar}"
 
 # Loki config
 LOKI_URL="${LOKI_URL:-http://loki.example:3100/loki/api/v1/query_range}"
-LOKI_QUERY='{container_name=~"p[0-9]+(bp|r[0-9])?|(c[0-9]+)"} | json | data_kind="TraceAddBlockEvent.AddedToCurrentChain"'
+LOKI_QUERY='{container_name=~"p[0-9]+(bp|r[0-9])?|(c[0-9]+)"} | json | data_kind=~"TraceAddBlockEvent\\.(AddedToCurrentChain|SwitchedToAFork)"'
 
 # Simple logger
 log() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*" >&2; }
