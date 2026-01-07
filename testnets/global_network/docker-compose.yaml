@@ -27,6 +27,16 @@ x-cardano_node_10_5_3: &cardano_node_10_5_3
     args:
       CARDANO_NODE_REF: "10.5.3"
 
+# 10.6.1 is a prelease with known bugs, so not used
+# by any nodes by default.
+x-cardano_node_10_6_1: &cardano_node_10_6_1
+  image: ${testnet}-10.6.1:latest
+  build:
+    context: "../../"
+    dockerfile: "cardano-node/Dockerfile.source"
+    args:
+      CARDANO_NODE_REF: "10.6.1"
+
 x-base_eu: &base_eu
   <<: *base
   env_file:

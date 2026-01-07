@@ -2,6 +2,7 @@ FROM docker.io/debian:stable-20251117-slim AS testnet_builder
 
 #ARG UV_VERSION="${UV_VERSION:-0.9.1}"
 ARG UV_VERSION="0.9.13"
+ARG TESTNET_GENERATION_TOOL_VERSION="v0.1.0"
 
 ENV TZ="UTC"
 RUN ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime && \
@@ -37,7 +38,7 @@ RUN ln -s /usr/local/src/uv/uv-x86_64-unknown-linux-gnu/uv /usr/local/bin/uv
 # testnet-generation-tool
 
 WORKDIR /usr/local/src
-RUN git clone --branch main https://github.com/cardano-foundation/testnet-generation-tool.git
+RUN git clone --branch ${TESTNET_GENERATION_TOOL_VERSION} https://github.com/cardano-foundation/testnet-generation-tool.git
 
 WORKDIR /usr/local/src/testnet-generation-tool
 RUN uv sync
