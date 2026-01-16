@@ -259,7 +259,7 @@ localroot_edges() {
 assemble_command() {
     cmd=(/usr/local/bin/amaru)
     cmd+=(--with-json-traces)
-    cmd+=(daemon)
+    cmd+=(run)
     cmd+=(--peer-address "${PEER}")
     cmd+=(--chain-dir chain."${NETWORK}".db)
     cmd+=(--network "${NETWORK}")

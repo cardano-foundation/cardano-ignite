@@ -50,7 +50,7 @@ RUN ln -s /root/.cargo/bin/cargo /usr/local/bin/cargo && \
 
 # Amaru node
 
-ARG AMARU_REF="${AMARU_REF:-main}"
+ARG AMARU_REF="${AMARU_REF:-17020694ec00b39668dd0d9e87902f94e99590fa}"
 ARG AMARU_REPO="${AMARU_REPO:-https://github.com/pragma-org/amaru.git}"
 
 # Clone amaru.git repository

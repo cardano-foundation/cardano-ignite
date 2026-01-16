@@ -816,7 +816,7 @@ services:
       RELAY_ID: "2"
       SYSTEM_START: ${SYSTEM_START:-}
       REGION: AS
-      PEER_HOST: a1.example
+      PEER_HOST: p3r1.example
     dns:
       - 172.16.4.2
     networks:
