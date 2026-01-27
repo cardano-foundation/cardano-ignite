@@ -101,26 +101,32 @@ RUN cabal install exe:tx-generator --disable-test --install-method=copy \
 
 # dmq-node
 
-ARG DMQ_NODE_VERSION="${DMQ_NODE_VERSION:-0.2.0.0-pre-6}"
+ARG WITH_DMQ_NODE=0
+ARG DMQ_NODE_VERSION="${DMQ_NODE_VERSION:-karknu/cardano-magic}"
 ARG DMQ_NODE_REPO="${DMQ_NODE_REPO:-https://github.com/IntersectMBO/dmq-node.git}"
 
-WORKDIR /usr/local/src
-RUN git clone --branch main ${DMQ_NODE_REPO}
-
-WORKDIR /usr/local/src/dmq-node
-RUN git fetch --all --recurse-submodules --tags && \
-    git checkout ${DMQ_NODE_VERSION}
-RUN echo "package *\n\
+RUN if [ "$WITH_DMQ_NODE" = "1" ]; then \
+        set -eux; \
+        git clone --branch main ${DMQ_NODE_REPO} /usr/local/src/dmq-node; \
+        cd /usr/local/src/dmq-node; \
+        git fetch --all --recurse-submodules --tags && \
+        git checkout ${DMQ_NODE_VERSION}; \
+        echo "package *\n\
   ghc-options: +RTS -A128m -n2m -RTS\n\
 \n\
 jobs: \$ncpus\n\
-semaphore: True" > /usr/local/src/dmq-node/cabal.project.local
-
-WORKDIR /usr/local/src/dmq-node/dmq-node
-
-RUN cabal update && \
-    cabal install exe:dmq-node --disable-test --install-method=copy \
-      --installdir=/usr/local/bin --overwrite-policy=always
+semaphore: True" > cabal.project.local; \
+        cd dmq-node; \
+        cabal update && \
+        cabal install exe:dmq-node --disable-test --install-method=copy \
+          --installdir=/usr/local/bin --overwrite-policy=always; \
+    else \
+        echo "Skipping dmq-node build (WITH_DMQ=0) -> creating dummy binary"; \
+        mkdir -p /usr/local/bin; \
+        echo "#!/bin/sh\\n echo \"dmq-node is disabled in this image\"; exit 0" \
+          > /usr/local/bin/dmq-node; \
+        chmod +x /usr/local/bin/dmq-node; \
+    fi
 
 # process_exporter
 
