@@ -29,6 +29,8 @@ SYSTEM_START="${SYSTEM_START:-$(date -d "@$(( ( $(date +%s) / 180 ) * 180 ))" +%
 TYPE="${TYPE:-bprelay}"
 USE_LEDGER_AFTER_SLOT="${USE_LEDGER_AFTER_SLOT:-0}"
 UTXOHD="${UTXOHD:-false}"
+DMQ_NODE_PATH=/opt/dmq-node
+DMQ_NODE_PORT=4001
 
 # Configuration files
 BYRON_GENESIS_JSON="${BYRON_GENESIS_JSON:-/opt/cardano-node/pools/${POOL_ID}/configs/byron-genesis.json}"
@@ -452,6 +454,43 @@ localroot_edges() {
     /localroot_edges.sh >/dev/null 2>&1
 }
 
+start_dmq_node() {
+    echo "{}" > "${DMQ_NODE_PATH}"/config.json
+    (
+        cat <<EOF
+{
+  "localRoots": [
+    {
+      "accessPoints": [],
+      "advertise": false,
+      "valency": 1,
+      "extraFlags": {}
+    }
+  ],
+  "publicRoots": [
+    {
+      "accessPoints": [],
+      "advertise": false
+    }
+  ],
+  "useLedgerAfterSlot": 1,
+  "peerSnapshotFile": "peer-snapshot.json",
+  "extraConfig": {}
+}
+EOF
+    ) > "${DMQ_NODE_PATH}"/topology.json
+    (
+        cat <<EOF
+{
+  "bigLedgerPools": [],
+  "slotNo": 0,
+  "version": 2
+}
+EOF
+    ) > "${DMQ_NODE_PATH}"/peer-snapshot.json
+
+    # dmq-node --host-addr 0.0.0.0 -p 4001 --local-socket node.socket -c config.json -t topology.json --cardano-node-socket ../metrics/node.socket --cardano-network-magic 42
+}
 
 assemble_command() {
     cmd=(/usr/local/bin/cardano-node)
@@ -500,6 +539,7 @@ main() {
     start_node_exporter &
     start_process_exporter &
     localroot_edges &
+    start_dmq_node &
     assemble_command
     "${cmd[@]}"
 }
