@@ -123,7 +123,7 @@ RUN ln -s /usr/local/src/process_exporter/process-exporter-${PROCESS_EXPORTER_VE
 
 #---------------------------------------------------------------------
 
-FROM docker.io/debian:stable-20251117-slim AS main
+FROM docker.io/debian:stable-20260112-slim AS main
 
 # Set time zone
 ENV TZ="UTC"

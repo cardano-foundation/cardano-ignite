@@ -1,4 +1,4 @@
-FROM docker.io/debian:stable-20251117-slim AS build
+FROM docker.io/debian:stable-20260112-slim AS build
 
 ARG PROCESS_EXPORTER_VERSION="${PROCESS_EXPORTER_VERSION:-0.8.7}"
 

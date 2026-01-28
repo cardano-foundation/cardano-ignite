@@ -10,7 +10,7 @@
 
 ### Prerequisites
 
-Please install the dependencies below. All commands are compatible with Debian 12.
+Please install the dependencies below. All commands are compatible with Debian 13.
 
 - Install dependencies with your package manager
 
@@ -23,7 +23,7 @@ Please install the dependencies below. All commands are compatible with Debian 1
 
   ```
   curl --proto '=https' --tlsv1.2 \
-      --location https://github.com/mikefarah/yq/releases/download/v4.49.2/yq_linux_amd64.tar.gz \
+      --location https://github.com/mikefarah/yq/releases/download/v4.50.1/yq_linux_amd64.tar.gz \
       --output /tmp/yq_linux_amd64.tar.gz
   ```
 

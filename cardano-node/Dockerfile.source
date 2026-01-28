@@ -124,7 +124,7 @@ FROM ${TESTNET_BUILDER_IMAGE} AS testnet_builder
 
 #---------------------------------------------------------------------
 
-FROM docker.io/debian:stable-20251117-slim AS main
+FROM docker.io/debian:stable-20260112-slim AS main
 
 ENV CARDANO_NODE_SOCKET_PATH="/opt/cardano-node/data/db/node.socket"
 
