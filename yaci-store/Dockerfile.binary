@@ -6,7 +6,7 @@ FROM ${TESTNET_BUILDER_IMAGE} AS testnet_builder
 
 #---------------------------------------------------------------------
 
-FROM docker.io/debian:stable-20251117-slim AS build
+FROM docker.io/debian:stable-20260112-slim AS build
 
 ARG CARDANO_NODE_VERSION="${CARDANO_NODE_VERSION:-10.5.3}"
 ARG NODE_EXPORTER_VERSION="${NODE_EXPORTER_VERSION:-1.10.2}"
@@ -94,7 +94,7 @@ RUN ln -s /usr/local/src/process_exporter/process-exporter-${PROCESS_EXPORTER_VE
 
 #---------------------------------------------------------------------
 
-FROM docker.io/debian:stable-20251117-slim AS main
+FROM docker.io/debian:stable-20260112-slim AS main
 
 ENV TZ="UTC"
 RUN ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime && \

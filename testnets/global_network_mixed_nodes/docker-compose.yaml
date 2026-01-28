@@ -697,7 +697,7 @@ services:
 
   # DNS Server
   ns:
-    image: coredns/coredns:1.13.1
+    image: coredns/coredns:1.14.1
     container_name: ns
     hostname: ns.example
     restart: unless-stopped
@@ -933,7 +933,7 @@ services:
     profiles: [build, optional, mgmt]
 
   prometheus:
-    image: prom/prometheus:v3.7.3
+    image: prom/prometheus:v3.9.1
     container_name: prometheus
     hostname: prometheus.example
     restart: unless-stopped
@@ -957,7 +957,7 @@ services:
     profiles: [build, core, mgmt]
 
   blackbox:
-    image: quay.io/prometheus/blackbox-exporter:v0.27.0
+    image: quay.io/prometheus/blackbox-exporter:v0.28.0
     container_name: blackbox
     hostname: blackbox.example
     restart: unless-stopped
@@ -981,7 +981,7 @@ services:
     profiles: [build, core, mgmt]
 
   loki:
-    image: grafana/loki:3.6.2
+    image: grafana/loki:3.6.4
     container_name: loki
     hostname: loki.example
     restart: unless-stopped
@@ -999,7 +999,7 @@ services:
     profiles: [build, core, mgmt]
 
   grafana:
-    image: grafana/grafana:12.3.0
+    image: grafana/grafana:12.3.1
     container_name: grafana
     hostname: grafana.example
     restart: unless-stopped
@@ -1020,7 +1020,7 @@ services:
     profiles: [build, core, mgmt]
 
   jaeger:
-    image: jaegertracing/jaeger:2.12.0
+    image: jaegertracing/jaeger:2.14.1
     container_name: jaeger
     hostname: jaeger.example
     restart: unless-stopped

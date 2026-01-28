@@ -1,7 +1,7 @@
 # -------------------------------------------------
 #  Shared build environment for Cardano binaries
 # -------------------------------------------------
-ARG BASE_IMAGE=docker.io/debian:stable-20251117-slim
+ARG BASE_IMAGE=docker.io/debian:stable-20260112-slim
 FROM ${BASE_IMAGE} AS haskell-builder
 
 # ── Common ARGs (keep the defaults from the originals) ──

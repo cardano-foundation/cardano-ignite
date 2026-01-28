@@ -40,6 +40,7 @@ The following list provides an overview of the key tools and technologies used i
 
 |Name                 |Description                                                          |Link                                                 |
 |---                  |---                                                                  |---                                                  |
+|Amaru                |A fully open source node client for Cardano, written in Rust.        |https://github.com/pragma-org/amaru                  |
 |Blackbox Exporter    |A Prometheus Exporter for probing endpoints over multiple protocols. |https://github.com/prometheus/blackbox_exporter      |
 |Blockfrost           |A blockchain explorer and API for Cardano.                           |https://github.com/blockfrost/blockfrost-backend-ryo |
 |Cardano CLI          |A command-line interface for the Cardano blockchain.                 |https://github.com/IntersectMBO/cardano-cli          |
