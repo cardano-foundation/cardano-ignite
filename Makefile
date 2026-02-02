@@ -7,6 +7,8 @@ export DOCKER_DEFAULT_PLATFORM?=linux/amd64
 export DOCKER_BUILDKIT=1
 export COMPOSE_DOCKER_CLI_BUILD=1
 
+export WITH_DMQ_NODE?=0
+
 # Determine and set the parent network interface
 HOST_INTERFACE_SETUP = \
     if [ -z "$${HOST_INTERFACE+x}" ]; then \
@@ -84,7 +86,11 @@ build: TESTNET prerequisites testnets/${testnet}/graph_nodes.sql testnets/${test
 	docker build -t ${testnet}-testnet_builder -f testnet-generation-tool/Dockerfile . && \
 	docker build -t ${testnet}-haskell_builder -f haskell-builder/Dockerfile . && \
 	cd testnets/${testnet} && \
-	docker compose --profile build build --build-arg GRAPHNODES="testnets/${testnet}/graph_nodes.sql" --build-arg TESTNET_BUILDER_IMAGE="${testnet}-testnet_builder" --build-arg HASKELL_BUILDER_IMAGE="${testnet}-haskell_builder"
+	docker compose --profile build build \
+		--build-arg GRAPHNODES="testnets/${testnet}/graph_nodes.sql" \
+		--build-arg TESTNET_BUILDER_IMAGE="${testnet}-testnet_builder" \
+		--build-arg HASKELL_BUILDER_IMAGE="${testnet}-haskell_builder" \
+		--build-arg WITH_DMQ_NODE="${WITH_DMQ_NODE}"
 
 cibuild: TESTNET prerequisites testnets/${testnet}/graph_nodes.sql testnets/${testnet}/coredns/example.zone testnets/${testnet}/prometheus/prometheus.yml ## Build testnet
 	ln -snf testnets/${testnet}/testnet.yaml .testnet.yaml && \
@@ -94,9 +100,11 @@ cibuild: TESTNET prerequisites testnets/${testnet}/graph_nodes.sql testnets/${te
 	docker buildx build -t ${testnet}-haskell_builder -f haskell-builder/Dockerfile --load . && \
 	docker buildx use default && \
 	cd testnets/${testnet} && \
-	docker compose --profile build build --build-arg GRAPHNODES="testnets/${testnet}/graph_nodes.sql" --build-arg TESTNET_BUILDER_IMAGE="${testnet}-testnet_builder" --build-arg HASKELL_BUILDER_IMAGE="${testnet}-haskell_builder"
-
-
+	docker compose --profile build build \
+		--build-arg GRAPHNODES="testnets/${testnet}/graph_nodes.sql" \
+		--build-arg TESTNET_BUILDER_IMAGE="${testnet}-testnet_builder" \
+		--build-arg HASKELL_BUILDER_IMAGE="${testnet}-haskell_builder"
+		--build-arg WITH_DMQ_NODE="${WITH_DMQ_NODE}"
 
 all:
 	for dir in testnets/*; do \
