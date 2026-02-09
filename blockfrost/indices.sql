@@ -21,6 +21,15 @@ CREATE INDEX IF NOT EXISTS bf_idx_drep_hash_raw ON drep_hash USING hash (raw);
 CREATE INDEX IF NOT EXISTS bf_idx_drep_hash_view ON drep_hash USING hash (view);
 CREATE INDEX IF NOT EXISTS bf_idx_drep_hash_has_script ON drep_hash USING hash (has_script);
 CREATE INDEX IF NOT EXISTS bf_idx_delegation_vote_addr_id ON delegation_vote USING hash (addr_id);
+CREATE INDEX IF NOT EXISTS bf_idx_drep_registration_hash_deposit ON drep_registration (drep_hash_id, deposit, tx_id);
+CREATE INDEX IF NOT EXISTS bf_idx_delegation_vote_drep_addr_txid ON delegation_vote (drep_hash_id, addr_id, tx_id, id);
+CREATE INDEX IF NOT EXISTS bf_idx_stake_deregistration_addr_txid ON stake_deregistration (addr_id, tx_id);
+CREATE INDEX IF NOT EXISTS bf_idx_drep_hash_raw_has_script ON drep_hash (raw, has_script);
+CREATE INDEX IF NOT EXISTS bf_idx_tx_out_unspent_covering ON tx_out (stake_address_id) INCLUDE (value) WHERE consumed_by_tx_id IS NULL;
+CREATE INDEX IF NOT EXISTS bf_idx_reward_addr_epoch_covering ON reward (addr_id, spendable_epoch) INCLUDE (amount);
+CREATE UNIQUE INDEX IF NOT EXISTS bf_u_idx_tx_in_outref_covering ON public.tx_in (tx_out_id, tx_out_index) INCLUDE (tx_in_id);
+CREATE INDEX IF NOT EXISTS bf_idx_tx_out_stakeaddr_covering ON public.tx_out (stake_address_id) INCLUDE (tx_id, index);
+CREATE INDEX IF NOT EXISTS bf_idx_tx_id_covering ON public.tx (id) INCLUDE (block_id, block_index, hash);
 
 -- https://github.com/IntersectMBO/cardano-db-sync/issues/1349#issuecomment-1416017488
 CREATE UNIQUE INDEX IF NOT EXISTS unique_ada_pots ON ada_pots USING btree (block_id);

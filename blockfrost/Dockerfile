@@ -1,8 +1,8 @@
 FROM docker.io/debian:stable-20260112-slim AS build
 
-ARG BLOCKFROST_BACKEND_RYO="${BLOCKFROST_BACKEND_RYO:-5.0.0}"
+ARG BLOCKFROST_BACKEND_RYO="${BLOCKFROST_BACKEND_RYO:-6.1.0}"
 ARG CARDANO_CLI_VERSION="${CARDANO_CLI_VERSION:-10.11.1.0}"
-ARG NODEJS_MAJOR_VERSION="${NODEJS_MAJOR_VERSION:-20}"
+ARG NODEJS_MAJOR_VERSION="${NODEJS_MAJOR_VERSION:-24}"
 ARG PROCESS_EXPORTER_VERSION="${PROCESS_EXPORTER_VERSION:-0.8.7}"
 
 ENV TZ="UTC"
@@ -19,7 +19,7 @@ RUN apt update && \
 
 # nodejs
 
-COPY --chown=root:root blockfrost/gpg/nodesource.gpg /etc/apt/trusted.gpg.d/nodesource.asc
+COPY --chown=root:root gpg/nodesource.gpg /etc/apt/trusted.gpg.d/nodesource.asc
 RUN echo "deb https://deb.nodesource.com/node_${NODEJS_MAJOR_VERSION}.x nodistro main" >/etc/apt/sources.list.d/nodesource.list
 
 RUN apt update && \
