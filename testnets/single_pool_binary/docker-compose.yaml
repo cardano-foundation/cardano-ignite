@@ -17,13 +17,13 @@ x-cardano_node_10_5_1: &cardano_node_10_5_1
     args:
       CARDANO_NODE_VERSION: "10.5.1"
 
-x-cardano_node_10_5_3: &cardano_node_10_5_3
-  image: ${testnet}-10.5.3:latest
+x-cardano_node_10_5_4: &cardano_node_10_5_4
+  image: ${testnet}-10.5.4:latest
   build:
     context: "../../"
     dockerfile: "cardano-node/Dockerfile.binary"
     args:
-      CARDANO_NODE_VERSION: "10.5.3"
+      CARDANO_NODE_VERSION: "10.5.4"
 
 x-env: &env
   POOL_ID: "0" # Placeholder required for override
@@ -31,7 +31,7 @@ x-env: &env
 
 services:
   p1:
-    <<: [*base, *cardano_node_10_5_3]
+    <<: [*base, *cardano_node_10_5_4]
     container_name: p1
     hostname: p1.example
     volumes:
@@ -84,7 +84,7 @@ services:
   # Client 1
   # Used by cardano-db-sync
   c1:
-    <<: [*base, *cardano_node_10_5_3]
+    <<: [*base, *cardano_node_10_5_4]
     container_name: c1
     hostname: c1.example
     volumes:
