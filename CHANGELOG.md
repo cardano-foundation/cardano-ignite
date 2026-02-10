@@ -1,3 +1,14 @@
+
+## 0.1.2 -- 2026-02-10
+
+### Updated
+
+- Updated cardano-node 10.5.3 instances to 10.5.4
+
+### Fixed
+
+- Workaround for SHA-1 preimage nodejs issue
+
 ## 0.1.1 -- 2026-01-28
 
 ### Added
