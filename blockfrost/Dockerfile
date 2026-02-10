@@ -19,7 +19,11 @@ RUN apt update && \
 
 # nodejs
 
-COPY --chown=root:root gpg/nodesource.gpg /etc/apt/trusted.gpg.d/nodesource.asc
+# XXX
+# Lets give give sha1 one more year. Without this the nodejs step will fail.
+RUN sed -i 's/sha1.second_preimage_resistance.*/sha1.second_preimage_resistance = 2027-01-01/' /usr/share/apt/default-sequoia.config
+
+COPY --chown=root:root blockfrost/gpg/nodesource.gpg /etc/apt/trusted.gpg.d/nodesource.asc
 RUN echo "deb https://deb.nodesource.com/node_${NODEJS_MAJOR_VERSION}.x nodistro main" >/etc/apt/sources.list.d/nodesource.list
 
 RUN apt update && \
