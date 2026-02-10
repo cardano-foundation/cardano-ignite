@@ -99,6 +99,35 @@ RUN cabal update && \
 RUN cabal install exe:tx-generator --disable-test --install-method=copy \
       --installdir=/usr/local/bin --overwrite-policy=always
 
+# dmq-node
+
+ARG WITH_DMQ_NODE=0
+ARG DMQ_NODE_VERSION="${DMQ_NODE_VERSION:-karknu/cardano-magic}"
+ARG DMQ_NODE_REPO="${DMQ_NODE_REPO:-https://github.com/IntersectMBO/dmq-node.git}"
+
+RUN if [ "$WITH_DMQ_NODE" = "1" ]; then \
+        set -eux; \
+        git clone --branch main ${DMQ_NODE_REPO} /usr/local/src/dmq-node; \
+        cd /usr/local/src/dmq-node; \
+        git fetch --all --recurse-submodules --tags && \
+        git checkout ${DMQ_NODE_VERSION}; \
+        echo "package *\n\
+  ghc-options: +RTS -A128m -n2m -RTS\n\
+\n\
+jobs: \$ncpus\n\
+semaphore: True" > cabal.project.local; \
+        cd dmq-node; \
+        cabal update && \
+        cabal install exe:dmq-node --disable-test --install-method=copy \
+          --installdir=/usr/local/bin --overwrite-policy=always; \
+    else \
+        echo "Skipping dmq-node build (WITH_DMQ=0) -> creating dummy binary"; \
+        mkdir -p /usr/local/bin; \
+        echo "#!/bin/sh\\n echo \"dmq-node is disabled in this image\"; exit 0" \
+          > /usr/local/bin/dmq-node; \
+        chmod +x /usr/local/bin/dmq-node; \
+    fi
+
 # process_exporter
 
 RUN install --directory --owner=root --group=root --mode=0755 /usr/local/src/process_exporter
@@ -172,6 +201,7 @@ RUN ldconfig
 
 COPY --from=build --chown=root:root /usr/local/bin/cardano-cli /usr/local/bin/cardano-cli
 COPY --from=build --chown=root:root /usr/local/bin/cardano-node /usr/local/bin/cardano-node
+COPY --from=build --chown=root:root /usr/local/bin/dmq-node /usr/local/bin/dmq-node
 COPY --from=build --chown=root:root /usr/local/bin/tx-generator /usr/local/bin/tx-generator
 COPY --from=build --chown=root:root /usr/local/bin/node_exporter /usr/local/bin/node_exporter
 COPY --from=build --chown=root:root /usr/local/bin/process_exporter /usr/local/bin/process_exporter
@@ -186,7 +216,8 @@ RUN install --directory --owner=root --group=root --mode=0755 /opt/cardano-node 
     install --directory --owner=cardano --group=cardano --mode=0750 /opt/cardano-node/log && \
     install --directory --owner=cardano --group=cardano --mode=0750 /opt/cardano-node/pools && \
     install --directory --owner=cardano --group=cardano --mode=0750 /opt/tx-generator/data && \
-    install --directory --owner=cardano --group=cardano --mode=0750 /opt/tx-generator/scripts-fallback/
+    install --directory --owner=cardano --group=cardano --mode=0750 /opt/tx-generator/scripts-fallback/ && \
+    install --directory --owner=cardano --group=cardano --mode=0750 /opt/dmq-node/
 
 COPY --from=testnet_builder --chown=cardano:cardano /tmp/testnet/pools /opt/cardano-node/pools
 COPY --from=testnet_builder --chown=cardano:cardano /tmp/testnet/utxos /opt/cardano-node/utxos
