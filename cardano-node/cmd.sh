@@ -283,6 +283,16 @@ relay_config_topology_json() {
     }
   ],
   "publicRoots": [],
+  "bootstrapPeers": [
+    {
+      "address": "p1.example",
+      "port": 3001
+    },
+    {
+      "address": "p2.example",
+      "port": 3001
+    }
+  ],
   "useLedgerAfterSlot": 0
 }
 EOF
@@ -317,6 +327,17 @@ EOF
     }
   ],
   "publicRoots": [],
+  "bootstrapPeers": [
+    {
+      "address": "p1.example",
+      "port": 3001
+    },
+    {
+      "address": "p2.example",
+      "port": 3001
+    }
+  ],
+
   "useLedgerAfterSlot": 0
 }
 EOF
@@ -341,6 +362,17 @@ privaterelay_config_topology_json() {
     }
   ],
   "publicRoots": [],
+  "bootstrapPeers": [
+    {
+      "address": "p1.example",
+      "port": 3001
+    },
+    {
+      "address": "p2.example",
+      "port": 3001
+    }
+  ],
+
   "useLedgerAfterSlot": 0
 }
 EOF
@@ -355,6 +387,17 @@ client_config_topology_json() {
   "localRoots": [
   ],
     "publicRoots": [],
+  "bootstrapPeers": [
+    {
+      "address": "p1.example",
+      "port": 3001
+    },
+    {
+      "address": "p2.example",
+      "port": 3001
+    }
+  ],
+
     "useLedgerAfterSlot": 0
 }
 EOF
@@ -469,6 +512,7 @@ assemble_command() {
     cmd+=(--config ${CONFIG_JSON})
     cmd+=(--port ${PORT})
     cmd+=(--topology ${CONFIG_PATH}/topology.json)
+    cmd+=(+RTS -N4 -RTS)
 }
 
 # Establish run order
