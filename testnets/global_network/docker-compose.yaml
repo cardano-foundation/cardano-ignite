@@ -27,15 +27,13 @@ x-cardano_node_10_5_4: &cardano_node_10_5_4
     args:
       CARDANO_NODE_REF: "10.5.4"
 
-# 10.6.1 is a prelease with known bugs, so not used
-# by any nodes by default.
-x-cardano_node_10_6_1: &cardano_node_10_6_1
-  image: ${testnet}-10.6.1:latest
+x-cardano_node_10_6_2: &cardano_node_10_6_2
+  image: ${testnet}-10.6.2:latest
   build:
     context: "../../"
     dockerfile: "cardano-node/Dockerfile.source"
     args:
-      CARDANO_NODE_REF: "10.6.1"
+      CARDANO_NODE_REF: "10.6.2"
 
 x-base_eu: &base_eu
   <<: *base
@@ -273,7 +271,7 @@ services:
 
   # Block Producer
   p2bp:
-    <<: [*base_eu, *cardano_node_10_5_4]
+    <<: [*base_eu, *cardano_node_10_6_2]
     container_name: p2bp
     hostname: p2bp.example
     volumes:
@@ -290,7 +288,7 @@ services:
 
   # Relay
   p2r1:
-    <<: [*base_eu, *cardano_node_10_5_4]
+    <<: [*base_eu, *cardano_node_10_6_2]
     container_name: p2r1
     hostname: p2r1.example
     volumes:
@@ -307,7 +305,7 @@ services:
 
   # Relay
   p2r2:
-    <<: [*base_eu, *cardano_node_10_5_4]
+    <<: [*base_eu, *cardano_node_10_6_2]
     container_name: p2r2
     hostname: p2r2.example
     volumes:
@@ -324,7 +322,7 @@ services:
 
   # Relay
   p2r3:
-    <<: [*base_eu, *cardano_node_10_5_4]
+    <<: [*base_eu, *cardano_node_10_6_2]
     container_name: p2r3
     hostname: p2r3.example
     volumes:
