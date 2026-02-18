@@ -1,5 +1,5 @@
-ARG TESTNET_BUILDER_IMAGE
-ARG HASKELL_BUILDER_IMAGE
+ARG TESTNET_BUILDER_IMAGE=scratch
+ARG HASKELL_BUILDER_IMAGE=scratch
 
 #---------------------------------------------------------------------
 

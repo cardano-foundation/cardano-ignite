@@ -5,13 +5,13 @@ ARG BASE_IMAGE=docker.io/debian:stable-20260112-slim
 FROM ${BASE_IMAGE} AS haskell-builder
 
 # ── Common ARGs (keep the defaults from the originals) ──
-ARG BLST_VERSION="${BLST_VERSION:-0.3.14}"
-ARG JOBS="${JOBS:-8}"
-ARG LIBSODIUM_VERSION="${LIBSODIUM_VERSION:-dbb48cc}"
-ARG SECP256K1_VERSION="${SECP256K1_VERSION:-ac83be33}"
-ARG BOOTSTRAP_HASKELL_CABAL_VERSION="${BOOTSTRAP_HASKELL_CABAL_VERSION:-3.14.2.0}"
-ARG BOOTSTRAP_HASKELL_GHC_VERSION="${BOOTSTRAP_HASKELL_GHC_VERSION:-9.6.7}"
-ARG BOOTSTRAP_HASKELL_GHCUP_VERSION="${BOOTSTRAP_HASKELL_GHCUP_VERSION:-0.1.50.2}"
+ARG BLST_VERSION=0.3.14
+ARG JOBS=8
+ARG LIBSODIUM_VERSION=dbb48cc
+ARG SECP256K1_VERSION=ac83be33
+ARG BOOTSTRAP_HASKELL_CABAL_VERSION=3.14.2.0
+ARG BOOTSTRAP_HASKELL_GHC_VERSION=9.6.7
+ARG BOOTSTRAP_HASKELL_GHCUP_VERSION=0.1.50.2
 ENV TZ="UTC"
 
 # ── Timezone ──
@@ -71,8 +71,8 @@ RUN git clone --branch master https://github.com/supranational/blst.git && \
     mv bindings/blst.h bindings/blst.hpp bindings/blst_aux.h /usr/local/include/ && \
     mv libblst.a /usr/local/lib
 
-ENV LD_LIBRARY_PATH="/usr/local/lib:$LD_LIBRARY_PATH" \
-    PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:$PKG_CONFIG_PATH"
+ENV LD_LIBRARY_PATH="/usr/local/lib" \
+    PKG_CONFIG_PATH="/usr/local/lib/pkgconfig"
 
 # ── GHCup (bootstrap Haskell toolchain) ──
 RUN curl -L https://downloads.haskell.org/~ghcup/${BOOTSTRAP_HASKELL_GHCUP_VERSION}/x86_64-linux-ghcup-${BOOTSTRAP_HASKELL_GHCUP_VERSION} \
