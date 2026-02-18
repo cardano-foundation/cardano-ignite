@@ -1,4 +1,4 @@
-ARG TESTNET_BUILDER_IMAGE=${TESTNET_BUILDER_IMAGE:-}
+ARG TESTNET_BUILDER_IMAGE=scratch
 
 #---------------------------------------------------------------------
 
