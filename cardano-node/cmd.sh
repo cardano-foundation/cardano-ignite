@@ -25,6 +25,8 @@ POOL_ID="${POOL_ID:-}"
 PORT="${PORT:-3001}"
 PROMETHEUS_LISTEN="${PROMETHEUS_LISTEN:-0.0.0.0}"
 PROMETHEUS_PORT="${PROMETHEUS_PORT:-12798}"
+PROFILING="${PROFILING:-}"
+SHUTDOWN_ON_BLOCK="${SHUTDOWN_ON_BLOCK:-}"
 SYSTEM_START="${SYSTEM_START:-$(date -d "@$(( ( $(date +%s) / 180 ) * 180 ))" +%Y-%m-%dT%H:%M:00Z)}"
 TYPE="${TYPE:-bprelay}"
 USE_LEDGER_AFTER_SLOT="${USE_LEDGER_AFTER_SLOT:-0}"
@@ -469,6 +471,24 @@ assemble_command() {
     cmd+=(--config ${CONFIG_JSON})
     cmd+=(--port ${PORT})
     cmd+=(--topology ${CONFIG_PATH}/topology.json)
+
+    local rts_args=()
+    if [ -n "${PROFILING}" ]; then
+        if /usr/local/bin/cardano-node +RTS -p -RTS --help >/dev/null 2>&1; then
+            local profile_tag
+            profile_tag="$(uname -n | cut -d. -f1)"
+            rts_args+=("-p" "-po/opt/cardano-node/log/cardano-node-${profile_tag}")
+        else
+            echo "PROFILING set but cardano-node was not built with profiling; ignoring RTS profiling flags." >&2
+        fi
+    fi
+    if [ ${#rts_args[@]} -gt 0 ]; then
+        cmd+=(+RTS "${rts_args[@]}" -RTS)
+    fi
+
+    if [ -n "${SHUTDOWN_ON_BLOCK}" ] && [ "${TYPE,,}" != "txg" ]; then
+        cmd+=(--shutdown-on-block-synced ${SHUTDOWN_ON_BLOCK})
+    fi
 }
 
 # Establish run order
@@ -501,7 +521,21 @@ main() {
     start_process_exporter &
     localroot_edges &
     assemble_command
+    set +e
     "${cmd[@]}"
+    node_exit_code=$?
+    set -e
+
+    if [ -n "${SHUTDOWN_ON_BLOCK}" ] && [ "${node_exit_code}" -eq 0 ]; then
+        echo "cardano-node exited (code ${node_exit_code}); SHUTDOWN_ON_BLOCK set, restarting without shutdown-on-block."
+        SHUTDOWN_ON_BLOCK=""
+	PROFILING=""
+        assemble_command
+        "${cmd[@]}"
+    else
+        exit ${node_exit_code}
+    fi
+
 }
 
 main

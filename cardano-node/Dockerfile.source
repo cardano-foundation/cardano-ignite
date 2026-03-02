@@ -60,6 +60,8 @@ RUN cabal update && \
 
 ARG CARDANO_NODE_REF="${CARDANO_NODE_REF:-10.5.4}"
 ARG CARDANO_NODE_REPO="${CARDANO_NODE_REPO:-https://github.com/IntersectMBO/cardano-node.git}"
+ARG PROFILING
+ENV PROFILING=${PROFILING}
 
 WORKDIR /usr/local/src
 RUN git clone --branch master ${CARDANO_NODE_REPO}
@@ -91,7 +93,11 @@ semaphore: True" > /usr/local/src/cardano-node/cabal.project.local
 WORKDIR /usr/local/src/cardano-node/cardano-node
 
 RUN cabal update && \
-    cabal install exe:cardano-node --disable-test --install-method=copy \
+    extra_flags="" && \
+    if [ -n "${PROFILING}" ]; then \
+      extra_flags="${extra_flags} --enable-profiling"; \
+    fi && \
+    cabal install exe:cardano-node --disable-test ${extra_flags} --install-method=copy \
       --installdir=/usr/local/bin --overwrite-policy=always
 
 # tx-generator

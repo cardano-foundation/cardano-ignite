@@ -10,24 +10,29 @@ x-base: &base
       loki-retries: "5"
 
 x-cardano_node_10_5_1: &cardano_node_10_5_1
-  image: ${testnet}-10.5.1:latest
+  image: ${testnet}-10.5.1-prof${PROFILING:-0}:latest
   build:
     context: "../../"
     dockerfile: "cardano-node/Dockerfile.binary"
     args:
       CARDANO_NODE_VERSION: "10.5.1"
+      TESTNET_BUILDER_IMAGE: ${TESTNET_BUILDER_IMAGE}
 
 x-cardano_node_10_5_4: &cardano_node_10_5_4
-  image: ${testnet}-10.5.4:latest
+  image: ${testnet}-10.5.4-prof${PROFILING:-0}:latest
   build:
     context: "../../"
     dockerfile: "cardano-node/Dockerfile.binary"
     args:
       CARDANO_NODE_VERSION: "10.5.4"
+      TESTNET_BUILDER_IMAGE: ${TESTNET_BUILDER_IMAGE}
 
 x-env: &env
   POOL_ID: "0" # Placeholder required for override
   SYSTEM_START: ${SYSTEM_START:-}
+  NO_INTERPOOL_LOCALROOTS: ${NO_INTERPOOL_LOCALROOTS:-false}
+  PROFILING: ${PROFILING:-}
+  SHUTDOWN_ON_BLOCK: ${SHUTDOWN_ON_BLOCK:-}
 
 services:
   p1:
