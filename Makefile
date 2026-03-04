@@ -7,6 +7,8 @@ export DOCKER_DEFAULT_PLATFORM?=linux/amd64
 export DOCKER_BUILDKIT=1
 export COMPOSE_DOCKER_CLI_BUILD=1
 
+PROFILING ?= 0
+
 # Determine and set the parent network interface
 HOST_INTERFACE_SETUP = \
     if [ -z "$${HOST_INTERFACE+x}" ]; then \
@@ -24,6 +26,8 @@ help:
 	@echo
 	@echo "Arguments:"
 	@printf "  \033[34m%-30s\033[0m %s\n" testnet "Testnet directory name (Example: simple_network_binary)"
+	@printf "  \033[34m%-30s\033[0m %s\n" PROFILING "Set to enable GHC profiling when building cardano-node (Example: PROFILING=1)"
+	@printf "  \033[34m%-30s\033[0m %s\n" SHUTDOWN_ON_BLOCK "Shut down cardano-node after syncing to a block (Example: SHUTDOWN_ON_BLOCK=123456)"
 	@echo
 	@echo "Examples:"
 	@printf "  \033[34mBuild and Start\033[0m\n"
@@ -74,8 +78,16 @@ testnets/%/prometheus/prometheus.yml: scripts/prometheus_targets.sh testnets/%/d
 testnets/%/.env.tmp: TESTNET
 	export SYSTEM_START=$$(date -u +'%Y-%m-%dT%H:%M:%SZ') \
 	&& echo "SYSTEM_START=$${SYSTEM_START}" > testnets/$*/.env.tmp \
+	&& echo "TESTNET_BUILDER_IMAGE=$*-testnet_builder" >> testnets/$*/.env.tmp \
+	&& echo "HASKELL_BUILDER_IMAGE=$*-haskell_builder" >> testnets/$*/.env.tmp \
 	&& if [ "$${NO_INTERPOOL_LOCALROOTS+set}" = "set" ]; then \
 		echo "NO_INTERPOOL_LOCALROOTS=$${NO_INTERPOOL_LOCALROOTS}" >> testnets/$*/.env.tmp; \
+	fi \
+	&& if [ "$${PROFILING+set}" = "set" ]; then \
+		echo "PROFILING=$${PROFILING}" >> testnets/$*/.env.tmp; \
+	fi \
+	&& if [ "$${SHUTDOWN_ON_BLOCK+set}" = "set" ]; then \
+		echo "SHUTDOWN_ON_BLOCK=$${SHUTDOWN_ON_BLOCK}" >> testnets/$*/.env.tmp; \
 	fi
 
 build: TESTNET prerequisites testnets/${testnet}/graph_nodes.sql testnets/${testnet}/coredns/example.zone testnets/${testnet}/prometheus/prometheus.yml ## Build testnet
@@ -84,7 +96,8 @@ build: TESTNET prerequisites testnets/${testnet}/graph_nodes.sql testnets/${test
 	docker build -t ${testnet}-testnet_builder -f testnet-generation-tool/Dockerfile . && \
 	docker build -t ${testnet}-haskell_builder -f haskell-builder/Dockerfile . && \
 	cd testnets/${testnet} && \
-	docker compose --profile build build --build-arg GRAPHNODES="testnets/${testnet}/graph_nodes.sql" --build-arg TESTNET_BUILDER_IMAGE="${testnet}-testnet_builder" --build-arg HASKELL_BUILDER_IMAGE="${testnet}-haskell_builder"
+	TESTNET_BUILDER_IMAGE="${testnet}-testnet_builder" HASKELL_BUILDER_IMAGE="${testnet}-haskell_builder" \
+	docker compose --profile build build --build-arg GRAPHNODES="testnets/${testnet}/graph_nodes.sql" --build-arg TESTNET_BUILDER_IMAGE="${testnet}-testnet_builder" --build-arg HASKELL_BUILDER_IMAGE="${testnet}-haskell_builder" --build-arg PROFILING=$(PROFILING)
 
 cibuild: TESTNET prerequisites testnets/${testnet}/graph_nodes.sql testnets/${testnet}/coredns/example.zone testnets/${testnet}/prometheus/prometheus.yml ## Build testnet
 	ln -snf testnets/${testnet}/testnet.yaml .testnet.yaml && \
@@ -94,7 +107,8 @@ cibuild: TESTNET prerequisites testnets/${testnet}/graph_nodes.sql testnets/${te
 	docker buildx build -t ${testnet}-haskell_builder -f haskell-builder/Dockerfile --load . && \
 	docker buildx use default && \
 	cd testnets/${testnet} && \
-	docker compose --profile build build --build-arg GRAPHNODES="testnets/${testnet}/graph_nodes.sql" --build-arg TESTNET_BUILDER_IMAGE="${testnet}-testnet_builder" --build-arg HASKELL_BUILDER_IMAGE="${testnet}-haskell_builder"
+	TESTNET_BUILDER_IMAGE="${testnet}-testnet_builder" HASKELL_BUILDER_IMAGE="${testnet}-haskell_builder" \
+	docker compose --profile build build --build-arg GRAPHNODES="testnets/${testnet}/graph_nodes.sql" --build-arg TESTNET_BUILDER_IMAGE="${testnet}-testnet_builder" --build-arg HASKELL_BUILDER_IMAGE="${testnet}-haskell_builder" --build-arg PROFILING=$(PROFILING)
 
 
 

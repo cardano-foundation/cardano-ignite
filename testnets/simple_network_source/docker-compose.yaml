@@ -10,24 +10,33 @@ x-base: &base
       loki-retries: "5"
 
 x-cardano_node_10_5_1: &cardano_node_10_5_1
-  image: ${testnet}-10.5.1:latest
+  image: ${testnet}-10.5.1-prof${PROFILING:-0}:latest
   build:
     context: "../../"
     dockerfile: "cardano-node/Dockerfile.source"
     args:
       CARDANO_NODE_REF: "10.5.1"
+      TESTNET_BUILDER_IMAGE: ${TESTNET_BUILDER_IMAGE}
+      HASKELL_BUILDER_IMAGE: ${HASKELL_BUILDER_IMAGE}
+      PROFILING: ${PROFILING:-}
 
 x-cardano_node_10_5_4: &cardano_node_10_5_4
-  image: ${testnet}-10.5.4:latest
+  image: ${testnet}-10.5.4-prof${PROFILING:-0}:latest
   build:
     context: "../../"
     dockerfile: "cardano-node/Dockerfile.source"
     args:
       CARDANO_NODE_REF: "10.5.4"
+      TESTNET_BUILDER_IMAGE: ${TESTNET_BUILDER_IMAGE}
+      HASKELL_BUILDER_IMAGE: ${HASKELL_BUILDER_IMAGE}
+      PROFILING: ${PROFILING:-}
 
 x-env: &env
   POOL_ID: "0" # Placeholder required for override
   SYSTEM_START: ${SYSTEM_START:-}
+  NO_INTERPOOL_LOCALROOTS: ${NO_INTERPOOL_LOCALROOTS:-false}
+  PROFILING: ${PROFILING:-}
+  SHUTDOWN_ON_BLOCK: ${SHUTDOWN_ON_BLOCK:-}
 
 services:
   p1:
@@ -148,6 +157,8 @@ services:
     build:
       context: "../../"
       dockerfile: "postgresql/Dockerfile"
+    ports:
+      - "${PSQL_HOST:-127.0.0.1}:${PSQL_PORT:-5432}:5432"
     profiles: [build, core]
 
   dbsync:
@@ -215,7 +226,7 @@ services:
     restart: unless-stopped
     command: -config.file=/etc/loki/local-config.yaml
     ports:
-      - "3100:3100"
+      - "${LOKI_HOST:-127.0.0.1}:${LOKI_PORT:-3100}:3100"
     volumes:
       - loki:/loki
     profiles: [build, core]
@@ -226,7 +237,7 @@ services:
     hostname: grafana.example
     restart: unless-stopped
     ports:
-      - "3000:3000"
+      - "${GRAFANA_HOST:-127.0.0.1}:${GRAFANA_PORT:-3000}:3000"
     volumes:
       - grafana:/var/lib/grafana
       - ../../grafana/provisioning:/etc/grafana/provisioning

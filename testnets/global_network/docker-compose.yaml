@@ -12,28 +12,37 @@ x-base: &base
       loki-retries: "5"
 
 x-cardano_node_10_5_1: &cardano_node_10_5_1
-  image: ${testnet}-10.5.1:latest
+  image: ${testnet}-10.5.1-prof${PROFILING:-0}:latest
   build:
     context: "../../"
     dockerfile: "cardano-node/Dockerfile.source"
     args:
       CARDANO_NODE_REF: "10.5.1"
+      TESTNET_BUILDER_IMAGE: ${TESTNET_BUILDER_IMAGE}
+      HASKELL_BUILDER_IMAGE: ${HASKELL_BUILDER_IMAGE}
+      PROFILING: ${PROFILING:-}
 
 x-cardano_node_10_5_4: &cardano_node_10_5_4
-  image: ${testnet}-10.5.4:latest
+  image: ${testnet}-10.5.4-prof${PROFILING:-0}:latest
   build:
     context: "../../"
     dockerfile: "cardano-node/Dockerfile.source"
     args:
       CARDANO_NODE_REF: "10.5.4"
+      TESTNET_BUILDER_IMAGE: ${TESTNET_BUILDER_IMAGE}
+      HASKELL_BUILDER_IMAGE: ${HASKELL_BUILDER_IMAGE}
+      PROFILING: ${PROFILING:-}
 
 x-cardano_node_10_6_2: &cardano_node_10_6_2
-  image: ${testnet}-10.6.2:latest
+  image: ${testnet}-10.6.2-prof${PROFILING:-0}:latest
   build:
     context: "../../"
     dockerfile: "cardano-node/Dockerfile.source"
     args:
       CARDANO_NODE_REF: "10.6.2"
+      TESTNET_BUILDER_IMAGE: ${TESTNET_BUILDER_IMAGE}
+      HASKELL_BUILDER_IMAGE: ${HASKELL_BUILDER_IMAGE}
+      PROFILING: ${PROFILING:-}
 
 x-base_eu: &base_eu
   <<: *base
@@ -828,7 +837,7 @@ services:
     dns:
       - 172.16.7.2
     ports:
-      - "${PSQL_HOST:-5432}:5432"
+      - "${PSQL_HOST:-127.0.0.1}:${PSQL_PORT:-5432}:5432"
     profiles: [build, core, mgmt]
 
   dbsync:
@@ -926,7 +935,7 @@ services:
     restart: unless-stopped
     command: -config.file=/etc/loki/local-config.yaml
     ports:
-      - "${LOKI_HOST:-3100}:3100"
+      - "${LOKI_HOST:-127.0.0.1}:${LOKI_PORT:-3100}:3100"
     volumes:
       - loki:/loki
     networks:
@@ -943,7 +952,7 @@ services:
     hostname: grafana.example
     restart: unless-stopped
     ports:
-      - "${GRAFANA_HOST:-3000}:3000"
+      - "${GRAFANA_HOST:-127.0.0.1}:${GRAFANA_PORT:-3000}:3000"
     volumes:
       - grafana:/var/lib/grafana
       - ../../grafana/provisioning:/etc/grafana/provisioning
