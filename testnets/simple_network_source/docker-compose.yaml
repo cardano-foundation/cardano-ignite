@@ -157,6 +157,8 @@ services:
     build:
       context: "../../"
       dockerfile: "postgresql/Dockerfile"
+    ports:
+      - "${PSQL_HOST:-127.0.0.1}:${PSQL_PORT:-5432}:5432"
     profiles: [build, core]
 
   dbsync:
@@ -224,7 +226,7 @@ services:
     restart: unless-stopped
     command: -config.file=/etc/loki/local-config.yaml
     ports:
-      - "3100:3100"
+      - "${LOKI_HOST:-127.0.0.1}:${LOKI_PORT:-3100}:3100"
     volumes:
       - loki:/loki
     profiles: [build, core]
@@ -235,7 +237,7 @@ services:
     hostname: grafana.example
     restart: unless-stopped
     ports:
-      - "3000:3000"
+      - "${GRAFANA_HOST:-127.0.0.1}:${GRAFANA_PORT:-3000}:3000"
     volumes:
       - grafana:/var/lib/grafana
       - ../../grafana/provisioning:/etc/grafana/provisioning
