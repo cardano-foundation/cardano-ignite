@@ -33,6 +33,17 @@ x-cardano_node_10_5_4: &cardano_node_10_5_4
       HASKELL_BUILDER_IMAGE: ${HASKELL_BUILDER_IMAGE}
       PROFILING: ${PROFILING:-}
 
+x-cardano_node_10_5_4_tx2: &cardano_node_10_5_4_tx2
+  image: ${testnet}-10.5.4_tx2-prof${PROFILING:-0}:latest
+  build:
+    context: "../../"
+    dockerfile: "cardano-node/Dockerfile.source"
+    args:
+      CARDANO_NODE_REF: "4832462bc57ea7f80f2fcc29cf7e2d063cc38059"
+      TESTNET_BUILDER_IMAGE: ${TESTNET_BUILDER_IMAGE}
+      HASKELL_BUILDER_IMAGE: ${HASKELL_BUILDER_IMAGE}
+      PROFILING: ${PROFILING:-}
+
 x-cardano_node_10_6_2: &cardano_node_10_6_2
   image: ${testnet}-10.6.2-prof${PROFILING:-0}:latest
   build:
@@ -206,7 +217,7 @@ services:
 
   # Block Producer
   p1bp:
-    <<: [*base_na, *cardano_node_10_5_1]
+    <<: [*base_na, *cardano_node_10_5_4_tx2]
     container_name: p1bp
     hostname: p1bp.example
     volumes:
@@ -224,7 +235,7 @@ services:
 
   # Relay
   p1r1:
-    <<: [*base_na, *cardano_node_10_5_1]
+    <<: [*base_na, *cardano_node_10_5_4_tx2]
     container_name: p1r1
     hostname: p1r1.example
     volumes:
@@ -242,7 +253,7 @@ services:
 
   # Relay
   p1r2:
-    <<: [*base_na, *cardano_node_10_5_1]
+    <<: [*base_na, *cardano_node_10_5_4]
     container_name: p1r2
     hostname: p1r2.example
     volumes:
@@ -260,7 +271,7 @@ services:
 
   # Relay
   p1r3:
-    <<: [*base_na, *cardano_node_10_5_1]
+    <<: [*base_na, *cardano_node_10_5_4_tx2]
     container_name: p1r3
     hostname: p1r3.example
     volumes:

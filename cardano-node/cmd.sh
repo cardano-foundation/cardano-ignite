@@ -31,6 +31,7 @@ SYSTEM_START="${SYSTEM_START:-$(date -d "@$(( ( $(date +%s) / 180 ) * 180 ))" +%
 TYPE="${TYPE:-bprelay}"
 USE_LEDGER_AFTER_SLOT="${USE_LEDGER_AFTER_SLOT:-0}"
 UTXOHD="${UTXOHD:-false}"
+TX_SUBMISSION_LOGIC_VERSION="${TX_SUBMISSION_LOGIC_VERSION:-1}"
 
 # Configuration files
 BYRON_GENESIS_JSON="${BYRON_GENESIS_JSON:-/opt/cardano-node/pools/${POOL_ID}/configs/byron-genesis.json}"
@@ -125,6 +126,9 @@ config_config_json() {
     fi
 
     jq ".EgressPollInterval = ${EGRESS_POLL_INTERVAL}" "${CONFIG_JSON}" | write_file "${CONFIG_JSON}"
+
+    jq ".TxSubmissionLogicVersion = ${TX_SUBMISSION_LOGIC_VERSION}" "${CONFIG_JSON}" | write_file "${CONFIG_JSON}"
+
 }
 
 record_edges() {
