@@ -1,8 +1,8 @@
-FROM docker.io/debian:stable-20260112-slim AS build
+FROM docker.io/debian:stable-20260223-slim AS build
 
-ARG BLOCKFROST_BACKEND_RYO="${BLOCKFROST_BACKEND_RYO:-5.0.0}"
+ARG BLOCKFROST_BACKEND_RYO="${BLOCKFROST_BACKEND_RYO:-6.2.0}"
 ARG CARDANO_CLI_VERSION="${CARDANO_CLI_VERSION:-10.11.1.0}"
-ARG NODEJS_MAJOR_VERSION="${NODEJS_MAJOR_VERSION:-20}"
+ARG NODEJS_MAJOR_VERSION="${NODEJS_MAJOR_VERSION:-24}"
 ARG PROCESS_EXPORTER_VERSION="${PROCESS_EXPORTER_VERSION:-0.8.7}"
 
 ENV TZ="UTC"
@@ -19,9 +19,8 @@ RUN apt update && \
 
 # nodejs
 
-# XXX
-# Lets give give sha1 one more year. Without this the nodejs step will fail.
-RUN sed -i 's/sha1.second_preimage_resistance.*/sha1.second_preimage_resistance = 2027-01-01/' /usr/share/apt/default-sequoia.config
+# NOTE: Update SHA1 second-preimage resistance date for Sequoia GPG library
+RUN sed -i 's@sha1.second_preimage_resistance.*@sha1.second_preimage_resistance = 2027-01-01@g' /usr/share/apt/default-sequoia.config
 
 COPY --chown=root:root blockfrost/gpg/nodesource.gpg /etc/apt/trusted.gpg.d/nodesource.asc
 RUN echo "deb https://deb.nodesource.com/node_${NODEJS_MAJOR_VERSION}.x nodistro main" >/etc/apt/sources.list.d/nodesource.list
@@ -89,7 +88,7 @@ RUN ln -s /usr/local/src/process_exporter/process-exporter-${PROCESS_EXPORTER_VE
 
 #---------------------------------------------------------------------
 
-FROM docker.io/debian:stable-20260112-slim AS main
+FROM docker.io/debian:stable-20260223-slim AS main
 
 ENV CARDANO_NODE_SOCKET_PATH="/opt/cardano-node/data/db/node.socket"
 
@@ -128,6 +127,12 @@ COPY --from=build --chown=root:root /usr/local/src/blockfrost-backend-ryo/*.json
 COPY --from=build --chown=root:root /usr/local/src/blockfrost-backend-ryo/dist /usr/local/src/blockfrost-backend-ryo/dist
 COPY --from=build --chown=root:root /usr/local/src/blockfrost-backend-ryo/genesis /usr/local/src/blockfrost-backend-ryo/genesis
 COPY --from=build --chown=root:root /usr/local/src/blockfrost-backend-ryo/node_modules /usr/local/src/blockfrost-backend-ryo/node_modules
+
+RUN install --directory --owner=root --group=root --mode=0755 /usr/local/etc/blockfrost-backend-ryo && \
+    install --directory --owner=root --group=root --mode=0755 /usr/local/etc/blockfrost-backend-ryo/genesis
+
+RUN ln -s /opt/cardano-node/pools/1/configs/shelley-genesis.json /usr/local/etc/blockfrost-backend-ryo/genesis/genesis.json
+RUN ln -s /opt/cardano-node/pools/1/configs/byron-genesis.json /usr/local/etc/blockfrost-backend-ryo/genesis/byron_genesis.json
 
 RUN groupadd --gid 10000 cardano && \
     useradd --comment 'cardano' --create-home --gid 10000 --password '!' --shell '/bin/bash' --uid 10000 cardano

@@ -1,7 +1,6 @@
-FROM docker.io/debian:stable-20260112-slim AS testnet_builder
+FROM docker.io/debian:stable-20260223-slim AS testnet_builder
 
-#ARG UV_VERSION="${UV_VERSION:-0.9.1}"
-ARG UV_VERSION="0.9.27"
+ARG UV_VERSION="${UV_VERSION:-0.10.8}"
 ARG TESTNET_GENERATION_TOOL_VERSION="v0.1.0"
 
 ENV TZ="UTC"
