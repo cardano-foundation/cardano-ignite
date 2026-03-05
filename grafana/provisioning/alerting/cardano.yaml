@@ -90,7 +90,6 @@ groups:
             __panelId__: "30"
           isPaused: false
           notification_settings:
-            receiver: grafana-default-email
         - uid: feq3uoiuj30g0c
           title: Three Second Block CDF
           condition: C
@@ -150,7 +149,6 @@ groups:
             __panelId__: "27"
           isPaused: false
           notification_settings:
-            receiver: grafana-default-email
         - uid: deq3urd9yowe8f
           title: Five Second Block CDF
           condition: C
@@ -210,7 +208,6 @@ groups:
             __panelId__: "28"
           isPaused: false
           notification_settings:
-            receiver: grafana-default-email
         - uid: feq3v5wwweu4ga
           title: Consensus
           condition: C
@@ -317,4 +314,3 @@ groups:
             __panelId__: "8"
           isPaused: false
           notification_settings:
-            receiver: grafana-default-email
