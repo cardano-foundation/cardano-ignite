@@ -95,14 +95,18 @@ WORKDIR /usr/local/src/cardano-node/cardano-node
 RUN cabal update && \
     extra_flags="" && \
     if [ -n "${PROFILING}" ]; then \
-      extra_flags="${extra_flags} --enable-profiling"; \
+      extra_flags="${extra_flags} --enable-profiling --profiling-detail=all"; \
     fi && \
     cabal install exe:cardano-node --disable-test ${extra_flags} --install-method=copy \
       --installdir=/usr/local/bin --overwrite-policy=always
 
 # tx-generator
 
-RUN cabal install exe:tx-generator --disable-test --install-method=copy \
+RUN extra_flags="" && \
+    if [ -n "${PROFILING}" ]; then \
+      extra_flags="${extra_flags} --enable-profiling --profiling-detail=all"; \
+    fi && \
+    cabal install exe:tx-generator --disable-test ${extra_flags} --install-method=copy \
       --installdir=/usr/local/bin --overwrite-policy=always
 
 # process_exporter
