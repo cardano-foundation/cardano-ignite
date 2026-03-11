@@ -39,7 +39,7 @@ x-cardano_node_10_5_4_tx2: &cardano_node_10_5_4_tx2
     context: "../../"
     dockerfile: "cardano-node/Dockerfile.source"
     args:
-      CARDANO_NODE_REF: "4832462bc57ea7f80f2fcc29cf7e2d063cc38059"
+      CARDANO_NODE_REF: "fee37a668c95f99fd105649ae957ed1385a2611c"
       TESTNET_BUILDER_IMAGE: ${TESTNET_BUILDER_IMAGE}
       HASKELL_BUILDER_IMAGE: ${HASKELL_BUILDER_IMAGE}
       PROFILING: ${PROFILING:-}
@@ -226,6 +226,7 @@ services:
     environment:
       POOL_ID: "1"
       TYPE: bp
+      TX_SUBMISSION_LOGIC_VERSION: 2
       PEER_SHARING: "false"
       EGRESS_POLL_INTERVAL: 0.001
     networks:
@@ -245,6 +246,7 @@ services:
       POOL_ID: "1"
       RELAY_ID: "1"
       TYPE: relay
+      TX_SUBMISSION_LOGIC_VERSION: 2
       EGRESS_POLL_INTERVAL: 0.001
     networks:
       net_na:
@@ -253,7 +255,7 @@ services:
 
   # Relay
   p1r2:
-    <<: [*base_na, *cardano_node_10_5_4]
+    <<: [*base_na, *cardano_node_10_5_4_tx2]
     container_name: p1r2
     hostname: p1r2.example
     volumes:
@@ -263,6 +265,7 @@ services:
       POOL_ID: "1"
       RELAY_ID: "2"
       TYPE: relay
+      TX_SUBMISSION_LOGIC_VERSION: 1
       EGRESS_POLL_INTERVAL: 0.001
     networks:
       net_na:
@@ -281,6 +284,7 @@ services:
       POOL_ID: "1"
       RELAY_ID: "3"
       TYPE: privaterelay
+      TX_SUBMISSION_LOGIC_VERSION: 1
       EGRESS_POLL_INTERVAL: 0.001
     networks:
       net_na:
@@ -291,7 +295,7 @@ services:
 
   # Block Producer
   p2bp:
-    <<: [*base_eu, *cardano_node_10_6_2]
+    <<: [*base_eu, *cardano_node_10_5_4_tx2]
     container_name: p2bp
     hostname: p2bp.example
     volumes:
@@ -300,6 +304,7 @@ services:
     environment:
       POOL_ID: "2"
       TYPE: bp
+      TX_SUBMISSION_LOGIC_VERSION: 2
       PEER_SHARING: "false"
     networks:
       net_eu:
@@ -308,7 +313,7 @@ services:
 
   # Relay
   p2r1:
-    <<: [*base_eu, *cardano_node_10_6_2]
+    <<: [*base_eu, *cardano_node_10_5_4_tx2]
     container_name: p2r1
     hostname: p2r1.example
     volumes:
@@ -318,6 +323,7 @@ services:
       POOL_ID: "2"
       RELAY_ID: "1"
       TYPE: relay
+      TX_SUBMISSION_LOGIC_VERSION: 1
     networks:
       net_eu:
         ipv4_address: 172.16.3.102
@@ -325,7 +331,7 @@ services:
 
   # Relay
   p2r2:
-    <<: [*base_eu, *cardano_node_10_6_2]
+    <<: [*base_eu, *cardano_node_10_5_4_tx2]
     container_name: p2r2
     hostname: p2r2.example
     volumes:
@@ -335,6 +341,7 @@ services:
       POOL_ID: "2"
       RELAY_ID: "2"
       TYPE: relay
+      TX_SUBMISSION_LOGIC_VERSION: 2
     networks:
       net_eu:
         ipv4_address: 172.16.3.103
@@ -342,7 +349,7 @@ services:
 
   # Relay
   p2r3:
-    <<: [*base_eu, *cardano_node_10_6_2]
+    <<: [*base_eu, *cardano_node_10_5_4_tx2]
     container_name: p2r3
     hostname: p2r3.example
     volumes:
@@ -352,6 +359,7 @@ services:
       POOL_ID: "2"
       RELAY_ID: "3"
       TYPE: privaterelay
+      TX_SUBMISSION_LOGIC_VERSION: 1
     networks:
       net_eu:
         ipv4_address: 172.16.3.104
@@ -361,7 +369,7 @@ services:
 
   # Block Producer
   p3bp:
-    <<: [*base_as, *cardano_node_10_5_4]
+    <<: [*base_as, *cardano_node_10_5_4_tx2]
     container_name: p3bp
     hostname: p3bp.example
     volumes:
@@ -370,6 +378,7 @@ services:
     environment:
       POOL_ID: "3"
       TYPE: bp
+      TX_SUBMISSION_LOGIC_VERSION: 2
       PEER_SHARING: "false"
     networks:
       net_as:
@@ -378,7 +387,7 @@ services:
 
   # Relay
   p3r1:
-    <<: [*base_as, *cardano_node_10_5_4]
+    <<: [*base_as, *cardano_node_10_5_4_tx2]
     container_name: p3r1
     hostname: p3r1.example
     volumes:
@@ -388,6 +397,7 @@ services:
       POOL_ID: "3"
       RELAY_ID: "1"
       TYPE: relay
+      TX_SUBMISSION_LOGIC_VERSION: 1
     networks:
       net_as:
         ipv4_address: 172.16.4.102
@@ -395,7 +405,7 @@ services:
 
   # Relay
   p3r2:
-    <<: [*base_as, *cardano_node_10_5_4]
+    <<: [*base_as, *cardano_node_10_5_4_tx2]
     container_name: p3r2
     hostname: p3r2.example
     volumes:
@@ -405,6 +415,7 @@ services:
       POOL_ID: "3"
       RELAY_ID: "2"
       TYPE: relay
+      TX_SUBMISSION_LOGIC_VERSION: 1
     networks:
       net_as:
         ipv4_address: 172.16.4.103
@@ -412,7 +423,7 @@ services:
 
   # Relay
   p3r3:
-    <<: [*base_as, *cardano_node_10_5_4]
+    <<: [*base_as, *cardano_node_10_5_4_tx2]
     container_name: p3r3
     hostname: p3r3.example
     volumes:
@@ -422,6 +433,7 @@ services:
       POOL_ID: "3"
       RELAY_ID: "3"
       TYPE: privaterelay
+      TX_SUBMISSION_LOGIC_VERSION: 2
     networks:
       net_as:
         ipv4_address: 172.16.4.104
@@ -431,7 +443,7 @@ services:
 
   # Block Producer
   p4bp:
-    <<: [*base_eu, *cardano_node_10_5_4]
+    <<: [*base_eu, *cardano_node_10_5_4_tx2]
     container_name: p4bp
     hostname: p4bp.example
     volumes:
@@ -440,6 +452,7 @@ services:
     environment:
       POOL_ID: "4"
       TYPE: bp
+      TX_SUBMISSION_LOGIC_VERSION: 1
       PEER_SHARING: "false"
     networks:
       net_eu:
@@ -448,7 +461,7 @@ services:
 
   # Relay
   p4r1:
-    <<: [*base_eu, *cardano_node_10_5_4]
+    <<: [*base_eu, *cardano_node_10_5_4_tx2]
     container_name: p4r1
     hostname: p4r1.example
     volumes:
@@ -458,6 +471,7 @@ services:
       POOL_ID: "4"
       RELAY_ID: "1"
       TYPE: relay
+      TX_SUBMISSION_LOGIC_VERSION: 2
     networks:
       net_eu:
         ipv4_address: 172.16.3.112
@@ -465,7 +479,7 @@ services:
 
   # Relay
   p4r2:
-    <<: [*base_eu, *cardano_node_10_5_4]
+    <<: [*base_eu, *cardano_node_10_5_4_tx2]
     container_name: p4r2
     hostname: p4r2.example
     volumes:
@@ -475,6 +489,7 @@ services:
       POOL_ID: "4"
       RELAY_ID: "2"
       TYPE: relay
+      TX_SUBMISSION_LOGIC_VERSION: 2
     networks:
       net_eu:
         ipv4_address: 172.16.3.113
@@ -482,7 +497,7 @@ services:
 
   # Relay
   p4r3:
-    <<: [*base_eu, *cardano_node_10_5_4]
+    <<: [*base_eu, *cardano_node_10_5_4_tx2]
     container_name: p4r3
     hostname: p4r3.example
     volumes:
@@ -492,6 +507,7 @@ services:
       POOL_ID: "4"
       RELAY_ID: "3"
       TYPE: privaterelay
+      TX_SUBMISSION_LOGIC_VERSION: 1
     networks:
       net_eu:
         ipv4_address: 172.16.3.114
@@ -501,7 +517,7 @@ services:
 
   # Block Producer
   p5bp:
-    <<: [*base_na, *cardano_node_10_5_4]
+    <<: [*base_na, *cardano_node_10_5_4_tx2]
     container_name: p5bp
     hostname: p5bp.example
     volumes:
@@ -510,6 +526,7 @@ services:
     environment:
       POOL_ID: "5"
       TYPE: bp
+      TX_SUBMISSION_LOGIC_VERSION: 1
       PEER_SHARING: "false"
     networks:
       net_na:
@@ -518,7 +535,7 @@ services:
 
   # Relay
   p5r1:
-    <<: [*base_na, *cardano_node_10_5_4]
+    <<: [*base_na, *cardano_node_10_5_4_tx2]
     container_name: p5r1
     hostname: p5r1.example
     volumes:
@@ -528,6 +545,7 @@ services:
       POOL_ID: "5"
       RELAY_ID: "1"
       TYPE: relay
+      TX_SUBMISSION_LOGIC_VERSION: 1
     networks:
       net_na:
         ipv4_address: 172.16.1.112
@@ -535,7 +553,7 @@ services:
 
   # Relay
   p5r2:
-    <<: [*base_na, *cardano_node_10_5_4]
+    <<: [*base_na, *cardano_node_10_5_4_tx2]
     container_name: p5r2
     hostname: p5r2.example
     volumes:
@@ -545,6 +563,7 @@ services:
       POOL_ID: "5"
       RELAY_ID: "2"
       TYPE: relay
+      TX_SUBMISSION_LOGIC_VERSION: 2
     networks:
       net_na:
         ipv4_address: 172.16.1.123
@@ -552,7 +571,7 @@ services:
 
   # Relay
   p5r3:
-    <<: [*base_na, *cardano_node_10_5_4]
+    <<: [*base_na, *cardano_node_10_5_4_tx2]
     container_name: p5r3
     hostname: p5r3.example
     volumes:
@@ -562,6 +581,7 @@ services:
       POOL_ID: "5"
       RELAY_ID: "3"
       TYPE: privaterelay
+      TX_SUBMISSION_LOGIC_VERSION: 2
     networks:
       net_na:
         ipv4_address: 172.16.1.124
@@ -571,7 +591,7 @@ services:
 
   # Block Producer
   p6bp:
-    <<: [*base_eu, *cardano_node_10_5_4]
+    <<: [*base_eu, *cardano_node_10_5_4_tx2]
     container_name: p6bp
     hostname: p6bp.example
     volumes:
@@ -580,6 +600,7 @@ services:
     environment:
       POOL_ID: "6"
       TYPE: bp
+      TX_SUBMISSION_LOGIC_VERSION: 1
       PEER_SHARING: "false"
     networks:
       net_eu:
@@ -588,7 +609,7 @@ services:
 
   # Relay
   p6r1:
-    <<: [*base_eu, *cardano_node_10_5_4]
+    <<: [*base_eu, *cardano_node_10_5_4_tx2]
     container_name: p6r1
     hostname: p6r1.example
     volumes:
@@ -598,6 +619,7 @@ services:
       POOL_ID: "6"
       RELAY_ID: "1"
       TYPE: relay
+      TX_SUBMISSION_LOGIC_VERSION: 2
     networks:
       net_eu:
         ipv4_address: 172.16.3.122
@@ -605,7 +627,7 @@ services:
 
   # Relay
   p6r2:
-    <<: [*base_eu, *cardano_node_10_5_4]
+    <<: [*base_eu, *cardano_node_10_5_4_tx2]
     container_name: p6r2
     hostname: p6r2.example
     volumes:
@@ -615,6 +637,7 @@ services:
       POOL_ID: "6"
       RELAY_ID: "2"
       TYPE: relay
+      TX_SUBMISSION_LOGIC_VERSION: 1
     networks:
       net_eu:
         ipv4_address: 172.16.3.123
@@ -622,7 +645,7 @@ services:
 
   # Relay
   p6r3:
-    <<: [*base_eu, *cardano_node_10_5_4]
+    <<: [*base_eu, *cardano_node_10_5_4_tx2]
     container_name: p6r3
     hostname: p6r3.example
     volumes:
@@ -632,6 +655,7 @@ services:
       POOL_ID: "6"
       RELAY_ID: "3"
       TYPE: privaterelay
+      TX_SUBMISSION_LOGIC_VERSION: 2
     networks:
       net_eu:
         ipv4_address: 172.16.3.124
