@@ -105,6 +105,8 @@ RUN apt update && \
         less \
         locales \
         lsof \
+        libsnappy1v5 \
+        liburing2 \
         netbase \
         netcat-openbsd \
         openssl \

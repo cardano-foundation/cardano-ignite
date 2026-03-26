@@ -11,13 +11,13 @@ x-base: &base
       loki-url: "http://127.0.0.1:3100/loki/api/v1/push"
       loki-retries: "5"
 
-x-cardano_node_10_5_1: &cardano_node_10_5_1
-  image: ${testnet}-10.5.1-prof${PROFILING:-0}:latest
+x-cardano_node_10_7_0: &cardano_node_10_7_0
+  image: ${testnet}-10.7.0-prof${PROFILING:-0}:latest
   build:
     context: "../../"
     dockerfile: "cardano-node/Dockerfile.source"
     args:
-      CARDANO_NODE_REF: "10.5.1"
+      CARDANO_NODE_REF: "10.7.0"
       TESTNET_BUILDER_IMAGE: ${TESTNET_BUILDER_IMAGE}
       HASKELL_BUILDER_IMAGE: ${HASKELL_BUILDER_IMAGE}
       PROFILING: ${PROFILING:-}
@@ -206,7 +206,7 @@ services:
 
   # Block Producer
   p1bp:
-    <<: [*base_na, *cardano_node_10_5_1]
+    <<: [*base_na, *cardano_node_10_7_0]
     container_name: p1bp
     hostname: p1bp.example
     volumes:
@@ -224,7 +224,7 @@ services:
 
   # Relay
   p1r1:
-    <<: [*base_na, *cardano_node_10_5_1]
+    <<: [*base_na, *cardano_node_10_7_0]
     container_name: p1r1
     hostname: p1r1.example
     volumes:
@@ -242,7 +242,7 @@ services:
 
   # Relay
   p1r2:
-    <<: [*base_na, *cardano_node_10_5_1]
+    <<: [*base_na, *cardano_node_10_7_0]
     container_name: p1r2
     hostname: p1r2.example
     volumes:
@@ -260,7 +260,7 @@ services:
 
   # Relay
   p1r3:
-    <<: [*base_na, *cardano_node_10_5_1]
+    <<: [*base_na, *cardano_node_10_7_0]
     container_name: p1r3
     hostname: p1r3.example
     volumes:

@@ -33,11 +33,14 @@ RUN apt-get update && \
         libgmp-dev \
         liblmdb-dev \
         libncurses-dev \
+        libsnappy-dev \
         libssl-dev \
         libsystemd-dev \
         libtinfo-dev \
         libtool \
+        liburing-dev \
         pkg-config \
+        protobuf-compiler \
         tar \
         zlib1g-dev && \
     rm -rf /var/lib/apt/lists/*
