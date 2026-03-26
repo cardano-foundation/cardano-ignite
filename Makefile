@@ -28,6 +28,7 @@ help:
 	@printf "  \033[34m%-30s\033[0m %s\n" testnet "Testnet directory name (Example: simple_network_binary)"
 	@printf "  \033[34m%-30s\033[0m %s\n" PROFILING "Set to enable GHC profiling when building cardano-node (Example: PROFILING=1)"
 	@printf "  \033[34m%-30s\033[0m %s\n" SHUTDOWN_ON_BLOCK "Shut down cardano-node after syncing to a block (Example: SHUTDOWN_ON_BLOCK=123456)"
+	@printf "  \033[34m%-30s\033[0m %s\n" SHUTDOWN_ON_SLOT "Shut down cardano-node after syncing to a slot (Example: SHUTDOWN_ON_SLOT=10000)"
 	@echo
 	@echo "Examples:"
 	@printf "  \033[34mBuild and Start\033[0m\n"
@@ -88,6 +89,9 @@ testnets/%/.env.tmp: TESTNET
 	fi \
 	&& if [ "$${SHUTDOWN_ON_BLOCK+set}" = "set" ]; then \
 		echo "SHUTDOWN_ON_BLOCK=$${SHUTDOWN_ON_BLOCK}" >> testnets/$*/.env.tmp; \
+	fi \
+	&& if [ "$${SHUTDOWN_ON_SLOT+set}" = "set" ]; then \
+		echo "SHUTDOWN_ON_SLOT=$${SHUTDOWN_ON_SLOT}" >> testnets/$*/.env.tmp; \
 	fi
 
 build: TESTNET prerequisites testnets/${testnet}/graph_nodes.sql testnets/${testnet}/coredns/example.zone testnets/${testnet}/prometheus/prometheus.yml ## Build testnet

@@ -27,11 +27,15 @@ PROMETHEUS_LISTEN="${PROMETHEUS_LISTEN:-0.0.0.0}"
 PROMETHEUS_PORT="${PROMETHEUS_PORT:-12798}"
 PROFILING="${PROFILING:-}"
 SHUTDOWN_ON_BLOCK="${SHUTDOWN_ON_BLOCK:-}"
+SHUTDOWN_ON_SLOT="${SHUTDOWN_ON_SLOT:-}"
 SYSTEM_START="${SYSTEM_START:-$(date -d "@$(( ( $(date +%s) / 180 ) * 180 ))" +%Y-%m-%dT%H:%M:00Z)}"
 TYPE="${TYPE:-bprelay}"
 USE_LEDGER_AFTER_SLOT="${USE_LEDGER_AFTER_SLOT:-0}"
 UTXOHD="${UTXOHD:-false}"
 TX_SUBMISSION_LOGIC_VERSION="${TX_SUBMISSION_LOGIC_VERSION:-1}"
+MEMPOOL_DEBUG="${MEMPOOL_DEBUG:-}"
+FORGE_DEBUG="${FORGE_DEBUG:-}"
+TX_DEBUG="${TX_DEBUG:-}"
 
 # Configuration files
 BYRON_GENESIS_JSON="${BYRON_GENESIS_JSON:-/opt/cardano-node/pools/${POOL_ID}/configs/byron-genesis.json}"
@@ -73,6 +77,12 @@ EOF
 verify_environment_variables() {
     if [ -z "${POOL_ID}" ]; then
         echo "POOL_ID not defined, exiting..."
+        sleep 60
+        exit 1
+    fi
+
+    if [ -n "${SHUTDOWN_ON_BLOCK}" ] && [ -n "${SHUTDOWN_ON_SLOT}" ]; then
+        echo "SHUTDOWN_ON_BLOCK and SHUTDOWN_ON_SLOT are mutually exclusive, exiting..."
         sleep 60
         exit 1
     fi
@@ -128,6 +138,30 @@ config_config_json() {
     jq ".EgressPollInterval = ${EGRESS_POLL_INTERVAL}" "${CONFIG_JSON}" | write_file "${CONFIG_JSON}"
 
     jq ".TxSubmissionLogicVersion = ${TX_SUBMISSION_LOGIC_VERSION}" "${CONFIG_JSON}" | write_file "${CONFIG_JSON}"
+
+    if [ -n "${TX_DEBUG}" ]; then
+        jq '
+            (.options //= {}) |
+            (.options.mapSeverity //= {}) |
+            .options.mapSeverity."cardano.node.TxInbound" = "Debug"
+        ' "${CONFIG_JSON}" | write_file "${CONFIG_JSON}"
+    fi
+
+    if [ -n "${MEMPOOL_DEBUG}" ]; then
+        jq '
+            (.options //= {}) |
+            (.options.mapSeverity //= {}) |
+            .options.mapSeverity."cardano.node.Mempool" = "Debug"
+        ' "${CONFIG_JSON}" | write_file "${CONFIG_JSON}"
+    fi
+
+    if [ -n "${FORGE_DEBUG}" ]; then
+        jq '
+            (.options //= {}) |
+            (.options.mapSeverity //= {}) |
+            .options.mapSeverity."cardano.node.Forge" = "Debug"
+        ' "${CONFIG_JSON}" | write_file "${CONFIG_JSON}"
+    fi
 
 }
 
@@ -493,6 +527,10 @@ assemble_command() {
     if [ -n "${SHUTDOWN_ON_BLOCK}" ] && [ "${TYPE,,}" != "txg" ]; then
         cmd+=(--shutdown-on-block-synced ${SHUTDOWN_ON_BLOCK})
     fi
+
+    if [ -n "${SHUTDOWN_ON_SLOT}" ] && [ "${TYPE,,}" != "txg" ]; then
+        cmd+=(--shutdown-on-slot-synced ${SHUTDOWN_ON_SLOT})
+    fi
 }
 
 # Establish run order
@@ -530,10 +568,11 @@ main() {
     node_exit_code=$?
     set -e
 
-    if [ -n "${SHUTDOWN_ON_BLOCK}" ] && [ "${node_exit_code}" -eq 0 ]; then
-        echo "cardano-node exited (code ${node_exit_code}); SHUTDOWN_ON_BLOCK set, restarting without shutdown-on-block."
+    if [ "${node_exit_code}" -eq 0 ] && { [ -n "${SHUTDOWN_ON_BLOCK}" ] || [ -n "${SHUTDOWN_ON_SLOT}" ]; }; then
+        echo "cardano-node exited (code ${node_exit_code}); shutdown-on-sync set, restarting without shutdown-on-sync."
         SHUTDOWN_ON_BLOCK=""
-	PROFILING=""
+        SHUTDOWN_ON_SLOT=""
+        PROFILING=""
         assemble_command
         "${cmd[@]}"
     else
