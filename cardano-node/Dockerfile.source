@@ -96,6 +96,8 @@ RUN cabal update && \
     extra_flags="" && \
     if [ -n "${PROFILING}" ]; then \
       extra_flags="${extra_flags} --enable-profiling"; \
+      printf '\npackage *\n  profiling: True\n  profiling-detail: all-functions\n' \
+        >> /usr/local/src/cardano-node/cabal.project.local; \
     fi && \
     cabal install exe:cardano-node --disable-test ${extra_flags} --install-method=copy \
       --installdir=/usr/local/bin --overwrite-policy=always
