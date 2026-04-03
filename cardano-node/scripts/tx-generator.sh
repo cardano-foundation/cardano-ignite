@@ -136,6 +136,8 @@ while [ ! -S /opt/cardano-node/data/db/node.socket ]; do
     sleep 3
 done
 
+sleep 60
+
 # Launch the tx-generator process
 case $TX_GEN_MODE in
   "plain")
