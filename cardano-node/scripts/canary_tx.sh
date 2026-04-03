@@ -223,6 +223,8 @@ main() {
     get_payment_address
     get_slot_length
 
+    sleep 120
+
     CURRENT_SEQ=0
 
     POOLS=$(ls /opt/cardano-node/pools | sort -n | tail -1)

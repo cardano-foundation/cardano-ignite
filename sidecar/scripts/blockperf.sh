@@ -57,7 +57,7 @@ DB_SIDECAR_USERNAME="${DB_SIDECAR_USERNAME:-sidecar}"
 
 # Loki config
 LOKI_URL="${LOKI_URL:-http://loki.example:3100/loki/api/v1/query_range}"
-LOKI_QUERY='{container_name=~"p[0-9]+(bp|r[0-9])?|(c[0-9]+)"} | json | data_kind=~"TraceAddBlockEvent\\.(AddedToCurrentChain|SwitchedToAFork)"'
+LOKI_QUERY='{container_name=~"p[0-9]+(bp|r[0-9])?|(c[0-9]+)"} | json | data_kind=~"(TraceAddBlockEvent\\.)?(AddedToCurrentChain|SwitchedToAFork)"'
 
 # Simple logger
 log() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*" >&2; }
@@ -103,14 +103,28 @@ while true; do
         --data-urlencode "end=$END" \
         --data-urlencode "limit=1000" |
         jq -r '
-            .data.result[].values[] | .[1] | fromjson |
+            .data.result[]?.values[]? | .[1] | fromjson as $log |
+            ($log.data.newSuffixSelectView // $log.data.newTipSelectView // {}) as $selectView |
+            ($log.data.newtip // "") as $newtip |
+            ($selectView.blockNo // $selectView.chainLength) as $blockNo |
+            ($selectView.slotNo // ($newtip | split("@")[1]? | tonumber?)) as $slotNo |
+            ($newtip | split("@")) as $tipParts |
+            ($tipParts[0] // null) as $hash |
+            select(
+                ($log.host != null) and
+                ($log.at != null) and
+                ($blockNo != null) and
+                ($slotNo != null) and
+                ($hash != null) and
+                ($hash != "")
+            ) |
             [
-                .host,                       # short host name (e.g. p1r1)
-                .at,                         # timestamp string
-                (."data"."newTipSelectView"."chainLength" | tostring),
-                (."data"."newtip" | split("@")[0]),
-                (."data"."newtip" | split("@")[1])
-            ] | @csv
+                $log.host,                   # short host name (e.g. p1r1)
+                $log.at,                     # timestamp string
+                ($blockNo | tostring),
+                $hash,
+                ($slotNo | tostring)
+            ] | @tsv
         ' > "$LOGS"
 
     # ------------------------------------------------------------------
@@ -123,8 +137,12 @@ while true; do
         # ------------------------------------------------------------------
         # Parse the CSV line produced by jq
         # ------------------------------------------------------------------
-        # shellcheck disable=SC2086   # intentional word‑splitting inside eval
-        eval "IFS=',' read -r host timestamp blockNo hash slotNo <<< $line"
+        IFS=$'\t' read -r host timestamp blockNo hash slotNo <<< "$line"
+
+        if [[ -z "$host" || -z "$timestamp" || -z "$blockNo" || -z "$hash" || -z "$slotNo" ]]; then
+            log "WARN: Skipping malformed block adoption row: $line"
+            continue
+        fi
 
         # ------------------------------------------------------------------
         # Resolve short host name to an IP address
@@ -185,4 +203,3 @@ while true; do
     log "Sleeping for 60 seconds..."
     sleep 60
 done
-
