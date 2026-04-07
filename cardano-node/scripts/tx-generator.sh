@@ -9,6 +9,7 @@ PATH="/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin"
 # Environment variables
 TPS="${TPS:-1}"
 TX_GEN_MODE="${TX_GEN_MODE:-plain}"
+TX_GENERATOR_TARGETS="${TX_GENERATOR_TARGETS:-}"
 
 # Check if required environment variables are set
 if [[ -z "${POOL_ID}" ]]; then
@@ -28,6 +29,52 @@ cd "$TMP_DIR" || {
     exit 1
 }
 
+build_target_nodes_json() {
+    local targets_csv
+    local first=true
+    local index=0
+    local emitted=0
+
+    if [[ -n "${TX_GENERATOR_TARGETS}" ]]; then
+        targets_csv="${TX_GENERATOR_TARGETS}"
+    else
+        targets_csv="127.0.0.1"
+    fi
+
+    IFS=',' read -r -a targets <<< "${targets_csv}"
+
+    printf '['
+    for target in "${targets[@]}"; do
+        target="${target#"${target%%[![:space:]]*}"}"
+        target="${target%"${target##*[![:space:]]}"}"
+        [[ -z "${target}" ]] && continue
+
+        if [[ "${first}" == false ]]; then
+            printf ','
+        fi
+        first=false
+        emitted=$((emitted + 1))
+
+        printf '
+    {
+      "addr": "%s",
+      "name": "target-%d",
+      "port": 3001
+    }'             "${target}" "${index}"
+        index=$((index + 1))
+    done
+
+    if [[ ${emitted} -eq 0 ]]; then
+        echo "Error: TX_GENERATOR_TARGETS did not contain any valid target addresses" >&2
+        exit 1
+    fi
+
+    printf '
+  ]'
+}
+
+TARGET_NODES_JSON="$(build_target_nodes_json)"
+
 # Generate the JSON configuration file
 cat <<EOF > tx-generator.json
 {
@@ -42,13 +89,7 @@ cat <<EOF > tx-generator.json
   "outputs_per_tx": 2,
   "plutus": null,
   "sigKey": "/opt/cardano-node/utxos/keys/genesis.${POOL_ID}.skey",
-  "targetNodes": [
-    {
-      "addr": "127.0.0.1",
-      "name": "node-0",
-      "port": 3001
-    }
-  ],
+  "targetNodes": ${TARGET_NODES_JSON},
   "tps": ${TPS},
   "tx_count": 172800,
   "tx_fee": 1000000
@@ -67,13 +108,7 @@ cat <<EOF > tx-generator-plutus.json
   "nodeConfigFile": "/opt/cardano-node/pools/${POOL_ID}/configs/config.json",
   "outputs_per_tx": 1,
   "sigKey": "/opt/cardano-node/utxos/keys/genesis.${POOL_ID}.skey",
-  "targetNodes": [
-    {
-      "addr": "127.0.0.1",
-      "name": "node-0",
-      "port": 3001
-    }
-  ],
+  "targetNodes": ${TARGET_NODES_JSON},
   "plutus": {
     "datum": null,
     "limitExecutionMem": null,
@@ -100,6 +135,8 @@ while [ ! -S /opt/cardano-node/data/db/node.socket ]; do
     echo "node.socket not found. Waiting 3 seconds..."
     sleep 3
 done
+
+sleep 60
 
 # Launch the tx-generator process
 case $TX_GEN_MODE in

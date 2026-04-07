@@ -125,6 +125,24 @@ config_config_json() {
     fi
 
     jq ".EgressPollInterval = ${EGRESS_POLL_INTERVAL}" "${CONFIG_JSON}" | write_file "${CONFIG_JSON}"
+
+    local tx_submission_logic_version_json
+    case "${TX_SUBMISSION_LOGIC_VERSION}" in
+        1|TxSubmissionLogicV1)
+            tx_submission_logic_version_json="TxSubmissionLogicV1"
+            ;;
+        2|TxSubmissionLogicV2)
+            tx_submission_logic_version_json="TxSubmissionLogicV2"
+            ;;
+        *)
+            echo "Invalid TX_SUBMISSION_LOGIC_VERSION: ${TX_SUBMISSION_LOGIC_VERSION}" >&2
+            echo "Expected one of: 1, 2, TxSubmissionLogicV1, TxSubmissionLogicV2" >&2
+            exit 1
+            ;;
+    esac
+
+    jq ".TxSubmissionLogicVersion = \"${tx_submission_logic_version_json}\"" "${CONFIG_JSON}" | write_file "${CONFIG_JSON}"
+
 }
 
 record_edges() {
