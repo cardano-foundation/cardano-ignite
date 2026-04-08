@@ -21,17 +21,14 @@ RUN git clone ${OUROBOROS_CONSENSUS_REPO}
 WORKDIR /usr/local/src/ouroboros-consensus
 RUN git fetch --all --recurse-submodules --tags && \
     git checkout ${OUROBOROS_CONSENSUS_REF}
-RUN printf "package *\n\
-  ghc-options: +RTS -A128m -n2m -RTS\n\
-\n\
-jobs: \$ncpus\n\
+RUN printf "jobs: 2\n\
 semaphore: True" > /usr/local/src/ouroboros-consensus/cabal.project.local
 
 WORKDIR /usr/local/src/ouroboros-consensus/ouroboros-consensus-cardano
 
 RUN cabal update && \
     cabal install db-synthesizer --disable-test --install-method=copy \
-      --installdir=/usr/local/bin --overwrite-policy=always
+      --installdir=/usr/local/bin --overwrite-policy=always --jobs=2
 
 RUN strip --strip-unneeded /usr/local/bin/db-synthesizer
 
