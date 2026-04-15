@@ -143,26 +143,26 @@ x-base_gw: &base_gw
     start_period: 2s
 
 x-pool_pair_a_cpu: &pool_pair_a_cpu
-  cpuset: "${POOL_PAIR_A_CPUSET:-8-35}"
+  cpuset: "${POOL_PAIR_A_CPUSET:-4-17,36-49}"
 
 x-pool_pair_b_cpu: &pool_pair_b_cpu
-  cpuset: "${POOL_PAIR_B_CPUSET:-36-63}"
+  cpuset: "${POOL_PAIR_B_CPUSET:-18-31,50-63}"
 
 x-mgmt_cpu: &mgmt_cpu
   cpus: "${MGMT_CPUS:-1.0}"
-  cpuset: "${MGMT_CPUSET:-0-7}"
+  cpuset: "${MGMT_CPUSET:-0-3,32-35}"
 
 x-dbsync_cpu: &dbsync_cpu
   cpus: "${DBSYNC_CPUS:-2.0}"
-  cpuset: "${MGMT_CPUSET:-0-7}"
+  cpuset: "${MGMT_CPUSET:-0-3,32-35}"
 
 x-client_cpu: &client_cpu
   cpus: "${CLIENT_CPUS:-1.0}"
-  cpuset: "${MGMT_CPUSET:-0-7}"
+  cpuset: "${MGMT_CPUSET:-0-3,32-35}"
 
 x-txg_cpu: &txg_cpu
   cpus: "${TXG_CPUS:-4.0}"
-  cpuset: "${MGMT_CPUSET:-0-7}"
+  cpuset: "${MGMT_CPUSET:-0-3,32-35}"
 
 networks:
   default:
