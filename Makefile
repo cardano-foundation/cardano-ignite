@@ -135,7 +135,7 @@ up-all: TESTNET ## Start testnet with optional containers (Blockfrost, TX Genera
 
 down: TESTNET ## Stop testnet
 	@cd testnets/${testnet} && \
-	docker compose --env-file .env.tmp --profile core --profile optional --profile privaterelays down --volumes --timeout 1 && \
+	docker compose --env-file .env.tmp --profile core --profile optional --profile privaterelays down --volumes --timeout 5 && \
 	rm -f .env.tmp
 
 query: TESTNET ## Query tip of all pools
