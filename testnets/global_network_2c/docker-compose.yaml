@@ -115,8 +115,6 @@ x-base_gw: &base_gw
     - NET_RAW
   sysctls:
     net.ipv4.ip_forward: "1"
-  volumes:
-    - ./gateway/gw_routes.sh:/opt/scripts/gw_routes.sh:ro
 
 x-pool_pair_a_cpu: &pool_pair_a_cpu
   cpuset: "${POOL_PAIR_A_CPUSET:-2-4}"
