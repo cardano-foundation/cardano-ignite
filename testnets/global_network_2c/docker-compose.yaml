@@ -125,8 +125,8 @@ x-base_eu: &base_eu
 x-base_gw: &base_gw
   image: ${testnet}_gateway:latest
   restart: unless-stopped
-  cpus: "${GATEWAY_CPUS:-0.50}"
-  cpuset: "${MGMT_CPUSET:-0-1}"
+  cpus: "${GATEWAY_CPUS:-1.0}"
+  cpuset: "${MGMT_CPUSET:-0-3,32-35}"
   build:
     context: "../../"
     dockerfile: gateway/Dockerfile
@@ -143,26 +143,26 @@ x-base_gw: &base_gw
     start_period: 2s
 
 x-pool_pair_a_cpu: &pool_pair_a_cpu
-  cpuset: "${POOL_PAIR_A_CPUSET:-2-4}"
+  cpuset: "${POOL_PAIR_A_CPUSET:-8-35}"
 
 x-pool_pair_b_cpu: &pool_pair_b_cpu
-  cpuset: "${POOL_PAIR_B_CPUSET:-5-7}"
+  cpuset: "${POOL_PAIR_B_CPUSET:-36-63}"
 
 x-mgmt_cpu: &mgmt_cpu
-  cpus: "${MGMT_CPUS:-0.50}"
-  cpuset: "${MGMT_CPUSET:-0-1}"
+  cpus: "${MGMT_CPUS:-1.0}"
+  cpuset: "${MGMT_CPUSET:-0-7}"
 
 x-dbsync_cpu: &dbsync_cpu
-  cpus: "${DBSYNC_CPUS:-1.0}"
-  cpuset: "${MGMT_CPUSET:-0-1}"
+  cpus: "${DBSYNC_CPUS:-2.0}"
+  cpuset: "${MGMT_CPUSET:-0-7}"
 
 x-client_cpu: &client_cpu
-  cpus: "${CLIENT_CPUS:-0.50}"
-  cpuset: "${MGMT_CPUSET:-0-1}"
+  cpus: "${CLIENT_CPUS:-1.0}"
+  cpuset: "${MGMT_CPUSET:-0-7}"
 
 x-txg_cpu: &txg_cpu
-  cpus: "${TXG_CPUS:-2.0}"
-  cpuset: "${MGMT_CPUSET:-0-1}"
+  cpus: "${TXG_CPUS:-4.0}"
+  cpuset: "${MGMT_CPUSET:-0-7}"
 
 networks:
   default:
