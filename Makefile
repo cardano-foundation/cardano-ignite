@@ -135,7 +135,11 @@ up-all: TESTNET ## Start testnet with optional containers (Blockfrost, TX Genera
 
 down: TESTNET ## Stop testnet
 	@cd testnets/${testnet} && \
-	docker compose --env-file .env.tmp --profile core --profile optional --profile privaterelays down --volumes --timeout 1 && \
+	$(HOST_INTERFACE_SETUP) && \
+	docker compose --env-file .env.tmp --profile core --profile optional --profile privaterelays down --volumes --remove-orphans --timeout 5 && \
+	for vlan in $$(yq '.networks[].driver_opts.parent | select(. != null)' docker-compose.yaml | grep -oE '[0-9]+$$'); do \
+		ip link show "$${HOST_INTERFACE}.$${vlan}" >/dev/null 2>&1 && ip link delete "$${HOST_INTERFACE}.$${vlan}" || true ; \
+	done && \
 	rm -f .env.tmp
 
 query: TESTNET ## Query tip of all pools

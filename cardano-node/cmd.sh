@@ -526,6 +526,13 @@ main() {
 
         cp -r /opt/synth/db "${DATA_PATH}"
         cp /opt/synth/start_time.unix_epoch "${DATA_PATH}"
+
+        # Overwrite baked-in genesis with the synth copy so all node variants
+        # (e.g. A/B test) use a single authoritative source of truth.
+        if [ -d /opt/synth/pools ]; then
+            cp /opt/synth/pools/${POOL_ID}/configs/shelley-genesis.json "${SHELLEY_GENESIS_JSON}"
+            cp /opt/synth/pools/${POOL_ID}/configs/byron-genesis.json "${BYRON_GENESIS_JSON}"
+        fi
     fi
 
     set_start_time

@@ -109,10 +109,15 @@ generate_pre_epochs() {
 
 if [ ! -f "${DATA_PATH}/start_time.unix_epoch" ]; then
     set_start_time
-    
+
     if [ -n "${PRE_EPOCHS}" ] && [ "${PRE_EPOCHS}" -gt 0 ] 2>/dev/null; then
         generate_pre_epochs
     fi
 
     echo "${SYSTEM_START_UNIX_ADJUSTED}" >"${DATA_PATH}/start_time.unix_epoch"
 fi
+
+# Publish pool configs (including genesis files) to the synth volume so all
+# node variants use a single authoritative genesis regardless of when their
+# images were built.
+cp -r /opt/cardano-node/pools "${DATA_PATH}/pools"
