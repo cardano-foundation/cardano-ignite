@@ -34,19 +34,19 @@ x-cardano_node_variant_a: &cardano_node_variant_a
     context: "../../"
     dockerfile: "cardano-node/Dockerfile.source"
     args:
-      CARDANO_NODE_REF: "${CARDANO_NODE_REF_A:-10.7.1}"
+      CARDANO_NODE_REF: "${CARDANO_NODE_REF_B:-fe606645cd95389ad4a8757d35939ad256ce11a4}"
       TESTNET_BUILDER_IMAGE: ${TESTNET_BUILDER_IMAGE}
       HASKELL_BUILDER_IMAGE: ${HASKELL_BUILDER_IMAGE}
       PROFILING: ${PROFILING:-}
 
 x-cardano_node_variant_b: &cardano_node_variant_b
-  image: ${testnet}-${CARDANO_NODE_IMAGE_TAG_B:-10.6.4}-prof${PROFILING:-0}:latest
+  image: ${testnet}-${CARDANO_NODE_IMAGE_TAG_B:-10.7.1}-prof${PROFILING:-0}:latest
   cpus: "${CARDANO_NODE_CPUS:-2.0}"
   build:
     context: "../../"
     dockerfile: "cardano-node/Dockerfile.source"
     args:
-      CARDANO_NODE_REF: "${CARDANO_NODE_REF_B:-10.6.4}"
+      CARDANO_NODE_REF: "${CARDANO_NODE_REF_B:-fe606645cd95389ad4a8757d35939ad256ce11a4}"
       TESTNET_BUILDER_IMAGE: ${TESTNET_BUILDER_IMAGE}
       HASKELL_BUILDER_IMAGE: ${HASKELL_BUILDER_IMAGE}
       PROFILING: ${PROFILING:-}
@@ -82,7 +82,7 @@ x-node-env-variant-a: &node_env_variant_a
 x-node-env-variant-b: &node_env_variant_b
   <<: *node_env_common
   AB_TEST_VARIANT: "B"
-  TX_SUBMISSION_LOGIC_VERSION: ${TX_SUBMISSION_LOGIC_VERSION_B:-1}
+  TX_SUBMISSION_LOGIC_VERSION: ${TX_SUBMISSION_LOGIC_VERSION_B:-2}
 
 x-node-env: &node_env
   <<: *node_env_common
@@ -636,6 +636,7 @@ services:
       POOL_ID: "1"
       TYPE: client
       REGION: EU
+      EXTRA_LOCALROOTS: "c6.example:3001,c2.example:3001"
       UTXOHD: "true"
     networks:
       net_eu:
@@ -654,6 +655,7 @@ services:
       POOL_ID: "1"
       TYPE: txg
       REGION: NA
+      EXTRA_LOCALROOTS: "c1.example:3001,c3.example:3001"
       TPS: ${TPS:-12}
       TX_GEN_MODE: ${TX_GEN_MODE:-plain}
       TX_GENERATOR_TARGETS: "172.16.1.104,172.16.3.104,172.16.1.114,172.16.3.114"
@@ -662,6 +664,82 @@ services:
       net_na:
         ipv4_address: 172.16.1.12
     profiles: [build, na, optional, tx-generators]
+
+  c3:
+    <<: [*base_eu, *cardano_node, *client_cpu]
+    container_name: c3
+    hostname: c3.example
+    volumes:
+      - c3:/opt/cardano-node
+      - synth:/opt/synth:ro
+    environment:
+      <<: *node_env
+      POOL_ID: "1"
+      TYPE: client
+      REGION: EU
+      EXTRA_LOCALROOTS: "c10.example:3001,c4.example:3001"
+      UTXOHD: "true"
+    networks:
+      net_eu:
+        ipv4_address: 172.16.3.41
+    profiles: [build, core, eu]
+
+  c4:
+    <<: [*base_eu, *cardano_node, *client_cpu]
+    container_name: c4
+    hostname: c4.example
+    volumes:
+      - c4:/opt/cardano-node
+      - synth:/opt/synth:ro
+    environment:
+      <<: *node_env
+      POOL_ID: "1"
+      TYPE: client
+      REGION: EU
+      EXTRA_LOCALROOTS: "c3.example:3001,c5.example:3001"
+      UTXOHD: "true"
+    networks:
+      net_eu:
+        ipv4_address: 172.16.3.42
+    profiles: [build, core, eu]
+
+  c5:
+    <<: [*base_na, *cardano_node, *client_cpu]
+    container_name: c5
+    hostname: c5.example
+    volumes:
+      - c5:/opt/cardano-node
+      - synth:/opt/synth:ro
+    environment:
+      <<: *node_env
+      POOL_ID: "1"
+      TYPE: client
+      REGION: NA
+      EXTRA_LOCALROOTS: "c4.example:3001,c6.example:3001"
+      UTXOHD: "true"
+    networks:
+      net_na:
+        ipv4_address: 172.16.1.43
+    profiles: [build, core, na]
+
+  c6:
+    <<: [*base_na, *cardano_node, *client_cpu]
+    container_name: c6
+    hostname: c6.example
+    volumes:
+      - c6:/opt/cardano-node
+      - synth:/opt/synth:ro
+    environment:
+      <<: *node_env
+      POOL_ID: "1"
+      TYPE: client
+      REGION: NA
+      EXTRA_LOCALROOTS: "c5.example:3001,c1.example:3001"
+      UTXOHD: "true"
+    networks:
+      net_na:
+        ipv4_address: 172.16.1.44
+    profiles: [build, core, na]
 
   db:
     <<: *mgmt_cpu
@@ -818,6 +896,10 @@ volumes:
   p4r3:
   c1:
   c2:
+  c3:
+  c4:
+  c5:
+  c6:
   db:
   dbsync:
   prometheus:
