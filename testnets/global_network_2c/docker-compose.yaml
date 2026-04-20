@@ -94,6 +94,16 @@ x-base_na: &base_na
     - 172.16.1.2
   networks:
     - net_na
+  depends_on:
+    nagw:
+      condition: service_started
+      required: false
+    eugw:
+      condition: service_started
+      required: false
+    adgw:
+      condition: service_started
+      required: false
 
 x-base_eu: &base_eu
   <<: *base
@@ -101,6 +111,16 @@ x-base_eu: &base_eu
     - 172.16.3.2
   networks:
     - net_eu
+  depends_on:
+    nagw:
+      condition: service_started
+      required: false
+    eugw:
+      condition: service_started
+      required: false
+    adgw:
+      condition: service_started
+      required: false
 
 x-base_gw: &base_gw
   image: ${testnet}_gateway:latest

@@ -41,6 +41,19 @@ x-base_eu: &base_eu
     - 172.16.3.2
   networks:
     - net_eu
+  depends_on:
+    nagw:
+      condition: service_started
+      required: false
+    eugw:
+      condition: service_started
+      required: false
+    asgw:
+      condition: service_started
+      required: false
+    adgw:
+      condition: service_started
+      required: false
 
 x-base_na: &base_na
   <<: *base
@@ -50,6 +63,19 @@ x-base_na: &base_na
     - 172.16.1.2
   networks:
     - net_na
+  depends_on:
+    nagw:
+      condition: service_started
+      required: false
+    eugw:
+      condition: service_started
+      required: false
+    asgw:
+      condition: service_started
+      required: false
+    adgw:
+      condition: service_started
+      required: false
 
 x-base_as: &base_as
   <<: *base
@@ -59,6 +85,19 @@ x-base_as: &base_as
     - 172.16.4.2
   networks:
     - net_as
+  depends_on:
+    nagw:
+      condition: service_started
+      required: false
+    eugw:
+      condition: service_started
+      required: false
+    asgw:
+      condition: service_started
+      required: false
+    adgw:
+      condition: service_started
+      required: false
 
 x-base_gw: &base_gw
     image: ${testnet}_gateway:latest
