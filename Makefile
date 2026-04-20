@@ -113,11 +113,15 @@ cibuild: TESTNET prerequisites testnets/${testnet}/graph_nodes.sql testnets/${te
 
 
 all:
+	failed=""; \
 	for dir in testnets/*; do \
 		if [ -d "$${dir}" ]; then \
-			$(MAKE) build testnet=$$(basename $${dir}); \
+			$(MAKE) build testnet=$$(basename $${dir}) || failed="$$failed $$(basename $${dir})"; \
 		fi; \
-	done
+	done; \
+	if [ -n "$$failed" ]; then \
+		echo "FAILED:$$failed"; exit 1; \
+	fi
 
 up: TESTNET testnets/${testnet}/.env.tmp ## Start testnet without optional containers
 	cd testnets/${testnet} && \
