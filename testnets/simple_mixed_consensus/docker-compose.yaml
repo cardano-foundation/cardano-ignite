@@ -122,7 +122,6 @@ services:
     profiles: [build, core, pools]
 
   p7:
-    <<: *base
     <<: [*base, *cardano_node_10_5_4]
     container_name: p7
     hostname: p7.example
