@@ -11,13 +11,13 @@ x-base: &base
       loki-url: "http://127.0.0.1:3100/loki/api/v1/push"
       loki-retries: "5"
 
-x-cardano_node_10_7_0: &cardano_node_10_7_0
-  image: ${testnet}-10.7.0-prof${PROFILING:-0}:latest
+x-cardano_node_10_7_1: &cardano_node_10_7_1
+  image: ${testnet}-10.7.1-prof${PROFILING:-0}:latest
   build:
     context: "../../"
     dockerfile: "cardano-node/Dockerfile.source"
     args:
-      CARDANO_NODE_REF: "10.7.0"
+      CARDANO_NODE_REF: "10.7.1"
       TESTNET_BUILDER_IMAGE: ${TESTNET_BUILDER_IMAGE}
       HASKELL_BUILDER_IMAGE: ${HASKELL_BUILDER_IMAGE}
       PROFILING: ${PROFILING:-}
@@ -33,13 +33,13 @@ x-cardano_node_10_5_4: &cardano_node_10_5_4
       HASKELL_BUILDER_IMAGE: ${HASKELL_BUILDER_IMAGE}
       PROFILING: ${PROFILING:-}
 
-x-cardano_node_10_6_2: &cardano_node_10_6_2
-  image: ${testnet}-10.6.2-prof${PROFILING:-0}:latest
+x-cardano_node_10_6_4: &cardano_node_10_6_4
+  image: ${testnet}-10.6.4-prof${PROFILING:-0}:latest
   build:
     context: "../../"
     dockerfile: "cardano-node/Dockerfile.source"
     args:
-      CARDANO_NODE_REF: "10.6.2"
+      CARDANO_NODE_REF: "10.6.4"
       TESTNET_BUILDER_IMAGE: ${TESTNET_BUILDER_IMAGE}
       HASKELL_BUILDER_IMAGE: ${HASKELL_BUILDER_IMAGE}
       PROFILING: ${PROFILING:-}
@@ -245,7 +245,7 @@ services:
 
   # Block Producer
   p1bp:
-    <<: [*base_na, *cardano_node_10_7_0]
+    <<: [*base_na, *cardano_node_10_7_1]
     container_name: p1bp
     hostname: p1bp.example
     volumes:
@@ -263,7 +263,7 @@ services:
 
   # Relay
   p1r1:
-    <<: [*base_na, *cardano_node_10_7_0]
+    <<: [*base_na, *cardano_node_10_7_1]
     container_name: p1r1
     hostname: p1r1.example
     volumes:
@@ -281,7 +281,7 @@ services:
 
   # Relay
   p1r2:
-    <<: [*base_na, *cardano_node_10_7_0]
+    <<: [*base_na, *cardano_node_10_7_1]
     container_name: p1r2
     hostname: p1r2.example
     volumes:
@@ -299,7 +299,7 @@ services:
 
   # Relay
   p1r3:
-    <<: [*base_na, *cardano_node_10_7_0]
+    <<: [*base_na, *cardano_node_10_7_1]
     container_name: p1r3
     hostname: p1r3.example
     volumes:
@@ -319,7 +319,7 @@ services:
 
   # Block Producer
   p2bp:
-    <<: [*base_eu, *cardano_node_10_6_2]
+    <<: [*base_eu, *cardano_node_10_6_4]
     container_name: p2bp
     hostname: p2bp.example
     volumes:
@@ -336,7 +336,7 @@ services:
 
   # Relay
   p2r1:
-    <<: [*base_eu, *cardano_node_10_6_2]
+    <<: [*base_eu, *cardano_node_10_6_4]
     container_name: p2r1
     hostname: p2r1.example
     volumes:
@@ -353,7 +353,7 @@ services:
 
   # Relay
   p2r2:
-    <<: [*base_eu, *cardano_node_10_6_2]
+    <<: [*base_eu, *cardano_node_10_6_4]
     container_name: p2r2
     hostname: p2r2.example
     volumes:
@@ -370,7 +370,7 @@ services:
 
   # Relay
   p2r3:
-    <<: [*base_eu, *cardano_node_10_6_2]
+    <<: [*base_eu, *cardano_node_10_6_4]
     container_name: p2r3
     hostname: p2r3.example
     volumes:
