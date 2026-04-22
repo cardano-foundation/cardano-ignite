@@ -10,5 +10,7 @@ PATH="/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin"
 
 iptables -A FORWARD -j ACCEPT
 
+touch /tmp/gateway_ready
+
 node_exporter >/dev/null 2>&1
 
