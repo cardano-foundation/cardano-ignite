@@ -96,13 +96,13 @@ x-base_na: &base_na
     - net_na
   depends_on:
     nagw:
-      condition: service_started
+      condition: service_healthy
       required: false
     eugw:
-      condition: service_started
+      condition: service_healthy
       required: false
     adgw:
-      condition: service_started
+      condition: service_healthy
       required: false
 
 x-base_eu: &base_eu
@@ -113,13 +113,13 @@ x-base_eu: &base_eu
     - net_eu
   depends_on:
     nagw:
-      condition: service_started
+      condition: service_healthy
       required: false
     eugw:
-      condition: service_started
+      condition: service_healthy
       required: false
     adgw:
-      condition: service_started
+      condition: service_healthy
       required: false
 
 x-base_gw: &base_gw
@@ -135,6 +135,12 @@ x-base_gw: &base_gw
     - NET_RAW
   sysctls:
     net.ipv4.ip_forward: "1"
+  healthcheck:
+    test: ["CMD-SHELL", "test -f /tmp/gateway_ready"]
+    interval: 2s
+    timeout: 2s
+    retries: 30
+    start_period: 2s
 
 x-pool_pair_a_cpu: &pool_pair_a_cpu
   cpuset: "${POOL_PAIR_A_CPUSET:-2-4}"
@@ -517,6 +523,7 @@ services:
     hostname: nagw.example
     environment:
       GATEWAY_ID: "nagw"
+      GATEWAY_PEERS: "eu ad"
     networks:
       net_na:
         ipv4_address: 172.16.1.11
@@ -535,6 +542,7 @@ services:
     hostname: eugw.example
     environment:
       GATEWAY_ID: "eugw"
+      GATEWAY_PEERS: "na ad"
     networks:
       net_eu:
         ipv4_address: 172.16.3.12
@@ -553,6 +561,7 @@ services:
     hostname: adgw.example
     environment:
       GATEWAY_ID: "adgw"
+      GATEWAY_PEERS: "eu na"
     networks:
       net_mgmt:
         ipv4_address: 172.16.7.14
