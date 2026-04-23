@@ -131,7 +131,7 @@ services:
 
   # DNS Server
   ns:
-    image: coredns/coredns:1.14.1
+    image: coredns/coredns:1.14.3
     container_name: ns
     hostname: ns.example
     restart: unless-stopped
@@ -246,7 +246,7 @@ services:
     profiles: [build, optional]
 
   prometheus:
-    image: prom/prometheus:v3.10.0
+    image: prom/prometheus:v3.11.2
     container_name: prometheus
     hostname: prometheus.example
     restart: unless-stopped
@@ -272,7 +272,7 @@ services:
     profiles: [build, core]
 
   loki:
-    image: grafana/loki:3.6.7
+    image: grafana/loki:3.7.1
     container_name: loki
     hostname: loki.example
     restart: unless-stopped
@@ -284,7 +284,7 @@ services:
     profiles: [build, core]
 
   grafana:
-    image: grafana/grafana:12.4.0
+    image: grafana/grafana:13.0.1
     container_name: grafana
     hostname: grafana.example
     restart: unless-stopped
@@ -299,7 +299,7 @@ services:
     profiles: [build, core]
 
   jaeger:
-    image: jaegertracing/jaeger:2.15.1
+    image: jaegertracing/jaeger:2.17.0
     container_name: jaeger
     hostname: jaeger.example
     restart: unless-stopped

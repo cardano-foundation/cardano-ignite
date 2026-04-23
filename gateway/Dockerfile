@@ -1,6 +1,6 @@
-FROM docker.io/debian:stable-20260223-slim AS build
+FROM docker.io/debian:stable-20260421-slim AS build
 
-ARG NODE_EXPORTER_VERSION="${NODE_EXPORTER_VERSION:-1.10.2}"
+ARG NODE_EXPORTER_VERSION="${NODE_EXPORTER_VERSION:-1.11.1}"
 
 ENV TZ="UTC"
 RUN ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime && \
@@ -36,7 +36,7 @@ RUN ln -s /usr/local/src/node_exporter/node_exporter-${NODE_EXPORTER_VERSION}.li
 
 #---------------------------------------------------------------------
 
-FROM docker.io/debian:stable-20260223-slim AS main
+FROM docker.io/debian:stable-20260421-slim AS main
 
 ENV TZ="UTC"
 RUN ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime && \
