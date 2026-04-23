@@ -37,7 +37,7 @@ RUN strip --strip-unneeded /usr/local/bin/db-synthesizer
 
 #---------------------------------------------------------------------
 
-FROM docker.io/debian:stable-20260223-slim AS main
+FROM docker.io/debian:stable-20260421-slim AS main
 
 ENV TZ="UTC"
 RUN ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime && \

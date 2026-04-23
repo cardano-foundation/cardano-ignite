@@ -4,7 +4,7 @@
 # Wait until the specific peer's tip is at least the specified
 # block number.
 #
- 
+
 if [ $# -ne 3 ]; then
     echo "Usage: $0 <host> <port> <target_block_number>" >&2
     exit 1

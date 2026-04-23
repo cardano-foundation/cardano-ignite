@@ -7,7 +7,7 @@ ARG HASKELL_BUILDER_IMAGE=scratch
 
 FROM ${HASKELL_BUILDER_IMAGE} AS build
 
-ARG NODE_EXPORTER_VERSION="${NODE_EXPORTER_VERSION:-1.10.2}"
+ARG NODE_EXPORTER_VERSION="${NODE_EXPORTER_VERSION:-1.11.1}"
 ARG PROCESS_EXPORTER_VERSION="${PROCESS_EXPORTER_VERSION:-0.8.7}"
 
 # NOTE:
@@ -36,7 +36,7 @@ RUN ln -s /usr/local/src/node_exporter/node_exporter-${NODE_EXPORTER_VERSION}.li
 
 # cardano-cli
 
-ARG CARDANO_CLI_VERSION="${CARDANO_CLI_VERSION:-10.11.1.0}"
+ARG CARDANO_CLI_VERSION="${CARDANO_CLI_VERSION:-10.15.1.0}"
 
 WORKDIR /usr/local/src
 RUN git clone --depth 1 --branch master https://github.com/IntersectMBO/cardano-cli.git
@@ -132,7 +132,7 @@ FROM ${TESTNET_BUILDER_IMAGE} AS testnet_builder
 
 #---------------------------------------------------------------------
 
-FROM docker.io/debian:stable-20260223-slim AS main
+FROM docker.io/debian:stable-20260421-slim AS main
 
 ENV CARDANO_NODE_SOCKET_PATH="/opt/cardano-node/data/db/node.socket"
 

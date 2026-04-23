@@ -23,7 +23,7 @@ Please install the dependencies below. All commands are compatible with Debian 1
 
   ```
   curl --proto '=https' --tlsv1.2 \
-      --location https://github.com/mikefarah/yq/releases/download/v4.52.4/yq_linux_amd64.tar.gz \
+      --location https://github.com/mikefarah/yq/releases/download/v4.53.2/yq_linux_amd64.tar.gz \
       --output /tmp/yq_linux_amd64.tar.gz
   ```
 

@@ -216,7 +216,7 @@ generate_amaru_snapshots() {
         echo "Error: Could not determine latest snapshot" >&2
         return 1
     fi
-    
+
     echo "Snapshot processing completed successfully!"
 
     mkdir -p ${BASE_DIR}/${NETWORK}/headers
