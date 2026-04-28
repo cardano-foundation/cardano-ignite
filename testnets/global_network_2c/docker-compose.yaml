@@ -34,7 +34,7 @@ x-cardano_node_variant_a: &cardano_node_variant_a
     context: "../../"
     dockerfile: "cardano-node/Dockerfile.source"
     args:
-      CARDANO_NODE_REF: "${CARDANO_NODE_REF_B:-a318ae1b77d15051beb6d66af805e93fff001085}"
+      CARDANO_NODE_REF: "${CARDANO_NODE_REF_B:-79d82b6fa9fea8ae8b1af43d8d1088c2523c00d2}"
       TESTNET_BUILDER_IMAGE: ${TESTNET_BUILDER_IMAGE}
       HASKELL_BUILDER_IMAGE: ${HASKELL_BUILDER_IMAGE}
       PROFILING: ${PROFILING:-}
@@ -46,19 +46,19 @@ x-cardano_node_variant_b: &cardano_node_variant_b
     context: "../../"
     dockerfile: "cardano-node/Dockerfile.source"
     args:
-      CARDANO_NODE_REF: "${CARDANO_NODE_REF_B:-a318ae1b77d15051beb6d66af805e93fff001085}"
+      CARDANO_NODE_REF: "${CARDANO_NODE_REF_B:-79d82b6fa9fea8ae8b1af43d8d1088c2523c00d2}"
       TESTNET_BUILDER_IMAGE: ${TESTNET_BUILDER_IMAGE}
       HASKELL_BUILDER_IMAGE: ${HASKELL_BUILDER_IMAGE}
       PROFILING: ${PROFILING:-}
 
 x-cardano_node: &cardano_node
-  image: ${testnet}-${CARDANO_NODE_IMAGE_TAG:-10.6.4_txg}-prof${PROFILING:-0}:latest
+  image: ${testnet}-${CARDANO_NODE_IMAGE_TAG_A:-10.7.1}-prof${PROFILING:-0}:latest
   cpus: "${CARDANO_NODE_CPUS:-2.0}"
   build:
     context: "../../"
     dockerfile: "cardano-node/Dockerfile.source"
     args:
-      CARDANO_NODE_REF: "${CARDANO_NODE_REF:-10.6.4}"
+      CARDANO_NODE_REF: "${CARDANO_NODE_REF_B:-79d82b6fa9fea8ae8b1af43d8d1088c2523c00d2}"
       TESTNET_BUILDER_IMAGE: ${TESTNET_BUILDER_IMAGE}
       HASKELL_BUILDER_IMAGE: ${HASKELL_BUILDER_IMAGE}
       PROFILING: ${PROFILING:-}
