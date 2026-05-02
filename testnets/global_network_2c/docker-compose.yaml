@@ -34,7 +34,7 @@ x-cardano_node_variant_a: &cardano_node_variant_a
     context: "../../"
     dockerfile: "cardano-node/Dockerfile.source"
     args:
-      CARDANO_NODE_REF: "${CARDANO_NODE_REF_B:-622d4861318f99b990621c81cd96277fb248c905}"
+      CARDANO_NODE_REF: "${CARDANO_NODE_REF_B:-5ed5ed21b0a5179d1d1dc4d3775154b8037bef91}"
       TESTNET_BUILDER_IMAGE: ${TESTNET_BUILDER_IMAGE}
       HASKELL_BUILDER_IMAGE: ${HASKELL_BUILDER_IMAGE}
       PROFILING: ${PROFILING:-}
@@ -46,7 +46,7 @@ x-cardano_node_variant_b: &cardano_node_variant_b
     context: "../../"
     dockerfile: "cardano-node/Dockerfile.source"
     args:
-      CARDANO_NODE_REF: "${CARDANO_NODE_REF_B:-622d4861318f99b990621c81cd96277fb248c905}"
+      CARDANO_NODE_REF: "${CARDANO_NODE_REF_B:-7bc77ec2e72c95949a704c1e5613402b22d5d9da}"
       TESTNET_BUILDER_IMAGE: ${TESTNET_BUILDER_IMAGE}
       HASKELL_BUILDER_IMAGE: ${HASKELL_BUILDER_IMAGE}
       PROFILING: ${PROFILING:-}
@@ -77,7 +77,7 @@ x-node-env-common: &node_env_common
 x-node-env-variant-a: &node_env_variant_a
   <<: *node_env_common
   AB_TEST_VARIANT: "A"
-  TX_SUBMISSION_LOGIC_VERSION: ${TX_SUBMISSION_LOGIC_VERSION_A:-1}
+  TX_SUBMISSION_LOGIC_VERSION: ${TX_SUBMISSION_LOGIC_VERSION_A:-2}
 
 x-node-env-variant-b: &node_env_variant_b
   <<: *node_env_common
