@@ -46,7 +46,7 @@ x-cardano_node_variant_b: &cardano_node_variant_b
     context: "../../"
     dockerfile: "cardano-node/Dockerfile.source"
     args:
-      CARDANO_NODE_REF: "${CARDANO_NODE_REF_B:-7bc77ec2e72c95949a704c1e5613402b22d5d9da}"
+      CARDANO_NODE_REF: "${CARDANO_NODE_REF_B:-b00b87bf740e0a908d8eeed017e6f437d8beb239}"
       TESTNET_BUILDER_IMAGE: ${TESTNET_BUILDER_IMAGE}
       HASKELL_BUILDER_IMAGE: ${HASKELL_BUILDER_IMAGE}
       PROFILING: ${PROFILING:-}
