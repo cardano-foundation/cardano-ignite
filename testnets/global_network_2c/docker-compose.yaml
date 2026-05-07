@@ -34,7 +34,7 @@ x-cardano_node_variant_a: &cardano_node_variant_a
     context: "../../"
     dockerfile: "cardano-node/Dockerfile.source"
     args:
-      CARDANO_NODE_REF: "${CARDANO_NODE_REF_B:-5f903f46bd41076a1e7a334f4a2d40e9fff63919}"
+      CARDANO_NODE_REF: "${CARDANO_NODE_REF_B:-d14b8aa1ce2dd75045e62429375cbfd993322499}"
       TESTNET_BUILDER_IMAGE: ${TESTNET_BUILDER_IMAGE}
       HASKELL_BUILDER_IMAGE: ${HASKELL_BUILDER_IMAGE}
       PROFILING: ${PROFILING:-}
@@ -46,7 +46,7 @@ x-cardano_node_variant_b: &cardano_node_variant_b
     context: "../../"
     dockerfile: "cardano-node/Dockerfile.source"
     args:
-      CARDANO_NODE_REF: "${CARDANO_NODE_REF_B:-5f903f46bd41076a1e7a334f4a2d40e9fff63919}"
+      CARDANO_NODE_REF: "${CARDANO_NODE_REF_B:-d14b8aa1ce2dd75045e62429375cbfd993322499}"
       TESTNET_BUILDER_IMAGE: ${TESTNET_BUILDER_IMAGE}
       HASKELL_BUILDER_IMAGE: ${HASKELL_BUILDER_IMAGE}
       PROFILING: ${PROFILING:-}
