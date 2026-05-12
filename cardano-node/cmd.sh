@@ -88,6 +88,8 @@ config_config_json() {
     # .minSeverity
     jq ".minSeverity = \"${MIN_SEVERITY^}\"" "${CONFIG_JSON}" | write_file "${CONFIG_JSON}"
 
+    jq '.options.mapSeverity["cardano.node.TxInbound"] = "Debug"' "${CONFIG_JSON}" | write_file "${CONFIG_JSON}"
+
     # .hasPrometheus
     jq ".hasPrometheus = [\"${PROMETHEUS_LISTEN}\", ${PROMETHEUS_PORT}]" "${CONFIG_JSON}" | write_file "${CONFIG_JSON}"
 
