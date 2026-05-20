@@ -24,6 +24,9 @@ fi
 
 # Generate Prometheus scrape configs
 cat <<EOF
+rule_files:
+  - /etc/prometheus/rules.yml
+
 scrape_configs:
   - job_name: 'node_exporter'
     static_configs:

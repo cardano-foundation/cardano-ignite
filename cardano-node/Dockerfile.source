@@ -62,6 +62,9 @@ ARG CARDANO_NODE_REF="${CARDANO_NODE_REF:-10.5.4}"
 ARG CARDANO_NODE_REPO="${CARDANO_NODE_REPO:-https://github.com/IntersectMBO/cardano-node.git}"
 ARG PROFILING
 ENV PROFILING=${PROFILING}
+# When IGNORE_ASSERTS=1, build ouroboros-network packages with
+# -fignore-asserts instead of -fno-ignore-asserts.
+ARG IGNORE_ASSERTS=""
 
 WORKDIR /usr/local/src
 RUN git clone --branch master ${CARDANO_NODE_REPO}
@@ -88,7 +91,11 @@ package network-mux\n\
   ghc-options: -fno-ignore-asserts\n\
 \n\
 jobs: \$ncpus\n\
-semaphore: True" > /usr/local/src/cardano-node/cabal.project.local
+semaphore: True" > /usr/local/src/cardano-node/cabal.project.local && \
+    if [ "${IGNORE_ASSERTS}" = "1" ]; then \
+      sed -i 's/-fno-ignore-asserts/-fignore-asserts/g' \
+        /usr/local/src/cardano-node/cabal.project.local; \
+    fi
 
 WORKDIR /usr/local/src/cardano-node/cardano-node
 
@@ -106,6 +113,18 @@ RUN cabal update && \
 
 RUN cabal install exe:tx-generator --disable-test --install-method=copy \
       --installdir=/usr/local/bin --overwrite-policy=always
+
+# tx-centrifuge (optional — only present on cardano-node revs that ship it).
+# When absent, install a stub so the unconditional COPY in the runtime stage
+# still succeeds; invoking it prints a clear error.
+
+RUN if [ -d /usr/local/src/cardano-node/bench/tx-centrifuge ]; then \
+      cabal install exe:tx-centrifuge --disable-test --install-method=copy \
+        --installdir=/usr/local/bin --overwrite-policy=always; \
+    else \
+      printf '#!/bin/sh\necho "tx-centrifuge not available in this cardano-node revision" >&2\nexit 127\n' \
+        > /usr/local/bin/tx-centrifuge && chmod +x /usr/local/bin/tx-centrifuge; \
+    fi
 
 # process_exporter
 
@@ -183,6 +202,7 @@ RUN ldconfig
 COPY --from=build --chown=root:root /usr/local/bin/cardano-cli /usr/local/bin/cardano-cli
 COPY --from=build --chown=root:root /usr/local/bin/cardano-node /usr/local/bin/cardano-node
 COPY --from=build --chown=root:root /usr/local/bin/tx-generator /usr/local/bin/tx-generator
+COPY --from=build --chown=root:root /usr/local/bin/tx-centrifuge /usr/local/bin/tx-centrifuge
 COPY --from=build --chown=root:root /usr/local/bin/node_exporter /usr/local/bin/node_exporter
 COPY --from=build --chown=root:root /usr/local/bin/process_exporter /usr/local/bin/process_exporter
 

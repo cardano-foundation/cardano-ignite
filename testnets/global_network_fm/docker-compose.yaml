@@ -1,5 +1,22 @@
 ---
 
+# Fancy global testnet — single pool in EU, with observers in NA and AS.
+#
+# Logical topology:
+#   c2 (eu, txg) --> p1r1 (eu, privaterelay) --> p1bp (eu, bp)
+#                          ^
+#                          |
+#               c1 (na, client), c3 (as, client) sync from p1r1
+#
+# Notes:
+# - poolCount = 1 in testnet.yaml.
+# - p1r1 is configured as a privaterelay because the default "relay" topology
+#   in cardano-node/cmd.sh assumes >=2 pools (ring topology). privaterelay
+#   talks only to p1bp; the txg/client containers reach p1r1 explicitly via
+#   EXTRA_LOCALROOTS.
+# - p1bp's hardcoded topology lists p1r1/p1r2/p1r3 — only p1r1 resolves here;
+#   the missing entries produce benign log noise.
+
 x-base: &base
   restart: unless-stopped
   cap_add:
@@ -11,38 +28,29 @@ x-base: &base
       loki-url: "http://127.0.0.1:3100/loki/api/v1/push"
       loki-retries: "5"
 
-x-cardano_node_10_7_1: &cardano_node_10_7_1
-  image: ${testnet}-10.7.1-prof${PROFILING:-0}:latest
+x-cardano_node: &cardano_node
+  image: ${testnet}-a93ad97-prof${PROFILING:-0}:latest
   build:
     context: "../../"
     dockerfile: "cardano-node/Dockerfile.source"
     args:
-      CARDANO_NODE_REF: "10.7.1"
+      CARDANO_NODE_REF: "a93ad9776c0f28144386067e5406f3fad3bd133a"
       TESTNET_BUILDER_IMAGE: ${TESTNET_BUILDER_IMAGE}
       HASKELL_BUILDER_IMAGE: ${HASKELL_BUILDER_IMAGE}
       PROFILING: ${PROFILING:-}
 
-x-cardano_node_10_5_4: &cardano_node_10_5_4
-  image: ${testnet}-10.5.4-prof${PROFILING:-0}:latest
+# Dedicated tx-generator image built from the commit that ships tx-centrifuge.
+x-cardano_node_txg: &cardano_node_txg
+  image: ${testnet}-06f7903_txg-prof${PROFILING:-0}:latest
   build:
     context: "../../"
     dockerfile: "cardano-node/Dockerfile.source"
     args:
-      CARDANO_NODE_REF: "10.5.4"
+      CARDANO_NODE_REF: "3ea9fb36e6d69faaaa1b5f00c2407eb24d3f868e"
       TESTNET_BUILDER_IMAGE: ${TESTNET_BUILDER_IMAGE}
       HASKELL_BUILDER_IMAGE: ${HASKELL_BUILDER_IMAGE}
       PROFILING: ${PROFILING:-}
-
-x-cardano_node_10_6_4: &cardano_node_10_6_4
-  image: ${testnet}-10.6.4-prof${PROFILING:-0}:latest
-  build:
-    context: "../../"
-    dockerfile: "cardano-node/Dockerfile.source"
-    args:
-      CARDANO_NODE_REF: "10.6.4"
-      TESTNET_BUILDER_IMAGE: ${TESTNET_BUILDER_IMAGE}
-      HASKELL_BUILDER_IMAGE: ${HASKELL_BUILDER_IMAGE}
-      PROFILING: ${PROFILING:-}
+      IGNORE_ASSERTS: "1"
 
 x-base_eu: &base_eu
   <<: *base
@@ -130,7 +138,7 @@ x-base_gw: &base_gw
 
 networks:
 
-  # Defalt Network
+  # Default Network
   # Used for communicating with the host
   default:
     driver: bridge
@@ -251,7 +259,7 @@ services:
 
   # Block Producer
   p1bp:
-    <<: [*base_na, *cardano_node_10_7_1]
+    <<: [*base_eu, *cardano_node]
     container_name: p1bp
     hostname: p1bp.example
     volumes:
@@ -263,13 +271,13 @@ services:
       PEER_SHARING: "false"
       EGRESS_POLL_INTERVAL: 0.001
     networks:
-      net_na:
-        ipv4_address: 172.16.1.101
-    profiles: [build, core, na, p1]
+      net_eu:
+        ipv4_address: 172.16.3.101
+    profiles: [build, core, eu, p1]
 
-  # Relay
+  # Relay (private; only peer of p1bp; reached by clients via EXTRA_LOCALROOTS)
   p1r1:
-    <<: [*base_na, *cardano_node_10_7_1]
+    <<: [*base_eu, *cardano_node]
     container_name: p1r1
     hostname: p1r1.example
     volumes:
@@ -278,398 +286,13 @@ services:
     environment:
       POOL_ID: "1"
       RELAY_ID: "1"
-      TYPE: relay
-      EGRESS_POLL_INTERVAL: 0.001
-    networks:
-      net_na:
-        ipv4_address: 172.16.1.102
-    profiles: [build, core, na, p1, p1relays]
-
-  # Relay
-  p1r2:
-    <<: [*base_na, *cardano_node_10_7_1]
-    container_name: p1r2
-    hostname: p1r2.example
-    volumes:
-      - p1r2:/opt/cardano-node/data
-      - synth:/opt/synth:ro
-    environment:
-      POOL_ID: "1"
-      RELAY_ID: "2"
-      TYPE: relay
-      EGRESS_POLL_INTERVAL: 0.001
-    networks:
-      net_na:
-        ipv4_address: 172.16.1.103
-    profiles: [build, core, na, p1, p1relays]
-
-  # Relay
-  p1r3:
-    <<: [*base_na, *cardano_node_10_7_1]
-    container_name: p1r3
-    hostname: p1r3.example
-    volumes:
-      - p1r3:/opt/cardano-node/data
-      - synth:/opt/synth:ro
-    environment:
-      POOL_ID: "1"
-      RELAY_ID: "3"
       TYPE: privaterelay
       EGRESS_POLL_INTERVAL: 0.001
-    networks:
-      net_na:
-        ipv4_address: 172.16.1.104
-    profiles: [na, p1, p1relays, privaterelays]
-
-  # Pool 2
-
-  # Block Producer
-  p2bp:
-    <<: [*base_eu, *cardano_node_10_6_4]
-    container_name: p2bp
-    hostname: p2bp.example
-    volumes:
-      - p2bp:/opt/cardano-node/data
-      - synth:/opt/synth:ro
-    environment:
-      POOL_ID: "2"
-      TYPE: bp
-      PEER_SHARING: "false"
-    networks:
-      net_eu:
-        ipv4_address: 172.16.3.101
-    profiles: [build, core, eu, p2]
-
-  # Relay
-  p2r1:
-    <<: [*base_eu, *cardano_node_10_6_4]
-    container_name: p2r1
-    hostname: p2r1.example
-    volumes:
-      - p2r1:/opt/cardano-node/data
-      - synth:/opt/synth:ro
-    environment:
-      POOL_ID: "2"
-      RELAY_ID: "1"
-      TYPE: relay
+      EXTRA_LOCALROOTS: "c1.example:3001,c2.example:3001,c3.example:3001,c4.example:3001"
     networks:
       net_eu:
         ipv4_address: 172.16.3.102
-    profiles: [build, core, eu, p2, p2relays]
-
-  # Relay
-  p2r2:
-    <<: [*base_eu, *cardano_node_10_6_4]
-    container_name: p2r2
-    hostname: p2r2.example
-    volumes:
-      - p2r2:/opt/cardano-node/data
-      - synth:/opt/synth:ro
-    environment:
-      POOL_ID: "2"
-      RELAY_ID: "2"
-      TYPE: relay
-    networks:
-      net_eu:
-        ipv4_address: 172.16.3.103
-    profiles: [build, core, eu, p2, p2relays]
-
-  # Relay
-  p2r3:
-    <<: [*base_eu, *cardano_node_10_6_4]
-    container_name: p2r3
-    hostname: p2r3.example
-    volumes:
-      - p2r3:/opt/cardano-node/data
-      - synth:/opt/synth:ro
-    environment:
-      POOL_ID: "2"
-      RELAY_ID: "3"
-      TYPE: privaterelay
-    networks:
-      net_eu:
-        ipv4_address: 172.16.3.104
-    profiles: [eu, p2, p2relays, privaterelays]
-
-  # Pool 3
-
-  # Block Producer
-  p3bp:
-    <<: [*base_as, *cardano_node_10_5_4]
-    container_name: p3bp
-    hostname: p3bp.example
-    volumes:
-      - p3bp:/opt/cardano-node/data
-      - synth:/opt/synth:ro
-    environment:
-      POOL_ID: "3"
-      TYPE: bp
-      PEER_SHARING: "false"
-    networks:
-      net_as:
-        ipv4_address: 172.16.4.101
-    profiles: [build, core, as, p3]
-
-  # Relay
-  p3r1:
-    <<: [*base_as, *cardano_node_10_5_4]
-    container_name: p3r1
-    hostname: p3r1.example
-    volumes:
-      - p3r1:/opt/cardano-node/data
-      - synth:/opt/synth:ro
-    environment:
-      POOL_ID: "3"
-      RELAY_ID: "1"
-      TYPE: relay
-    networks:
-      net_as:
-        ipv4_address: 172.16.4.102
-    profiles: [build, core, as, p3, p3relays]
-
-  # Relay
-  p3r2:
-    <<: [*base_as, *cardano_node_10_5_4]
-    container_name: p3r2
-    hostname: p3r2.example
-    volumes:
-      - p3r2:/opt/cardano-node/data
-      - synth:/opt/synth:ro
-    environment:
-      POOL_ID: "3"
-      RELAY_ID: "2"
-      TYPE: relay
-    networks:
-      net_as:
-        ipv4_address: 172.16.4.103
-    profiles: [build, core, as, p3, p3relays]
-
-  # Relay
-  p3r3:
-    <<: [*base_as, *cardano_node_10_5_4]
-    container_name: p3r3
-    hostname: p3r3.example
-    volumes:
-      - p3r3:/opt/cardano-node/data
-      - synth:/opt/synth:ro
-    environment:
-      POOL_ID: "3"
-      RELAY_ID: "3"
-      TYPE: privaterelay
-    networks:
-      net_as:
-        ipv4_address: 172.16.4.104
-    profiles: [p3, p3relays, privaterelays]
-
-  # Pool 4
-
-  # Block Producer
-  p4bp:
-    <<: [*base_eu, *cardano_node_10_5_4]
-    container_name: p4bp
-    hostname: p4bp.example
-    volumes:
-      - p4bp:/opt/cardano-node/data
-      - synth:/opt/synth:ro
-    environment:
-      POOL_ID: "4"
-      TYPE: bp
-      PEER_SHARING: "false"
-    networks:
-      net_eu:
-        ipv4_address: 172.16.3.111
-    profiles: [build, core, eu, p4]
-
-  # Relay
-  p4r1:
-    <<: [*base_eu, *cardano_node_10_5_4]
-    container_name: p4r1
-    hostname: p4r1.example
-    volumes:
-      - p4r1:/opt/cardano-node/data
-      - synth:/opt/synth:ro
-    environment:
-      POOL_ID: "4"
-      RELAY_ID: "1"
-      TYPE: relay
-    networks:
-      net_eu:
-        ipv4_address: 172.16.3.112
-    profiles: [build, core, eu, p4, p4relays]
-
-  # Relay
-  p4r2:
-    <<: [*base_eu, *cardano_node_10_5_4]
-    container_name: p4r2
-    hostname: p4r2.example
-    volumes:
-      - p4r2:/opt/cardano-node/data
-      - synth:/opt/synth:ro
-    environment:
-      POOL_ID: "4"
-      RELAY_ID: "2"
-      TYPE: relay
-    networks:
-      net_eu:
-        ipv4_address: 172.16.3.113
-    profiles: [build, core, eu, p4, p4relays]
-
-  # Relay
-  p4r3:
-    <<: [*base_eu, *cardano_node_10_5_4]
-    container_name: p4r3
-    hostname: p4r3.example
-    volumes:
-      - p4r3:/opt/cardano-node/data
-      - synth:/opt/synth:ro
-    environment:
-      POOL_ID: "4"
-      RELAY_ID: "3"
-      TYPE: privaterelay
-    networks:
-      net_eu:
-        ipv4_address: 172.16.3.114
-    profiles: [eu, p4, p4relays, privaterelays]
-
-  # Pool 5
-
-  # Block Producer
-  p5bp:
-    <<: [*base_na, *cardano_node_10_5_4]
-    container_name: p5bp
-    hostname: p5bp.example
-    volumes:
-      - p5bp:/opt/cardano-node/data
-      - synth:/opt/synth:ro
-    environment:
-      POOL_ID: "5"
-      TYPE: bp
-      PEER_SHARING: "false"
-    networks:
-      net_na:
-        ipv4_address: 172.16.1.111
-    profiles: [build, core, na, p5]
-
-  # Relay
-  p5r1:
-    <<: [*base_na, *cardano_node_10_5_4]
-    container_name: p5r1
-    hostname: p5r1.example
-    volumes:
-      - p5r1:/opt/cardano-node/data
-      - synth:/opt/synth:ro
-    environment:
-      POOL_ID: "5"
-      RELAY_ID: "1"
-      TYPE: relay
-    networks:
-      net_na:
-        ipv4_address: 172.16.1.112
-    profiles: [build, core, na, p5, p5relays]
-
-  # Relay
-  p5r2:
-    <<: [*base_na, *cardano_node_10_5_4]
-    container_name: p5r2
-    hostname: p5r2.example
-    volumes:
-      - p5r2:/opt/cardano-node/data
-      - synth:/opt/synth:ro
-    environment:
-      POOL_ID: "5"
-      RELAY_ID: "2"
-      TYPE: relay
-    networks:
-      net_na:
-        ipv4_address: 172.16.1.123
-    profiles: [build, core, na, p5, p5relays]
-
-  # Relay
-  p5r3:
-    <<: [*base_na, *cardano_node_10_5_4]
-    container_name: p5r3
-    hostname: p5r3.example
-    volumes:
-      - p5r3:/opt/cardano-node/data
-      - synth:/opt/synth:ro
-    environment:
-      POOL_ID: "5"
-      RELAY_ID: "3"
-      TYPE: privaterelay
-    networks:
-      net_na:
-        ipv4_address: 172.16.1.124
-    profiles: [na, p5, p5relays, privaterelays]
-
-  # Pool 6
-
-  # Block Producer
-  p6bp:
-    <<: [*base_eu, *cardano_node_10_5_4]
-    container_name: p6bp
-    hostname: p6bp.example
-    volumes:
-      - p6bp:/opt/cardano-node/data
-      - synth:/opt/synth:ro
-    environment:
-      POOL_ID: "6"
-      TYPE: bp
-      PEER_SHARING: "false"
-    networks:
-      net_eu:
-        ipv4_address: 172.16.3.121
-    profiles: [build, core, eu, p6]
-
-  # Relay
-  p6r1:
-    <<: [*base_eu, *cardano_node_10_5_4]
-    container_name: p6r1
-    hostname: p6r1.example
-    volumes:
-      - p6r1:/opt/cardano-node/data
-      - synth:/opt/synth:ro
-    environment:
-      POOL_ID: "6"
-      RELAY_ID: "1"
-      TYPE: relay
-    networks:
-      net_eu:
-        ipv4_address: 172.16.3.122
-    profiles: [build, core, eu, p6, p6relays]
-
-  # Relay
-  p6r2:
-    <<: [*base_eu, *cardano_node_10_5_4]
-    container_name: p6r2
-    hostname: p6r2.example
-    volumes:
-      - p6r2:/opt/cardano-node/data
-      - synth:/opt/synth:ro
-    environment:
-      POOL_ID: "6"
-      RELAY_ID: "2"
-      TYPE: relay
-    networks:
-      net_eu:
-        ipv4_address: 172.16.3.123
-    profiles: [build, core, eu, p6, p6relays]
-
-  # Relay
-  p6r3:
-    <<: [*base_eu, *cardano_node_10_5_4]
-    container_name: p6r3
-    hostname: p6r3.example
-    volumes:
-      - p6r3:/opt/cardano-node/data
-      - synth:/opt/synth:ro
-    environment:
-      POOL_ID: "6"
-      RELAY_ID: "3"
-      TYPE: privaterelay
-    networks:
-      net_eu:
-        ipv4_address: 172.16.3.124
-    profiles: [eu, p6, p6relays, privaterelays]
+    profiles: [build, core, eu, p1, p1relays]
 
   # North America Gateway
   nagw:
@@ -769,7 +392,7 @@ services:
     restart: unless-stopped
     command: -conf /etc/coredns/corefile
     volumes:
-      - ./coredns:/etc/coredns # Mount custom corefile
+      - ./coredns:/etc/coredns
     networks:
       net_na:
         ipv4_address: 172.16.1.2
@@ -793,7 +416,7 @@ services:
       dockerfile: "sidecar/Dockerfile"
     environment:
       TOPOLOGY: "fancy"
-      POOLS: "6"
+      POOLS: "1"
     volumes:
       - synth:/opt/synth:ro
     cap_add:
@@ -822,10 +445,9 @@ services:
       dockerfile: "db-synthesizer/Dockerfile"
     profiles: [build, core, mgmt]
 
-  # Client 1
-  # Used by cardano-db-sync
+  # Client 1 — passive observer in NA, also used by cardano-db-sync
   c1:
-    <<: [*base_eu, *cardano_node_10_5_4]
+    <<: [*base_na, *cardano_node]
     container_name: c1
     hostname: c1.example
     volumes:
@@ -836,14 +458,17 @@ services:
       TYPE: "client"
       UTXOHD: "true"
       SYSTEM_START: ${SYSTEM_START:-}
+      EXTRA_LOCALROOTS: "p1r1.example:3001"
     networks:
-      net_eu:
-        ipv4_address: 172.16.3.4
-    profiles: [build, core, eu]
+      net_na:
+        ipv4_address: 172.16.1.4
+    profiles: [build, core, na]
 
-  # TX generator 1
+  # TX generator in EU — feeds transactions into p1r1.
+  # Uses the dedicated tx-generator image (cardano_node_txg) built from the
+  # commit that ships tx-centrifuge.
   c2:
-    <<: [*base_na, *cardano_node_10_5_4]
+    <<: [*base_eu, *cardano_node_txg]
     container_name: c2
     hostname: c2.example
     volumes:
@@ -852,15 +477,60 @@ services:
     environment:
       POOL_ID: "1"
       TYPE: "txg"
-      TPS: "1"
-      TX_GEN_MODE: "plain"
-      #TX_GEN_MODE: "plutus"
+      TPS: "108"
+      TX_GEN_MODE: "centrifuge"
       UTXOHD: "true"
       SYSTEM_START: ${SYSTEM_START:-}
+      EXTRA_LOCALROOTS: "p1r1.example:3001"
+      TX_GENERATOR_TARGETS: "p1r1.example"
+      CENTRIFUGE_INPUTS_PER_TX: "1"
+      CENTRIFUGE_OUTPUTS_PER_TX: "2"
+      CENTRIFUGE_FEE: "1000000"
+      CENTRIFUGE_RECYCLE: "on_pull"
+      CENTRIFUGE_MAX_BATCH_SIZE: "500"
     networks:
-      net_na:
-        ipv4_address: 172.16.1.12
-    profiles: [build, na, optional, tx-generators]
+      net_eu:
+        ipv4_address: 172.16.3.20
+    profiles: [build, eu, optional, tx-generators]
+
+  # Client 3 — passive observer in Asia
+  c3:
+    <<: [*base_as, *cardano_node]
+    container_name: c3
+    hostname: c3.example
+    volumes:
+      - c3:/opt/cardano-node
+      - synth:/opt/synth:ro
+    environment:
+      POOL_ID: "1"
+      TYPE: "client"
+      UTXOHD: "true"
+      SYSTEM_START: ${SYSTEM_START:-}
+      EXTRA_LOCALROOTS: "p1r1.example:3001"
+    networks:
+      net_as:
+        ipv4_address: 172.16.4.4
+    profiles: [build, core, as]
+
+  # Client 4 — passive observer in Asia, pinned to tx-submission v1
+  c4:
+    <<: [*base_as, *cardano_node]
+    container_name: c4
+    hostname: c4.example
+    volumes:
+      - c4:/opt/cardano-node
+      - synth:/opt/synth:ro
+    environment:
+      POOL_ID: "1"
+      TYPE: "client"
+      UTXOHD: "true"
+      SYSTEM_START: ${SYSTEM_START:-}
+      EXTRA_LOCALROOTS: "p1r1.example:3001"
+      TX_SUBMISSION_LOGIC_VERSION: "1"
+    networks:
+      net_as:
+        ipv4_address: 172.16.4.6
+    profiles: [build, core, as]
 
   # PostgreSQL Database
   db:
@@ -1043,30 +713,10 @@ services:
 volumes:
   p1bp:
   p1r1:
-  p1r2:
-  p1r3:
-  p2bp:
-  p2r1:
-  p2r2:
-  p2r3:
-  p3bp:
-  p3r1:
-  p3r2:
-  p3r3:
-  p4bp:
-  p4r1:
-  p4r2:
-  p4r3:
-  p5bp:
-  p5r1:
-  p5r2:
-  p5r3:
-  p6bp:
-  p6r1:
-  p6r2:
-  p6r3:
   c1:
   c2:
+  c3:
+  c4:
   db:
   dbsync:
   prometheus:

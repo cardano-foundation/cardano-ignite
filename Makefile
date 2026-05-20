@@ -75,6 +75,10 @@ testnets/%/prometheus/prometheus.yml: scripts/prometheus_targets.sh testnets/%/d
 	mkdir -p testnets/${testnet}/prometheus/
 	./scripts/prometheus_targets.sh testnets/$*/docker-compose.yaml >$@
 
+testnets/%/prometheus/rules.yml: scripts/prometheus_rules.sh testnets/%/testnet.yaml
+	mkdir -p testnets/${testnet}/prometheus/
+	./scripts/prometheus_rules.sh testnets/$*/testnet.yaml >$@
+
 testnets/%/.env.tmp: TESTNET
 	export SYSTEM_START=$$(date -u +'%Y-%m-%dT%H:%M:%SZ') \
 	&& echo "SYSTEM_START=$${SYSTEM_START}" > testnets/$*/.env.tmp \
@@ -90,7 +94,7 @@ testnets/%/.env.tmp: TESTNET
 		echo "SHUTDOWN_ON_BLOCK=$${SHUTDOWN_ON_BLOCK}" >> testnets/$*/.env.tmp; \
 	fi
 
-build: TESTNET prerequisites testnets/${testnet}/graph_nodes.sql testnets/${testnet}/coredns/example.zone testnets/${testnet}/prometheus/prometheus.yml ## Build testnet
+build: TESTNET prerequisites testnets/${testnet}/graph_nodes.sql testnets/${testnet}/coredns/example.zone testnets/${testnet}/prometheus/prometheus.yml testnets/${testnet}/prometheus/rules.yml ## Build testnet
 	ln -snf testnets/${testnet}/testnet.yaml .testnet.yaml && \
 	$(HOST_INTERFACE_SETUP) && \
 	docker build -t ${testnet}-testnet_builder -f testnet-generation-tool/Dockerfile . && \
@@ -99,7 +103,7 @@ build: TESTNET prerequisites testnets/${testnet}/graph_nodes.sql testnets/${test
 	TESTNET_BUILDER_IMAGE="${testnet}-testnet_builder" HASKELL_BUILDER_IMAGE="${testnet}-haskell_builder" \
 	docker compose --profile build build --build-arg GRAPHNODES="testnets/${testnet}/graph_nodes.sql" --build-arg TESTNET_BUILDER_IMAGE="${testnet}-testnet_builder" --build-arg HASKELL_BUILDER_IMAGE="${testnet}-haskell_builder" --build-arg PROFILING=$(PROFILING)
 
-cibuild: TESTNET prerequisites testnets/${testnet}/graph_nodes.sql testnets/${testnet}/coredns/example.zone testnets/${testnet}/prometheus/prometheus.yml ## Build testnet
+cibuild: TESTNET prerequisites testnets/${testnet}/graph_nodes.sql testnets/${testnet}/coredns/example.zone testnets/${testnet}/prometheus/prometheus.yml testnets/${testnet}/prometheus/rules.yml ## Build testnet
 	ln -snf testnets/${testnet}/testnet.yaml .testnet.yaml && \
 	$(HOST_INTERFACE_SETUP) && \
 	docker buildx create --use && \
@@ -177,3 +181,4 @@ clean:
 	rm -rf testnets/*/.env.tmp
 	rm -rf testnets/*/coredns
 	rm -rf testnets/*/prometheus
+	rm -rf testnets/*/prometheus/rules.yml

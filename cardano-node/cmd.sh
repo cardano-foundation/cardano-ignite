@@ -449,7 +449,14 @@ canary_tx() {
 }
 
 tx_generator() {
-    /tx-generator.sh >/dev/null 2>&1
+    case "${TX_GEN_MODE,,}" in
+        "centrifuge")
+            /tx-centrifuge.sh
+            ;;
+        *)
+            /tx-generator.sh
+            ;;
+    esac
 }
 
 config_pgpass() {
