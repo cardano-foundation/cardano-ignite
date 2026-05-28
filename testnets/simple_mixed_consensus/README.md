@@ -5,8 +5,8 @@ Testing in-memory and disk-based UTXO HD.
 
 ## Cardano-Node
 
-- **Version**: 10.5.4
-- **Branch**: 10.5.4
+- **Version**: 11.0.1
+- **Branch**: 11.0.1
 - **Binary/Source**: Source
 
 ## Testnet

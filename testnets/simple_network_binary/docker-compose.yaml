@@ -9,22 +9,13 @@ x-base: &base
       loki-url: "http://127.0.0.1:3100/loki/api/v1/push"
       loki-retries: "5"
 
-x-cardano_node_10_5_1: &cardano_node_10_5_1
-  image: ${testnet}-10.5.1-prof${PROFILING:-0}:latest
+x-cardano_node_11_0_1: &cardano_node_11_0_1
+  image: ${testnet}-11.0.1-prof${PROFILING:-0}:latest
   build:
     context: "../../"
     dockerfile: "cardano-node/Dockerfile.binary"
     args:
-      CARDANO_NODE_VERSION: "10.5.1"
-      TESTNET_BUILDER_IMAGE: ${TESTNET_BUILDER_IMAGE}
-
-x-cardano_node_10_5_4: &cardano_node_10_5_4
-  image: ${testnet}-10.5.4-prof${PROFILING:-0}:latest
-  build:
-    context: "../../"
-    dockerfile: "cardano-node/Dockerfile.binary"
-    args:
-      CARDANO_NODE_VERSION: "10.5.4"
+      CARDANO_NODE_VERSION: "11.0.1"
       TESTNET_BUILDER_IMAGE: ${TESTNET_BUILDER_IMAGE}
 
 x-env: &env
@@ -36,7 +27,7 @@ x-env: &env
 
 services:
   p1:
-    <<: [*base, *cardano_node_10_5_4]
+    <<: [*base, *cardano_node_11_0_1]
     container_name: p1
     hostname: p1.example
     volumes:
@@ -48,7 +39,7 @@ services:
     profiles: [build, core, pools]
 
   p2:
-    <<: [*base, *cardano_node_10_5_4]
+    <<: [*base, *cardano_node_11_0_1]
     container_name: p2
     hostname: p2.example
     volumes:
@@ -61,7 +52,7 @@ services:
     profiles: [build, core, pools]
 
   p3:
-    <<: [*base, *cardano_node_10_5_1]
+    <<: [*base, *cardano_node_11_0_1]
     container_name: p3
     hostname: p3.example
     volumes:
@@ -114,7 +105,7 @@ services:
   # Client 1
   # Used by cardano-db-sync
   c1:
-    <<: [*base, *cardano_node_10_5_4]
+    <<: [*base, *cardano_node_11_0_1]
     container_name: c1
     hostname: c1.example
     volumes:

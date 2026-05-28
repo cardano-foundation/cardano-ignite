@@ -26,12 +26,12 @@ RUN apt update && \
 RUN install --directory --owner=root --group=root --mode=0755 /usr/local/src/cardano-node
 
 RUN curl --proto '=https' --tlsv1.2 \
-        --location https://github.com/IntersectMBO/cardano-node/releases/download/${CARDANO_NODE_VERSION}/cardano-node-${CARDANO_NODE_VERSION}-linux.tar.gz \
-        --output /usr/local/src/cardano-node/cardano-node-${CARDANO_NODE_VERSION}-linux.tar.gz
+        --location https://github.com/IntersectMBO/cardano-node/releases/download/${CARDANO_NODE_VERSION}/cardano-node-${CARDANO_NODE_VERSION}-linux-amd64.tar.gz \
+        --output /usr/local/src/cardano-node/cardano-node-${CARDANO_NODE_VERSION}-linux-amd64.tar.gz
 
 RUN install --directory --owner=root --group=root --mode=0755 /usr/local/src/cardano-node/${CARDANO_NODE_VERSION}
 
-RUN tar --extract --gzip --file=/usr/local/src/cardano-node/cardano-node-${CARDANO_NODE_VERSION}-linux.tar.gz --directory=/usr/local/src/cardano-node/${CARDANO_NODE_VERSION}
+RUN tar --extract --gzip --file=/usr/local/src/cardano-node/cardano-node-${CARDANO_NODE_VERSION}-linux-amd64.tar.gz --directory=/usr/local/src/cardano-node/${CARDANO_NODE_VERSION}
 
 RUN chmod 0755 /usr/local/src/cardano-node/${CARDANO_NODE_VERSION}/bin/cardano-cli \
         /usr/local/src/cardano-node/${CARDANO_NODE_VERSION}/bin/cardano-node
