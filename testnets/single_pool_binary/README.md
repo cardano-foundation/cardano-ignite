@@ -1,10 +1,10 @@
 # Description
 
-Simple testnet with pre-compiled cardano-node version 10.5.4.
+Simple testnet with pre-compiled cardano-node version 11.0.1.
 
 ## Cardano-Node
 
-- **Version**: 10.5.4
+- **Version**: 11.0.1
 - **Branch**: -
 - **Binary/Source**: Binary
 

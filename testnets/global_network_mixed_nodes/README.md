@@ -1,11 +1,11 @@
 # Description
 
-Global testnet with cardano-node version 10.5.4 and amaru nodes.
+Global testnet with cardano-node version 11.0.1 and amaru nodes.
 4 epochs of blocks is generated before the nodes starts.
 
 ## Cardano-Node
 
-- **Version**: 10.5.4
+- **Version**: 11.0.1
 - **Branch**: -
 - **Binary/Source**: Source
 
