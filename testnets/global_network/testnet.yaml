@@ -57,25 +57,17 @@ TestBabbageHardForkAtEpoch: 0
 TestConwayHardForkAtEpoch: 0
 TestMaryHardForkAtEpoch: 0
 TestShelleyHardForkAtEpoch: 0
-TraceBlockFetchClient: true
-TraceChainSyncClient: true
-TraceConnectionManager: true
-TraceConnectionManagerTransitions: false
-TraceDNSResolver: false
-TraceDNSSubscription: false
-TraceDebugPeerSelection: false
-TraceForge: true
-TraceForgeStateInfo: false
-TraceHandshake: false
-TraceInboundGovernor: true
-TraceIpSubscription: false
-TraceLedgerPeers: false
-TraceLocalConnectionManager: false
-TraceLocalHandshake: false
-TraceLocalRootPeers: false
-TraceMempool: true
-TracePeerSelection: true
-TracePeerSelectionActions: true
-TracePublicRootPeers: false
-TraceServer: true
 TurnOnLogMetrics: true
+TraceOptions:
+  Mempool:
+    severity: Info
+  BlockFetch.Client:
+    severity: Info
+  ChainSync.Client:
+    severity: Info
+  Net.InboundGovernor:
+    severity: Info
+  Net.PeerSelection.Actions:
+    severity: Info
+  Net.Server:
+    severity: Info

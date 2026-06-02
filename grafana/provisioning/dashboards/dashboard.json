@@ -2729,7 +2729,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "cardano_node_metrics_forks_int",
+          "expr": "cardano_node_metrics_forks_counter",
           "interval": "",
           "legendFormat": "{{instance}}",
           "range": true,
@@ -3501,7 +3501,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "cardano_node_metrics_Forge_forged_int - cardano_node_metrics_Forge_adopted_int",
+          "expr": "cardano_node_metrics_Forge_forged_counter - cardano_node_metrics_Forge_adopted_counter",
           "interval": "",
           "legendFormat": "{{instance}}",
           "range": true,
@@ -3605,7 +3605,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "cardano_node_metrics_slotsMissedNum_int",
+          "expr": "cardano_node_metrics_slotsMissed_int",
           "interval": "",
           "legendFormat": "{{instance}}",
           "range": true,
@@ -3710,7 +3710,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "(rate(cardano_node_metrics_Forge_node_is_leader_int[1h])/rate(cardano_node_metrics_slotNum_int[1h]))",
+          "expr": "(rate(cardano_node_metrics_Forge_node_is_leader_counter[1h])/rate(cardano_node_metrics_slotNum_int[1h]))",
           "interval": "",
           "legendFormat": "{{instance}}",
           "range": true,
@@ -3866,7 +3866,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "cardano_node_metrics_blockfetchclient_blockdelay_cdfOne",
+          "expr": "cardano_node_metrics_blockfetchclient_blockdelay_cdfOne_real",
           "interval": "",
           "legendFormat": "{{instance}}",
           "range": true,
@@ -3970,7 +3970,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "cardano_node_metrics_blockfetchclient_blockdelay_cdfThree",
+          "expr": "cardano_node_metrics_blockfetchclient_blockdelay_cdfThree_real",
           "interval": "",
           "legendFormat": "{{instance}}",
           "range": true,
@@ -4074,7 +4074,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "cardano_node_metrics_blockfetchclient_blockdelay_cdfFive",
+          "expr": "cardano_node_metrics_blockfetchclient_blockdelay_cdfFive_real",
           "interval": "",
           "legendFormat": "{{instance}}",
           "range": true,
@@ -4179,7 +4179,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "cardano_node_metrics_blockfetchclient_blockdelay_s*1000",
+          "expr": "cardano_node_metrics_blockfetchclient_blockdelay_real*1000",
           "interval": "",
           "legendFormat": "{{instance}}",
           "range": true,
@@ -4284,7 +4284,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "rate(cardano_node_metrics_served_block_latest_count_int[1h])/rate(cardano_node_metrics_blockNum_int[1h])*100",
+          "expr": "rate(cardano_node_metrics_served_block_counter[1h])/rate(cardano_node_metrics_blockNum_int[1h])*100",
           "interval": "",
           "legendFormat": "{{instance}}",
           "range": true,
@@ -4388,7 +4388,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "cardano_node_metrics_peerSelection_ActiveBigLedgerPeers",
+          "expr": "cardano_node_metrics_peerSelection_ActiveBigLedgerPeers_int",
           "interval": "",
           "legendFormat": "{{instance}}",
           "range": true,
@@ -4492,7 +4492,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "cardano_node_metrics_inboundGovernor_warm",
+          "expr": "cardano_node_metrics_inboundGovernor_warm_int",
           "interval": "",
           "legendFormat": "{{instance}}",
           "range": true,
@@ -4596,7 +4596,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "cardano_node_metrics_inboundGovernor_hot",
+          "expr": "cardano_node_metrics_inboundGovernor_hot_int",
           "interval": "",
           "legendFormat": "{{instance}}",
           "range": true,
@@ -4700,7 +4700,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "cardano_node_metrics_peerSelection_hot",
+          "expr": "cardano_node_metrics_peerSelection_Hot_int",
           "interval": "",
           "legendFormat": "{{instance}}",
           "range": true,
@@ -4831,7 +4831,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "rate(cardano_node_metrics_txsProcessedNum_int{instance!~\"otlp.*\"}[1h])",
+          "expr": "rate(cardano_node_metrics_txsProcessedNum_counter{instance!~\"otlp.*\"}[1h])",
           "interval": "",
           "legendFormat": "{{instance}}",
           "range": true,
@@ -4843,7 +4843,7 @@
             "uid": "prometheus_uid"
           },
           "editorMode": "code",
-          "expr": "rate(cardano_node_metrics_txsProcessedNum_int_total{job=\"amaru\"}[1h])",
+          "expr": "rate(cardano_node_metrics_txsProcessedNum_counter{job=\"amaru\"}[1h])",
           "hide": false,
           "interval": "",
           "legendFormat": "{{exported_job}}",
