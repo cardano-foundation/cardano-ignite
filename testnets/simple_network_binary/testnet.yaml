@@ -53,23 +53,7 @@ TestBabbageHardForkAtEpoch: 0
 TestConwayHardForkAtEpoch: 0
 TestMaryHardForkAtEpoch: 0
 TestShelleyHardForkAtEpoch: 0
-TraceConnectionManager: false
-TraceConnectionManagerTransitions: false
-TraceDNSResolver: false
-TraceDNSSubscription: false
-TraceDebugPeerSelection: false
-TraceForge: false
-TraceForgeStateInfo: false
-TraceHandshake: false
-TraceInboundGovernor: false
-TraceIpSubscription: false
-TraceLedgerPeers: false
-TraceLocalConnectionManager: false
-TraceLocalHandshake: false
-TraceLocalRootPeers: false
-TraceMempool: true
-TracePeerSelection: false
-TracePeerSelectionActions: false
-TracePublicRootPeers: false
-TraceServer: false
 TurnOnLogMetrics: false
+TraceOptions:
+  Mempool:
+    severity: Info

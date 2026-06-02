@@ -13,18 +13,12 @@ DB_SIDECAR_DATABASE="${DB_SIDECAR_DATABASE:-sidecar}"
 DB_SIDECAR_PASSWORD="${DB_SIDECAR_PASSWORD:-sidecar}"
 DB_SIDECAR_USERNAME="${DB_SIDECAR_USERNAME:-sidecar}"
 EGRESS_POLL_INTERVAL="${EGRESS_POLL_INTERVAL:-0}"
-EKG_PORT="${EKG_PORT:-12788}"
 EXTRA_LOCALROOTS="${EXTRA_LOCALROOTS:-}"
 NO_INTERPOOL_LOCALROOTS="${NO_INTERPOOL_LOCALROOTS:-false}"
-LOG_TO_CONSOLE="${LOG_TO_CONSOLE:-true}"
-LOG_TO_FILE="${LOG_TO_FILE:-true}"
-MIN_SEVERITY="${MIN_SEVERITY:-Info}"
 OUROBOROS_GENESIS="${OUROBOROS_GENESIS:-false}"
 PEER_SHARING="${PEER_SHARING:-true}"
 POOL_ID="${POOL_ID:-}"
 PORT="${PORT:-3001}"
-PROMETHEUS_LISTEN="${PROMETHEUS_LISTEN:-0.0.0.0}"
-PROMETHEUS_PORT="${PROMETHEUS_PORT:-12798}"
 PROFILING="${PROFILING:-}"
 SHUTDOWN_ON_BLOCK="${SHUTDOWN_ON_BLOCK:-}"
 SYSTEM_START="${SYSTEM_START:-$(date -d "@$(( ( $(date +%s) / 180 ) * 180 ))" +%Y-%m-%dT%H:%M:00Z)}"
@@ -43,9 +37,6 @@ KEY_PATH="/opt/cardano-node/pools/${POOL_ID}/keys"
 SHELLEY_GENESIS_JSON="${SHELLEY_GENESIS_JSON:-/opt/cardano-node/pools/${POOL_ID}/configs/shelley-genesis.json}"
 SOCKET_PATH="/opt/cardano-node/data/db/node.socket"
 PGPASS="$HOME/.pgpass"
-
-# Log file
-LOG_FILE="/opt/cardano-node/log/node.json"
 
 # Implement sponge-like command without the need for binary nor TMPDIR environment variable
 write_file() {
@@ -81,30 +72,6 @@ verify_environment_variables() {
 config_config_json() {
     # .AlonzoGenesisHash, .ByronGenesisHash, .ConwayGenesisHash, .ShelleyGenesisHash
     jq "del(.AlonzoGenesisHash, .ByronGenesisHash, .ConwayGenesisHash, .ShelleyGenesisHash)" "${CONFIG_JSON}" | write_file "${CONFIG_JSON}"
-
-    # .hasEKG
-    jq "del(.hasEKG)" "${CONFIG_JSON}" | write_file "${CONFIG_JSON}"
-
-    # .minSeverity
-    jq ".minSeverity = \"${MIN_SEVERITY^}\"" "${CONFIG_JSON}" | write_file "${CONFIG_JSON}"
-
-    # .hasPrometheus
-    jq ".hasPrometheus = [\"${PROMETHEUS_LISTEN}\", ${PROMETHEUS_PORT}]" "${CONFIG_JSON}" | write_file "${CONFIG_JSON}"
-
-    # .hasEKG
-    jq ".hasEKG = ${EKG_PORT}" "${CONFIG_JSON}" | write_file "${CONFIG_JSON}"
-
-    # .defaultScribes, .setupScribes
-    if [ "${LOG_TO_CONSOLE,,}" = "true" ] && [ "${LOG_TO_FILE,,}" = "true" ]; then
-        jq ".\"defaultScribes\" = [[\"StdoutSK\", \"stdout\"], [\"FileSK\", \"${LOG_FILE}\"]]" "${CONFIG_JSON}" | write_file "${CONFIG_JSON}"
-        jq ".\"setupScribes\" = [{\"scFormat\": \"ScJson\", \"scKind\": \"StdoutSK\", \"scName\": \"stdout\", \"scRotation\": null}, {\"scFormat\": \"ScJson\", \"scKind\": \"FileSK\", \"scName\": \"${LOG_FILE}\", \"scRotation\": null}]" "${CONFIG_JSON}" | write_file "${CONFIG_JSON}"
-    elif [ "${LOG_TO_CONSOLE,,}" = "false" ] && [ "${LOG_TO_FILE,,}" = "true" ]; then
-        jq ".\"defaultScribes\" = [[\"FileSK\", \"${LOG_FILE}\"]]" "${CONFIG_JSON}" | write_file "${CONFIG_JSON}"
-        jq ".\"setupScribes\" = [{\"scFormat\": \"ScJson\", \"scKind\": \"FileSK\", \"scName\": \"${LOG_FILE}\", \"scRotation\": null}]" "${CONFIG_JSON}" | write_file "${CONFIG_JSON}"
-    else
-        jq '."defaultScribes" = [["StdoutSK", "stdout"]]' "${CONFIG_JSON}" | write_file "${CONFIG_JSON}"
-        jq '."setupScribes" = [{"scFormat": "ScJson", "scKind": "StdoutSK", "scName": "stdout", "scRotation": null}]' "${CONFIG_JSON}" | write_file "${CONFIG_JSON}"
-    fi
 
     # .PeerSharing
     if [ "${PEER_SHARING,,}" = "true" ]; then

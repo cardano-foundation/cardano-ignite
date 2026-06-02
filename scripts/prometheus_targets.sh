@@ -91,7 +91,7 @@ cat <<EOF
 EOF
 
 for target in "${targets[@]}"; do
-    echo "        - http://${target}:12798"
+    echo "        - http://${target}:12798/metrics"
 done
 
 cat <<EOF
