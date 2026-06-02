@@ -5073,6 +5073,218 @@
       "type": "timeseries"
     },
     {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus_uid"
+      },
+      "description": "Bytes",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 5,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "decbytes"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 8,
+        "x": 0,
+        "y": 93
+      },
+      "id": 119,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.1.0",
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "cardano_node_metrics_mempoolBytes_int",
+          "interval": "",
+          "legendFormat": "{{instance}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Mempool Bytes",
+      "transformations": [
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "^(.*)\\..*\\:.*",
+            "renamePattern": "$1"
+          }
+        }
+      ],
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus_uid"
+      },
+      "description": "mempool size / capacity. Capacity is published as a Prometheus recording rule mempool_capacity_bytes by scripts/prometheus_rules.sh: MempoolCapacityBytesOverride if set in testnet.yaml, else 2 * (maxBlockBodySize - fixedBlockBodyOverhead).",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 5,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "max": 1,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 0.8
+              }
+            ]
+          },
+          "unit": "percentunit"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 8,
+        "x": 8,
+        "y": 93
+      },
+      "id": 120,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.1.0",
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "cardano_node_metrics_mempoolBytes_int / scalar(mempool_capacity_bytes)",
+          "interval": "",
+          "legendFormat": "{{instance}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Mempool Fullness",
+      "transformations": [
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "^(.*)\\..*\\:.*",
+            "renamePattern": "$1"
+          }
+        }
+      ],
+      "type": "timeseries"
+    },
+    {
       "fieldConfig": {
         "defaults": {},
         "overrides": []
@@ -5081,7 +5293,7 @@
         "h": 2,
         "w": 24,
         "x": 0,
-        "y": 93
+        "y": 100
       },
       "id": 91,
       "options": {
@@ -5163,7 +5375,7 @@
         "h": 7,
         "w": 8,
         "x": 0,
-        "y": 95
+        "y": 102
       },
       "id": 67,
       "options": {
@@ -5267,7 +5479,7 @@
         "h": 7,
         "w": 8,
         "x": 8,
-        "y": 95
+        "y": 102
       },
       "id": 31,
       "options": {
@@ -5372,7 +5584,7 @@
         "h": 7,
         "w": 8,
         "x": 16,
-        "y": 95
+        "y": 102
       },
       "id": 40,
       "options": {
@@ -5477,7 +5689,7 @@
         "h": 7,
         "w": 8,
         "x": 0,
-        "y": 102
+        "y": 109
       },
       "id": 39,
       "options": {
@@ -5581,7 +5793,7 @@
         "h": 7,
         "w": 8,
         "x": 8,
-        "y": 102
+        "y": 109
       },
       "id": 103,
       "options": {
@@ -5684,7 +5896,7 @@
         "h": 7,
         "w": 8,
         "x": 16,
-        "y": 102
+        "y": 109
       },
       "id": 102,
       "options": {
@@ -5787,7 +5999,7 @@
         "h": 7,
         "w": 8,
         "x": 0,
-        "y": 109
+        "y": 116
       },
       "id": 104,
       "options": {
@@ -5848,7 +6060,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 116
+        "y": 123
       },
       "id": 99,
       "panels": [
@@ -5892,7 +6104,7 @@
             "h": 2,
             "w": 24,
             "x": 0,
-            "y": 182
+            "y": 189
           },
           "id": 98,
           "options": {
@@ -6029,7 +6241,7 @@
             "h": 7,
             "w": 12,
             "x": 0,
-            "y": 184
+            "y": 191
           },
           "id": 97,
           "options": {
@@ -6165,7 +6377,7 @@
             "h": 7,
             "w": 12,
             "x": 12,
-            "y": 184
+            "y": 191
           },
           "id": 96,
           "options": {

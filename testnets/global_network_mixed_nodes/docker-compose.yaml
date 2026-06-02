@@ -984,6 +984,7 @@ services:
     volumes:
       - prometheus:/prometheus
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./prometheus/rules.yml:/etc/prometheus/rules.yml
     networks:
       net_eu:
         ipv4_address: 172.16.3.8
