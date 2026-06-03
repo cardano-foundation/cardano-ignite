@@ -919,7 +919,7 @@ services:
     profiles: [build, optional, mgmt]
 
   prometheus:
-    image: prom/prometheus:v3.11.2
+    image: prom/prometheus:v3.12.0
     container_name: prometheus
     hostname: prometheus.example
     restart: unless-stopped
@@ -968,7 +968,7 @@ services:
     profiles: [build, core, mgmt]
 
   loki:
-    image: grafana/loki:3.7.1
+    image: grafana/loki:3.7.2
     container_name: loki
     hostname: loki.example
     restart: unless-stopped
@@ -986,7 +986,7 @@ services:
     profiles: [build, core, mgmt]
 
   grafana:
-    image: grafana/grafana:13.0.1
+    image: grafana/grafana:13.0.2
     container_name: grafana
     hostname: grafana.example
     restart: unless-stopped

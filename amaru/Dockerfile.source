@@ -42,7 +42,7 @@ RUN cabal update && \
 RUN strip --strip-unneeded /usr/local/bin/db-server
 
 # Install rustup
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+RUN curl --proto '=https' --tlsv1.3 -sSf https://sh.rustup.rs | sh -s -- -y
 
 
 RUN ln -s /root/.cargo/bin/cargo /usr/local/bin/cargo && \
@@ -71,12 +71,12 @@ RUN /usr/local/src/amaru/target/release/amaru --help
 RUN install --directory --owner=root --group=root --mode=0755 /usr/local/src/node_exporter
 
 # Download node_exporter archive
-RUN curl --proto '=https' --tlsv1.2 \
+RUN curl --proto '=https' --tlsv1.3 \
         --location https://github.com/prometheus/node_exporter/releases/download/v${NODE_EXPORTER_VERSION}/node_exporter-${NODE_EXPORTER_VERSION}.linux-amd64.tar.gz \
         --output /usr/local/src/node_exporter/node_exporter-${NODE_EXPORTER_VERSION}.linux-amd64.tar.gz
 
 # Download node_exporter checksum
-RUN curl --proto '=https' --tlsv1.2 \
+RUN curl --proto '=https' --tlsv1.3 \
         --location https://github.com/prometheus/node_exporter/releases/download/v${NODE_EXPORTER_VERSION}/sha256sums.txt \
         --output /usr/local/src/node_exporter/sha256sums.txt
 
@@ -98,12 +98,12 @@ RUN ln -s /usr/local/src/node_exporter/node_exporter-${NODE_EXPORTER_VERSION}.li
 RUN install --directory --owner=root --group=root --mode=0755 /usr/local/src/process_exporter
 
 # Download process_exporter archive
-RUN curl --proto '=https' --tlsv1.2 \
+RUN curl --proto '=https' --tlsv1.3 \
         --location https://github.com/ncabatoff/process-exporter/releases/download/v${PROCESS_EXPORTER_VERSION}/process-exporter-${PROCESS_EXPORTER_VERSION}.linux-amd64.tar.gz \
         --output /usr/local/src/process_exporter/process-exporter-${PROCESS_EXPORTER_VERSION}.linux-amd64.tar.gz
 
 # Download process_exporter checksum
-RUN curl --proto '=https' --tlsv1.2 \
+RUN curl --proto '=https' --tlsv1.3 \
         --location https://github.com/ncabatoff/process-exporter/releases/download/v${PROCESS_EXPORTER_VERSION}/checksums.txt \
         --output /usr/local/src/process_exporter/checksums.txt
 
@@ -123,7 +123,7 @@ RUN ln -s /usr/local/src/process_exporter/process-exporter-${PROCESS_EXPORTER_VE
 
 #---------------------------------------------------------------------
 
-FROM docker.io/debian:stable-20260421-slim AS main
+FROM docker.io/debian:stable-20260518-slim AS main
 
 # Set time zone
 ENV TZ="UTC"

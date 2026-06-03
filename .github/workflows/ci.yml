@@ -24,7 +24,7 @@ jobs:
         run: |
           sudo apt update
           sudo apt install --no-install-recommends -y ca-certificates curl iproute2 make tar
-          curl --proto '=https' --tlsv1.2 --location https://github.com/mikefarah/yq/releases/download/v4.47.2/yq_linux_amd64.tar.gz --output /tmp/yq_linux_amd64.tar.gz
+          curl --proto '=https' --tlsv1.3 --location https://github.com/mikefarah/yq/releases/download/v4.47.2/yq_linux_amd64.tar.gz --output /tmp/yq_linux_amd64.tar.gz
           sudo tar --extract --gzip --file=/tmp/yq_linux_amd64.tar.gz --directory=/usr/local/bin ./yq_linux_amd64 --transform='s|yq_linux_amd64|yq|' --no-same-owner
           make cibuild testnet=simple_network_binary
           make up testnet=simple_network_binary

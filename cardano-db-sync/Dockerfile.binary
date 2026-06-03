@@ -1,7 +1,7 @@
-FROM docker.io/debian:stable-20260421-slim AS build
+FROM docker.io/debian:stable-20260518-slim AS build
 
-ARG CARDANO_CLI_VERSION="${CARDANO_CLI_VERSION:-10.15.1.0}"
-ARG CARDANO_DB_SYNC_VERSION="${CARDANO_DB_SYNC_VERSION:-13.6.0.4}"
+ARG CARDANO_CLI_VERSION="${CARDANO_CLI_VERSION:-11.0.0.0}"
+ARG CARDANO_DB_SYNC_VERSION="${CARDANO_DB_SYNC_VERSION:-13.7.1.0}"
 ARG PROCESS_EXPORTER_VERSION="${PROCESS_EXPORTER_VERSION:-0.8.7}"
 
 ENV TZ="UTC"
@@ -21,15 +21,15 @@ RUN install --directory --owner=root --group=root --mode=0755 /usr/local/src/car
     install --directory --owner=root --group=root --mode=0755 /usr/local/src/cardano-db-sync/git && \
     install --directory --owner=root --group=root --mode=0755 /usr/local/src/cardano-db-sync/tar
 
-RUN curl --proto '=https' --tlsv1.2 \
+RUN curl --proto '=https' --tlsv1.3 \
         --location https://github.com/IntersectMBO/cardano-db-sync/releases/download/${CARDANO_DB_SYNC_VERSION}/cardano-db-sync-${CARDANO_DB_SYNC_VERSION}-linux.tar.gz \
         --output /usr/local/src/cardano-db-sync/cardano-db-sync-${CARDANO_DB_SYNC_VERSION}-linux.tar.gz
 
 RUN tar --extract --gzip --file=/usr/local/src/cardano-db-sync/cardano-db-sync-${CARDANO_DB_SYNC_VERSION}-linux.tar.gz --directory=/usr/local/src/cardano-db-sync/tar
 
-RUN chmod 0755 /usr/local/src/cardano-db-sync/tar/cardano-db-sync
+RUN chmod 0755 /usr/local/src/cardano-db-sync/tar/bin/cardano-db-sync
 
-RUN ln -s /usr/local/src/cardano-db-sync/tar/cardano-db-sync /usr/local/bin/cardano-db-sync
+RUN ln -s /usr/local/src/cardano-db-sync/tar/bin/cardano-db-sync /usr/local/bin/cardano-db-sync
 
 WORKDIR /usr/local/src/cardano-db-sync/git
 RUN git clone --depth=1 --branch ${CARDANO_DB_SYNC_VERSION} https://github.com/IntersectMBO/cardano-db-sync.git
@@ -38,11 +38,11 @@ RUN git clone --depth=1 --branch ${CARDANO_DB_SYNC_VERSION} https://github.com/I
 
 RUN install --directory --owner=root --group=root --mode=0755 /usr/local/src/cardano-cli
 
-RUN curl --proto '=https' --tlsv1.2 \
+RUN curl --proto '=https' --tlsv1.3 \
         --location https://github.com/IntersectMBO/cardano-cli/releases/download/cardano-cli-${CARDANO_CLI_VERSION}/cardano-cli-${CARDANO_CLI_VERSION}-x86_64-linux.tar.gz \
         --output /usr/local/src/cardano-cli/cardano-cli-${CARDANO_CLI_VERSION}-x86_64-linux.tar.gz
 
-RUN curl --proto '=https' --tlsv1.2 \
+RUN curl --proto '=https' --tlsv1.3 \
         --location https://github.com/IntersectMBO/cardano-cli/releases/download/cardano-cli-${CARDANO_CLI_VERSION}/cardano-cli-${CARDANO_CLI_VERSION}-sha256sums.txt \
         --output /usr/local/src/cardano-cli/cardano-cli-${CARDANO_CLI_VERSION}-sha256sums.txt
 
@@ -59,11 +59,11 @@ RUN ln -s /usr/local/src/cardano-cli/cardano-cli-x86_64-linux /usr/local/bin/car
 
 RUN install --directory --owner=root --group=root --mode=0755 /usr/local/src/process_exporter
 
-RUN curl --proto '=https' --tlsv1.2 \
+RUN curl --proto '=https' --tlsv1.3 \
         --location https://github.com/ncabatoff/process-exporter/releases/download/v${PROCESS_EXPORTER_VERSION}/process-exporter-${PROCESS_EXPORTER_VERSION}.linux-amd64.tar.gz \
         --output /usr/local/src/process_exporter/process-exporter-${PROCESS_EXPORTER_VERSION}.linux-amd64.tar.gz
 
-RUN curl --proto '=https' --tlsv1.2 \
+RUN curl --proto '=https' --tlsv1.3 \
         --location https://github.com/ncabatoff/process-exporter/releases/download/v${PROCESS_EXPORTER_VERSION}/checksums.txt \
         --output /usr/local/src/process_exporter/checksums.txt
 
@@ -78,7 +78,7 @@ RUN ln -s /usr/local/src/process_exporter/process-exporter-${PROCESS_EXPORTER_VE
 
 #---------------------------------------------------------------------
 
-FROM docker.io/debian:stable-20260421-slim AS main
+FROM docker.io/debian:stable-20260518-slim AS main
 
 ENV CARDANO_NODE_SOCKET_PATH="/opt/cardano-node/data/db/node.socket" \
     PGPASSFILE="/opt/cardano-db-sync/config/pgpass"
