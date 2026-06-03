@@ -3740,32 +3740,6 @@
         "x": 0,
         "y": 59
       },
-      "id": 87,
-      "options": {
-        "code": {
-          "language": "plaintext",
-          "showLineNumbers": false,
-          "showMiniMap": false
-        },
-        "content": "<h1></h1>\n<h3 style=\"text-align: left\">Block Forging</h3>",
-        "mode": "html"
-      },
-      "pluginVersion": "12.1.0",
-      "title": "",
-      "transparent": true,
-      "type": "text"
-    },
-    {
-      "fieldConfig": {
-        "defaults": {},
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 2,
-        "w": 24,
-        "x": 0,
-        "y": 61
-      },
       "id": 88,
       "options": {
         "code": {
@@ -3846,7 +3820,7 @@
         "h": 7,
         "w": 8,
         "x": 0,
-        "y": 63
+        "y": 61
       },
       "id": 26,
       "options": {
@@ -3950,7 +3924,7 @@
         "h": 7,
         "w": 8,
         "x": 8,
-        "y": 63
+        "y": 61
       },
       "id": 27,
       "options": {
@@ -4054,7 +4028,7 @@
         "h": 7,
         "w": 8,
         "x": 16,
-        "y": 63
+        "y": 61
       },
       "id": 28,
       "options": {
@@ -4159,7 +4133,7 @@
         "h": 7,
         "w": 8,
         "x": 0,
-        "y": 70
+        "y": 68
       },
       "id": 22,
       "options": {
@@ -4264,7 +4238,7 @@
         "h": 7,
         "w": 8,
         "x": 8,
-        "y": 70
+        "y": 68
       },
       "id": 29,
       "options": {
@@ -4368,7 +4342,7 @@
         "h": 7,
         "w": 8,
         "x": 16,
-        "y": 70
+        "y": 68
       },
       "id": 38,
       "options": {
@@ -4472,7 +4446,7 @@
         "h": 7,
         "w": 8,
         "x": 0,
-        "y": 77
+        "y": 75
       },
       "id": 35,
       "options": {
@@ -4576,7 +4550,7 @@
         "h": 7,
         "w": 8,
         "x": 8,
-        "y": 77
+        "y": 75
       },
       "id": 36,
       "options": {
@@ -4680,7 +4654,7 @@
         "h": 7,
         "w": 8,
         "x": 16,
-        "y": 77
+        "y": 75
       },
       "id": 37,
       "options": {
@@ -4728,7 +4702,7 @@
         "h": 2,
         "w": 24,
         "x": 0,
-        "y": 84
+        "y": 82
       },
       "id": 89,
       "options": {
@@ -4811,7 +4785,7 @@
         "h": 7,
         "w": 8,
         "x": 0,
-        "y": 86
+        "y": 84
       },
       "id": 90,
       "options": {
@@ -4928,7 +4902,7 @@
         "h": 7,
         "w": 8,
         "x": 8,
-        "y": 86
+        "y": 84
       },
       "id": 41,
       "options": {
@@ -5033,7 +5007,7 @@
         "h": 7,
         "w": 8,
         "x": 16,
-        "y": 86
+        "y": 84
       },
       "id": 43,
       "options": {
@@ -5073,6 +5047,218 @@
       "type": "timeseries"
     },
     {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus_uid"
+      },
+      "description": "Bytes",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 5,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "decbytes"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 8,
+        "x": 0,
+        "y": 91
+      },
+      "id": 119,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.1.0",
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "cardano_node_metrics_mempoolBytes_int",
+          "interval": "",
+          "legendFormat": "{{instance}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Mempool Bytes",
+      "transformations": [
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "^(.*)\\..*\\:.*",
+            "renamePattern": "$1"
+          }
+        }
+      ],
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus_uid"
+      },
+      "description": "mempool size / capacity. Capacity is published as a Prometheus recording rule mempool_capacity_bytes by scripts/prometheus_rules.sh: MempoolCapacityBytesOverride if set in testnet.yaml, else 2 * (maxBlockBodySize - fixedBlockBodyOverhead).",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 5,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "max": 1,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 0.8
+              }
+            ]
+          },
+          "unit": "percentunit"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 8,
+        "x": 8,
+        "y": 91
+      },
+      "id": 120,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.1.0",
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "cardano_node_metrics_mempoolBytes_int / scalar(mempool_capacity_bytes)",
+          "interval": "",
+          "legendFormat": "{{instance}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Mempool Fullness",
+      "transformations": [
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "^(.*)\\..*\\:.*",
+            "renamePattern": "$1"
+          }
+        }
+      ],
+      "type": "timeseries"
+    },
+    {
       "fieldConfig": {
         "defaults": {},
         "overrides": []
@@ -5081,7 +5267,7 @@
         "h": 2,
         "w": 24,
         "x": 0,
-        "y": 93
+        "y": 98
       },
       "id": 91,
       "options": {
@@ -5163,7 +5349,7 @@
         "h": 7,
         "w": 8,
         "x": 0,
-        "y": 95
+        "y": 100
       },
       "id": 67,
       "options": {
@@ -5267,7 +5453,7 @@
         "h": 7,
         "w": 8,
         "x": 8,
-        "y": 95
+        "y": 100
       },
       "id": 31,
       "options": {
@@ -5372,7 +5558,7 @@
         "h": 7,
         "w": 8,
         "x": 16,
-        "y": 95
+        "y": 100
       },
       "id": 40,
       "options": {
@@ -5477,7 +5663,7 @@
         "h": 7,
         "w": 8,
         "x": 0,
-        "y": 102
+        "y": 107
       },
       "id": 39,
       "options": {
@@ -5581,7 +5767,7 @@
         "h": 7,
         "w": 8,
         "x": 8,
-        "y": 102
+        "y": 107
       },
       "id": 103,
       "options": {
@@ -5684,7 +5870,7 @@
         "h": 7,
         "w": 8,
         "x": 16,
-        "y": 102
+        "y": 107
       },
       "id": 102,
       "options": {
@@ -5787,7 +5973,7 @@
         "h": 7,
         "w": 8,
         "x": 0,
-        "y": 109
+        "y": 114
       },
       "id": 104,
       "options": {
@@ -5848,7 +6034,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 116
+        "y": 121
       },
       "id": 99,
       "panels": [
@@ -5892,7 +6078,7 @@
             "h": 2,
             "w": 24,
             "x": 0,
-            "y": 182
+            "y": 187
           },
           "id": 98,
           "options": {
@@ -6029,7 +6215,7 @@
             "h": 7,
             "w": 12,
             "x": 0,
-            "y": 184
+            "y": 189
           },
           "id": 97,
           "options": {
@@ -6165,7 +6351,7 @@
             "h": 7,
             "w": 12,
             "x": 12,
-            "y": 184
+            "y": 189
           },
           "id": 96,
           "options": {
@@ -6217,6 +6403,323 @@
       ],
       "title": "Ada Pots",
       "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus_uid"
+      },
+      "description": "Per-container cardano-node CPU usage in cores (rate over 5m).",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 8,
+        "x": 8,
+        "y": 116
+      },
+      "id": 200,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.1.0",
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "sum by (instance) (rate(namedprocess_namegroup_cpu_seconds_total{groupname=\"cardano-node\"}[5m]))",
+          "interval": "",
+          "legendFormat": "{{instance}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Process CPU",
+      "transformations": [
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "^(.*)\\..*\\:.*",
+            "renamePattern": "$1"
+          }
+        }
+      ],
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus_uid"
+      },
+      "description": "Total GC pause time over the last 5 minutes (ms).",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 8,
+        "x": 16,
+        "y": 116
+      },
+      "id": 201,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.1.0",
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "increase(rts_gc_gc_wall_ms[5m])",
+          "interval": "",
+          "legendFormat": "{{instance}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "GC Pause Time",
+      "transformations": [
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "^(.*)\\..*\\:.*",
+            "renamePattern": "$1"
+          }
+        }
+      ],
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus_uid"
+      },
+      "description": "Fraction of submitted txs accepted by the node, 5m window.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "percentunit",
+          "min": 0,
+          "max": 1
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 8,
+        "x": 16,
+        "y": 93
+      },
+      "id": 202,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.1.0",
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "rate(cardano_node_metrics_submissions_accepted_counter[5m]) / rate(cardano_node_metrics_submissions_submitted_counter[5m])",
+          "interval": "",
+          "legendFormat": "{{instance}}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "TX Acceptance Rate",
+      "transformations": [
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "^(.*)\\..*\\:.*",
+            "renamePattern": "$1"
+          }
+        }
+      ],
+      "type": "timeseries"
     }
   ],
   "preload": false,
