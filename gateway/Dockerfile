@@ -1,4 +1,4 @@
-FROM docker.io/debian:stable-20260421-slim AS build
+FROM docker.io/debian:stable-20260518-slim AS build
 
 ARG NODE_EXPORTER_VERSION="${NODE_EXPORTER_VERSION:-1.11.1}"
 
@@ -17,11 +17,11 @@ RUN apt update && \
 
 RUN install --directory --owner=root --group=root --mode=0755 /usr/local/src/node_exporter
 
-RUN curl --proto '=https' --tlsv1.2 \
+RUN curl --proto '=https' --tlsv1.3 \
         --location https://github.com/prometheus/node_exporter/releases/download/v${NODE_EXPORTER_VERSION}/node_exporter-${NODE_EXPORTER_VERSION}.linux-amd64.tar.gz \
         --output /usr/local/src/node_exporter/node_exporter-${NODE_EXPORTER_VERSION}.linux-amd64.tar.gz
 
-RUN curl --proto '=https' --tlsv1.2 \
+RUN curl --proto '=https' --tlsv1.3 \
         --location https://github.com/prometheus/node_exporter/releases/download/v${NODE_EXPORTER_VERSION}/sha256sums.txt \
         --output /usr/local/src/node_exporter/sha256sums.txt
 
@@ -36,7 +36,7 @@ RUN ln -s /usr/local/src/node_exporter/node_exporter-${NODE_EXPORTER_VERSION}.li
 
 #---------------------------------------------------------------------
 
-FROM docker.io/debian:stable-20260421-slim AS main
+FROM docker.io/debian:stable-20260518-slim AS main
 
 ENV TZ="UTC"
 RUN ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime && \

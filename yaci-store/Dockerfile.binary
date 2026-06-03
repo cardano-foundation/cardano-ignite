@@ -6,12 +6,12 @@ FROM ${TESTNET_BUILDER_IMAGE} AS testnet_builder
 
 #---------------------------------------------------------------------
 
-FROM docker.io/debian:stable-20260421-slim AS build
+FROM docker.io/debian:stable-20260518-slim AS build
 
 ARG CARDANO_NODE_VERSION="${CARDANO_NODE_VERSION:-11.0.1}"
 ARG NODE_EXPORTER_VERSION="${NODE_EXPORTER_VERSION:-1.11.1}"
 ARG PROCESS_EXPORTER_VERSION="${PROCESS_EXPORTER_VERSION:-0.8.7}"
-ARG YACI_STORE_VERSION="${YACI_STORE_VERSION:-2.0.0}"
+ARG YACI_STORE_VERSION="${YACI_STORE_VERSION:-2.0.1}"
 
 ENV TZ="UTC"
 RUN ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime && \
@@ -26,7 +26,7 @@ RUN apt update && \
 # cardano-cli
 RUN install --directory --owner=root --group=root --mode=0755 /usr/local/src/cardano-node
 
-RUN curl --proto '=https' --tlsv1.2 \
+RUN curl --proto '=https' --tlsv1.3 \
         --location https://github.com/IntersectMBO/cardano-node/releases/download/${CARDANO_NODE_VERSION}/cardano-node-${CARDANO_NODE_VERSION}-linux-amd64.tar.gz \
         --output /usr/local/src/cardano-node/cardano-node-${CARDANO_NODE_VERSION}-linux-amd64.tar.gz
 
@@ -42,7 +42,7 @@ RUN ln -s /usr/local/src/cardano-node/${CARDANO_NODE_VERSION}/bin/cardano-cli /u
 
 RUN install --directory --owner=root --group=root --mode=0755 /usr/local/src/yaci-store
 
-RUN curl --proto '=https' --tlsv1.2 \
+RUN curl --proto '=https' --tlsv1.3 \
         --location https://github.com/bloxbean/yaci-store/releases/download/rel-native-${YACI_STORE_VERSION}/yaci-store-${YACI_STORE_VERSION}-linux-x64-all.zip \
         --output /usr/local/src/yaci-store/yaci-store-${YACI_STORE_VERSION}-linux-x64-all.zip
 
@@ -54,11 +54,11 @@ RUN ln -s /usr/local/src/yaci-store/yaci-store-${YACI_STORE_VERSION}/yaci-store 
 
 RUN install --directory --owner=root --group=root --mode=0755 /usr/local/src/node_exporter
 
-RUN curl --proto '=https' --tlsv1.2 \
+RUN curl --proto '=https' --tlsv1.3 \
         --location https://github.com/prometheus/node_exporter/releases/download/v${NODE_EXPORTER_VERSION}/node_exporter-${NODE_EXPORTER_VERSION}.linux-amd64.tar.gz \
         --output /usr/local/src/node_exporter/node_exporter-${NODE_EXPORTER_VERSION}.linux-amd64.tar.gz
 
-RUN curl --proto '=https' --tlsv1.2 \
+RUN curl --proto '=https' --tlsv1.3 \
         --location https://github.com/prometheus/node_exporter/releases/download/v${NODE_EXPORTER_VERSION}/sha256sums.txt \
         --output /usr/local/src/node_exporter/sha256sums.txt
 
@@ -75,11 +75,11 @@ RUN ln -s /usr/local/src/node_exporter/node_exporter-${NODE_EXPORTER_VERSION}.li
 
 RUN install --directory --owner=root --group=root --mode=0755 /usr/local/src/process_exporter
 
-RUN curl --proto '=https' --tlsv1.2 \
+RUN curl --proto '=https' --tlsv1.3 \
         --location https://github.com/ncabatoff/process-exporter/releases/download/v${PROCESS_EXPORTER_VERSION}/process-exporter-${PROCESS_EXPORTER_VERSION}.linux-amd64.tar.gz \
         --output /usr/local/src/process_exporter/process-exporter-${PROCESS_EXPORTER_VERSION}.linux-amd64.tar.gz
 
-RUN curl --proto '=https' --tlsv1.2 \
+RUN curl --proto '=https' --tlsv1.3 \
         --location https://github.com/ncabatoff/process-exporter/releases/download/v${PROCESS_EXPORTER_VERSION}/checksums.txt \
         --output /usr/local/src/process_exporter/checksums.txt
 
@@ -94,7 +94,7 @@ RUN ln -s /usr/local/src/process_exporter/process-exporter-${PROCESS_EXPORTER_VE
 
 #---------------------------------------------------------------------
 
-FROM docker.io/debian:stable-20260421-slim AS main
+FROM docker.io/debian:stable-20260518-slim AS main
 
 ENV TZ="UTC"
 RUN ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime && \

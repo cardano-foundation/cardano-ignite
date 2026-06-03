@@ -1,6 +1,6 @@
-FROM docker.io/debian:stable-20260421-slim AS testnet_builder
+FROM docker.io/debian:stable-20260518-slim AS testnet_builder
 
-ARG UV_VERSION="${UV_VERSION:-0.11.7}"
+ARG UV_VERSION="${UV_VERSION:-0.11.18}"
 ARG TESTNET_GENERATION_TOOL_VERSION="v0.2.0"
 
 ENV TZ="UTC"
@@ -17,11 +17,11 @@ RUN apt update && \
 
 RUN install --directory --owner=root --group=root --mode=0755 /usr/local/src/uv
 
-RUN curl --proto '=https' --tlsv1.2 \
+RUN curl --proto '=https' --tlsv1.3 \
         --location https://github.com/astral-sh/uv/releases/download/${UV_VERSION}/uv-x86_64-unknown-linux-gnu.tar.gz \
         --output /usr/local/src/uv/uv-x86_64-unknown-linux-gnu.tar.gz
 
-RUN curl --proto '=https' --tlsv1.2 \
+RUN curl --proto '=https' --tlsv1.3 \
         --location https://github.com/astral-sh/uv/releases/download/${UV_VERSION}/uv-x86_64-unknown-linux-gnu.tar.gz.sha256 \
         --output /usr/local/src/uv/uv-x86_64-unknown-linux-gnu.tar.gz.sha256
 
