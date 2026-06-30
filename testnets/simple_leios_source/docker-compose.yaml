@@ -20,6 +20,10 @@ x-cardano_node_leios: &cardano_node_leios
       # Leios CLI pinned by this node's cabal.project (IntersectMBO/cardano-cli leios-prototype)
       CARDANO_CLI_REPO: "https://github.com/IntersectMBO/cardano-cli.git"
       CARDANO_CLI_REF: "a90a9637235a8f0e14a133bc03d87d8ee2b8a957"
+      # tx-centrifuge is built from a SEPARATE checkout of the leios tx-generator branch
+      # bench/leios (the only branch shipping bench/tx-centrifuge; the ouroboros-leios flake
+      # tracks "latest bench/leios"). The node stays on CARDANO_NODE_REF above.
+      TX_CENTRIFUGE_REF: "bench/leios"
       TESTNET_BUILDER_IMAGE: ${TESTNET_BUILDER_IMAGE}
       HASKELL_BUILDER_IMAGE: ${HASKELL_BUILDER_IMAGE}
       PROFILING: ${PROFILING:-}
@@ -135,7 +139,13 @@ services:
     environment:
       POOL_ID: "1"
       TYPE: "txg"
-      TPS: "1"
+      # Use tx-centrifuge (Leios load generator) instead of the legacy tx-generator.
+      TX_GEN_MODE: "centrifuge"
+      TPS: "50"
+      TX_GENERATOR_TARGETS: "p1.example,p2.example,p3.example"
+      NETWORK_MAGIC: "42"
+      # 2 outputs/tx so on_pull recycle grows the UTxO pool -> parallelism -> reaches TPS.
+      CENTRIFUGE_OUTPUTS_PER_TX: "2"
       UTXOHD: "true"
       SYSTEM_START: ${SYSTEM_START:-}
     profiles: [build, optional]

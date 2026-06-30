@@ -414,7 +414,16 @@ canary_tx() {
 }
 
 tx_generator() {
-    /tx-generator.sh >/dev/null 2>&1
+    # TX_GEN_MODE selects the load generator: "centrifuge" -> tx-centrifuge,
+    # anything else (default) -> the legacy tx-generator.
+    case "${TX_GEN_MODE,,}" in
+        centrifuge)
+            /tx-centrifuge.sh
+            ;;
+        *)
+            /tx-generator.sh >/dev/null 2>&1
+            ;;
+    esac
 }
 
 config_pgpass() {
