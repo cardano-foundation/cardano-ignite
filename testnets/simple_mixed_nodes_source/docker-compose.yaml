@@ -118,17 +118,6 @@ services:
       SYSTEM_START: ${SYSTEM_START:-}
     profiles: [build, core]
 
-  # DNS Server
-  ns:
-    image: coredns/coredns:1.14.3
-    container_name: ns
-    hostname: ns.example
-    restart: unless-stopped
-    command: -conf /etc/coredns/corefile
-    volumes:
-      - ./coredns:/etc/coredns # Mount custom corefile
-    profiles: [build, core]
-
   sidecar:
     image: ${testnet}_sidecar:latest
     container_name: sidecar

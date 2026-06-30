@@ -22,6 +22,17 @@ if [ ${#targets[@]} -eq 0 ]; then
     exit 1
 fi
 
+# Several monitored services are optional and absent from some topologies: simple/
+# bridge networks have no ns (they resolve via Docker's embedded DNS).
+# Scraping or probing an absent service is a permanent failure in Grafana
+# (target down / probe_http_status_code == 0), so emit
+# a target line only when the compose actually defines that service.
+target_if_present() {
+    if [ "$(yq -r ".services | has(\"$1\")" "$DOCKER_COMPOSE_FILE" 2>/dev/null)" = "true" ]; then
+        echo "        - $2"
+    fi
+}
+
 # Generate Prometheus scrape configs
 cat <<EOF
 rule_files:
@@ -31,11 +42,11 @@ scrape_configs:
   - job_name: 'node_exporter'
     static_configs:
       - targets:
-        - nagw.example:9100
-        - eugw.example:9100
-        - asgw.example:9100
-        - adgw.example:9100
 EOF
+target_if_present nagw "nagw.example:9100"
+target_if_present eugw "eugw.example:9100"
+target_if_present asgw "asgw.example:9100"
+target_if_present adgw "adgw.example:9100"
 
 for target in "${targets[@]}"; do
     echo "        - ${target}:9100"
@@ -46,11 +57,11 @@ cat <<EOF
     static_configs:
       - targets:
         - db.example:9256
-        - dbsync.example:9256
-        - blockfrost.example:9256
         - sidecar.example:9256
-        - yaci.example:9256
 EOF
+target_if_present dbsync     "dbsync.example:9256"
+target_if_present blockfrost "blockfrost.example:9256"
+target_if_present yaci       "yaci.example:9256"
 
 for target in "${targets[@]}"; do
     echo "        - ${target}:9256"
@@ -67,14 +78,21 @@ for target in "${targets[@]}"; do
     echo "        - ${target}:12798"
 done
 
+# The amaru job only applies to testnets that run amaru nodes; jaeger/otlp
+# receive amaru's metrics. Skip the job entirely everywhere else.
+if [ "$(yq -r '.services | has("jaeger") or has("otlp")' "$DOCKER_COMPOSE_FILE" 2>/dev/null)" = "true" ]; then
 cat <<EOF
   - job_name: 'amaru'
     static_configs:
       - targets:
-        - jaeger.example:8889
-        - otlp.example:8889
 EOF
+target_if_present jaeger "jaeger.example:8889"
+target_if_present otlp   "otlp.example:8889"
+fi
 
+# Blackbox HTTP health probes. blackbox/grafana/loki/prometheus belong to every
+# testnet's core profile and are always probed; blockfrost/dbsync/ns/yaci are gated
+# by target_if_present (defined above).
 cat <<EOF
   - job_name: 'http_ip4_basic'
     metrics_path: /probe
@@ -83,15 +101,15 @@ cat <<EOF
     static_configs:
       - targets:
         - http://blackbox.example:9115/metrics
-        - http://blockfrost.example:3000/health
-        - http://dbsync.example:8080
         - http://grafana.example:3000
         - http://loki.example:3100/metrics
-        - http://ns.example:8090/health
         - http://prometheus.example:9090/metrics
-        - http://yaci.example:8080/actuator/health
-
 EOF
+target_if_present blockfrost "http://blockfrost.example:3000/health"
+target_if_present dbsync     "http://dbsync.example:8080"
+target_if_present ns         "http://ns.example:8090/health"
+target_if_present yaci       "http://yaci.example:8080/actuator/health"
+echo
 
 for target in "${targets[@]}"; do
     echo "        - http://${target}:12798/metrics"

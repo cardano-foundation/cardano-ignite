@@ -38,17 +38,6 @@ services:
       POOL_ID: "1"
     profiles: [build, core, pools]
 
-  # DNS Server
-  ns:
-    image: coredns/coredns:1.14.3
-    container_name: ns
-    hostname: ns.example
-    restart: unless-stopped
-    command: -conf /etc/coredns/corefile
-    volumes:
-      - ./coredns:/etc/coredns # Mount custom corefile
-    profiles: [build, core]
-
   sidecar:
     image: ${testnet}_sidecar:latest
     container_name: sidecar

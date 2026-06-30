@@ -395,6 +395,16 @@
                 "to": 999
               },
               "type": "range"
+            },
+            {
+              "type": "value",
+              "options": {
+                "-1": {
+                  "color": "#808080",
+                  "index": 6,
+                  "text": "N/A"
+                }
+              }
             }
           ],
           "thresholds": {
@@ -438,10 +448,11 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "probe_http_status_code{job=\"http_ip4_basic\",instance=\"http://ns.example:8090/health\"}",
+          "expr": "(probe_http_status_code{job=\"http_ip4_basic\",instance=\"http://ns.example:8090/health\"}) or on() vector(-1)",
           "legendFormat": "__auto",
-          "range": true,
-          "refId": "A"
+          "range": false,
+          "refId": "A",
+          "instant": true
         }
       ],
       "title": "CoreDNS",
@@ -747,6 +758,16 @@
                 "to": 999
               },
               "type": "range"
+            },
+            {
+              "type": "value",
+              "options": {
+                "-1": {
+                  "color": "#808080",
+                  "index": 6,
+                  "text": "N/A"
+                }
+              }
             }
           ],
           "thresholds": {
@@ -790,10 +811,11 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "probe_http_status_code{job=\"http_ip4_basic\",instance=\"http://dbsync.example:8080\"}",
+          "expr": "(probe_http_status_code{job=\"http_ip4_basic\",instance=\"http://dbsync.example:8080\"}) or on() vector(-1)",
           "legendFormat": "__auto",
-          "range": true,
-          "refId": "A"
+          "range": false,
+          "refId": "A",
+          "instant": true
         }
       ],
       "title": "Cardano DB Sync",
@@ -881,6 +903,16 @@
                 "to": 999
               },
               "type": "range"
+            },
+            {
+              "type": "value",
+              "options": {
+                "-1": {
+                  "color": "#808080",
+                  "index": 6,
+                  "text": "N/A"
+                }
+              }
             }
           ],
           "thresholds": {
@@ -924,10 +956,11 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "probe_http_status_code{job=\"http_ip4_basic\",instance=\"http://blockfrost.example:3000/health\"}",
+          "expr": "(probe_http_status_code{job=\"http_ip4_basic\",instance=\"http://blockfrost.example:3000/health\"}) or on() vector(-1)",
           "legendFormat": "__auto",
-          "range": true,
-          "refId": "A"
+          "range": false,
+          "refId": "A",
+          "instant": true
         }
       ],
       "title": "Blockfrost",
@@ -1015,6 +1048,16 @@
                 "to": 999
               },
               "type": "range"
+            },
+            {
+              "type": "value",
+              "options": {
+                "-1": {
+                  "color": "#808080",
+                  "index": 6,
+                  "text": "N/A"
+                }
+              }
             }
           ],
           "thresholds": {
@@ -1058,10 +1101,11 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "probe_http_status_code{job=\"http_ip4_basic\",instance=\"http://yaci.example:8080/actuator/health\"}",
+          "expr": "(probe_http_status_code{job=\"http_ip4_basic\",instance=\"http://yaci.example:8080/actuator/health\"}) or on() vector(-1)",
           "legendFormat": "__auto",
-          "range": true,
-          "refId": "A"
+          "range": false,
+          "refId": "A",
+          "instant": true
         }
       ],
       "title": "Yaci Store",
