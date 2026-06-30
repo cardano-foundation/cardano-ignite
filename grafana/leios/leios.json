@@ -310,7 +310,7 @@
           "datasource": { "type": "loki", "uid": "loki_uid" },
           "direction": "backward",
           "editorMode": "code",
-          "expr": "sum(count_over_time({container_name=~\"p[0-9]+\"} |= \"LeiosVoteAcquired\" [5m]))",
+          "expr": "sum(count_over_time({container_name=~\"p[0-9]+(bp)?\"} |= \"LeiosVoteAcquired\" [5m]))",
           "legendFormat": "votes acquired / 5m",
           "queryType": "range",
           "refId": "A"
@@ -319,7 +319,7 @@
           "datasource": { "type": "loki", "uid": "loki_uid" },
           "direction": "backward",
           "editorMode": "code",
-          "expr": "sum(count_over_time({container_name=~\"p[0-9]+\"} |= \"MsgLeiosVotes\" [5m]))",
+          "expr": "sum(count_over_time({container_name=~\"p[0-9]+(bp)?\"} |= \"MsgLeiosVotes\" [5m]))",
           "legendFormat": "vote messages / 5m",
           "queryType": "range",
           "refId": "B"

@@ -1,0 +1,97 @@
+--- # Required Testnet Parameters
+poolCount: 6
+poolCost: 340000000
+poolMargin: 0.0
+poolPledge: 0
+delegatedSupply: 600000000000000
+systemStart: 'now'
+systemStartDelay: 5
+networkMagic: 42
+testnetDomain: example
+
+--- # Optional Byron Genesis Overide
+protocolConsts:
+  k: 90
+
+--- # Optional Shelley Genesis Overide
+slotLength: 1
+epochLength: 17280
+securityParam: 90
+maxLovelaceSupply: 45000000000000000
+protocolParams:
+  maxBlockBodySize: 90112
+  decentralisationParam: 0
+  protocolVersion:
+    major: 10
+    minor: 0
+
+--- # Optional Alonzo Genesis Overide
+
+--- # Optional Conway Genesis Overide
+
+--- # Optional Node Config Overide
+# Leios runs in the Dijkstra era. This doc mirrors the Leios node config from
+# simple_leios_source on top of global_network's peer/topology tuning.
+# ExperimentalHardForksEnabled MUST be true for the node to parse DijkstraGenesisFile /
+# TestDijkstraHardForkAtEpoch (POM.hs:386).
+ExperimentalHardForksEnabled: true
+ExperimentalProtocolsEnabled: true
+LastKnownBlockVersion-Alt: 0
+LastKnownBlockVersion-Major: 3
+LastKnownBlockVersion-Minor: 1
+MaxConcurrencyBulkSync: 2
+MaxConcurrencyDeadline: 4
+MaxKnownMajorProtocolVersion: 2
+# Official Leios testnet mempool override (~512 kB).
+MempoolCapacityBytesOverride: 500000
+# SQLite store for Leios IBs/EBs/votes; absolute path -> writable container data dir.
+LeiosDbConfig:
+  Backend: SQLite
+  Filepath: /opt/cardano-node/data/db/leios.db
+PeerSharing: true
+RequiresNetworkMagic: "RequiresMagic"
+SyncTargetNumberOfActivePeers: 2
+SyncTargetNumberOfEstablishedPeers: 2
+SyncTargetNumberOfKnownPeers: 2
+SyncTargetNumberOfRootPeers: 0
+TargetNumberOfActiveBigLedgerPeers: 2
+TargetNumberOfActivePeers: 5
+TargetNumberOfEstablishedBigLedgerPeers: 3
+TargetNumberOfEstablishedPeers: 6
+TargetNumberOfKnownBigLedgerPeers: 5
+TargetNumberOfKnownPeers: 8
+TargetNumberOfRootPeers: 4
+TestAllegraHardForkAtEpoch: 0
+TestAlonzoHardForkAtEpoch: 0
+TestBabbageHardForkAtEpoch: 0
+TestConwayHardForkAtEpoch: 0
+# Fork to Leios/Dijkstra at genesis (from-genesis network).
+TestDijkstraHardForkAtEpoch: 0
+TestMaryHardForkAtEpoch: 0
+TestShelleyHardForkAtEpoch: 0
+TurnOnLogMetrics: true
+TraceOptions:
+  Mempool:
+    severity: Info
+  BlockFetch.Client:
+    severity: Info
+  ChainSync.Client:
+    severity: Info
+  Net.InboundGovernor:
+    severity: Info
+  Net.PeerSelection.Actions:
+    severity: Info
+  Net.Server:
+    severity: Info
+  Consensus.LeiosKernel:
+    severity: Debug
+    maxFrequency: 0
+  Consensus.LeiosPeer:
+    severity: Debug
+    maxFrequency: 0
+  LeiosNotify.Remote:
+    severity: Debug
+    maxFrequency: 0
+  LeiosFetch.Remote:
+    severity: Debug
+    maxFrequency: 0
