@@ -37,13 +37,15 @@ RUN ln -s /usr/local/src/node_exporter/node_exporter-${NODE_EXPORTER_VERSION}.li
 # cardano-cli
 
 ARG CARDANO_CLI_VERSION="${CARDANO_CLI_VERSION:-11.0.0.0}"
+ARG CARDANO_CLI_REPO="${CARDANO_CLI_REPO:-https://github.com/IntersectMBO/cardano-cli.git}"
+ARG CARDANO_CLI_REF="${CARDANO_CLI_REF:-cardano-cli-${CARDANO_CLI_VERSION}}"
 
 WORKDIR /usr/local/src
-RUN git clone --depth 1 --branch master https://github.com/IntersectMBO/cardano-cli.git
+RUN git clone ${CARDANO_CLI_REPO}
 
 WORKDIR /usr/local/src/cardano-cli
 RUN git fetch --all --recurse-submodules --tags && \
-    git checkout cardano-cli-${CARDANO_CLI_VERSION}
+    git checkout ${CARDANO_CLI_REF}
 RUN echo "package *\n\
   ghc-options: +RTS -A128m -n2m -RTS\n\
 \n\

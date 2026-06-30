@@ -1,0 +1,254 @@
+---
+
+x-base: &base
+  restart: unless-stopped
+  logging:
+    driver: "loki"
+    options:
+      mode: non-blocking
+      loki-url: "http://127.0.0.1:3100/loki/api/v1/push"
+      loki-retries: "5"
+
+x-cardano_node_leios: &cardano_node_leios
+  image: ${testnet}-leios-prof${PROFILING:-0}:latest
+  build:
+    context: "../../"
+    dockerfile: "cardano-node/Dockerfile.source"
+    args:
+      # Leios node: IntersectMBO/cardano-node @ origin/leios-prototype (== local 11.0.1.164)
+      CARDANO_NODE_REF: "db5373ea6a6f79b398b468d2e04ce43eafcf90d0"
+      # Leios CLI pinned by this node's cabal.project (IntersectMBO/cardano-cli leios-prototype)
+      CARDANO_CLI_REPO: "https://github.com/IntersectMBO/cardano-cli.git"
+      CARDANO_CLI_REF: "a90a9637235a8f0e14a133bc03d87d8ee2b8a957"
+      TESTNET_BUILDER_IMAGE: ${TESTNET_BUILDER_IMAGE}
+      HASKELL_BUILDER_IMAGE: ${HASKELL_BUILDER_IMAGE}
+      PROFILING: ${PROFILING:-}
+
+x-env: &env
+  POOL_ID: "0" # Placeholder required for override
+  SYSTEM_START: ${SYSTEM_START:-}
+  NO_INTERPOOL_LOCALROOTS: ${NO_INTERPOOL_LOCALROOTS:-false}
+  PROFILING: ${PROFILING:-}
+  SHUTDOWN_ON_BLOCK: ${SHUTDOWN_ON_BLOCK:-}
+
+services:
+  p1:
+    <<: [*base, *cardano_node_leios]
+    container_name: p1
+    hostname: p1.example
+    volumes:
+      - p1:/opt/cardano-node/data
+      - synth:/opt/synth:ro
+    environment:
+      <<: *env
+      POOL_ID: "1"
+    profiles: [build, core, pools]
+
+  p2:
+    <<: [*base, *cardano_node_leios]
+    container_name: p2
+    hostname: p2.example
+    volumes:
+      - p2:/opt/cardano-node/data
+      - synth:/opt/synth:ro
+    environment:
+      <<: *env
+      POOL_ID: "2"
+      PEER_SHARING: "false"
+    profiles: [build, core, pools]
+
+  p3:
+    <<: [*base, *cardano_node_leios]
+    container_name: p3
+    hostname: p3.example
+    volumes:
+      - p3:/opt/cardano-node/data
+      - synth:/opt/synth:ro
+    environment:
+      <<: *env
+      POOL_ID: "3"
+    profiles: [build, core, pools]
+
+  # DNS Server
+  ns:
+    image: coredns/coredns:1.14.3
+    container_name: ns
+    hostname: ns.example
+    restart: unless-stopped
+    command: -conf /etc/coredns/corefile
+    volumes:
+      - ./coredns:/etc/coredns # Mount custom corefile
+    profiles: [build, core]
+
+  sidecar:
+    image: ${testnet}_sidecar:latest
+    container_name: sidecar
+    hostname: sidecar.example
+    restart: unless-stopped
+    build:
+      context: "../../"
+      dockerfile: "sidecar/Dockerfile"
+    environment:
+      POOLS: "3"
+    volumes:
+      - synth:/opt/synth:ro
+    profiles: [build, core]
+
+  synth:
+    image: ${testnet}_db-synthesizer:latest
+    container_name: synth
+    restart: no
+    environment:
+      SYSTEM_START: ${SYSTEM_START:-}
+      # Hardcoded to 0: the db-synthesizer is not Leios/Dijkstra-aware. If it ran
+      # (PRE_EPOCHS > 0) it would fail to synthesize the chain, so it must never run.
+      PRE_EPOCHS: "0"
+    volumes:
+      - synth:/opt/cardano-node/data
+    build:
+      context: "../../"
+      dockerfile: "db-synthesizer/Dockerfile"
+    profiles: [build, core, mgmt]
+
+  # Client / observer node
+  c1:
+    <<: [*base, *cardano_node_leios]
+    container_name: c1
+    hostname: c1.example
+    volumes:
+      - c1:/opt/cardano-node
+      - synth:/opt/synth:ro
+    environment:
+      POOL_ID: "1"
+      TYPE: "client"
+      SYSTEM_START: ${SYSTEM_START:-}
+    profiles: [build, core]
+
+  # TX generator
+  c2:
+    <<: [*base, *cardano_node_leios]
+    container_name: c2
+    hostname: c2.example
+    volumes:
+      - c2:/opt/cardano-node
+      - synth:/opt/synth:ro
+    environment:
+      POOL_ID: "1"
+      TYPE: "txg"
+      TPS: "1"
+      UTXOHD: "true"
+      SYSTEM_START: ${SYSTEM_START:-}
+    profiles: [build, optional]
+
+  # PostgreSQL Database (used by sidecar for the node graph / convergence helpers)
+  db:
+    image: postgresql:latest
+    container_name: db
+    hostname: db.example
+    restart: unless-stopped
+    volumes:
+      - db:/opt/postgresql
+    build:
+      context: "../../"
+      dockerfile: "postgresql/Dockerfile"
+    ports:
+      - "${PSQL_HOST:-127.0.0.1}:${PSQL_PORT:-5432}:5432"
+    profiles: [build, core]
+
+  # Leios/Dijkstra-aware cardano-db-sync, built from source (leios-prototype-2026w26,
+  # the tag whose consensus/ledger pins match the Leios node).
+  # Distinct image tag so it does not clobber the shared binary `cardano-db-sync:latest`
+  # other testnets use.
+  dbsync:
+    image: ${testnet}-cardano-db-sync:latest
+    container_name: dbsync
+    hostname: dbsync.example
+    restart: unless-stopped
+    volumes:
+      - dbsync:/opt/cardano-db-sync
+      - c1:/opt/cardano-node
+    environment:
+      DB_HOST: "db.example"
+    build:
+      context: "../../"
+      dockerfile: "cardano-db-sync/Dockerfile.source"
+      args:
+        CARDANO_DB_SYNC_REF: "leios-prototype-2026w26"
+        HASKELL_BUILDER_IMAGE: ${HASKELL_BUILDER_IMAGE}
+    depends_on:
+      db:
+        condition: service_started
+    profiles: [build, core]
+
+  prometheus:
+    image: prom/prometheus:v3.12.0
+    container_name: prometheus
+    hostname: prometheus.example
+    restart: unless-stopped
+    volumes:
+      - prometheus:/prometheus
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./prometheus/rules.yml:/etc/prometheus/rules.yml
+    depends_on:
+      blackbox:
+        condition: service_started
+    profiles: [build, core]
+
+  blackbox:
+    image: quay.io/prometheus/blackbox-exporter:v0.28.0
+    container_name: blackbox
+    hostname: blackbox.example
+    restart: unless-stopped
+    command: --config.file=/etc/blackbox_exporter/blackbox.yml
+    volumes:
+      - ../../blackbox:/etc/blackbox_exporter/
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    profiles: [build, core]
+
+  loki:
+    image: grafana/loki:3.7.2
+    container_name: loki
+    hostname: loki.example
+    restart: unless-stopped
+    command: -config.file=/etc/loki/local-config.yaml
+    ports:
+      - "${LOKI_HOST:-127.0.0.1}:${LOKI_PORT:-3100}:3100"
+    volumes:
+      - loki:/loki
+    profiles: [build, core]
+
+  grafana:
+    image: grafana/grafana:13.0.2
+    container_name: grafana
+    hostname: grafana.example
+    restart: unless-stopped
+    ports:
+      - "${GRAFANA_HOST:-127.0.0.1}:${GRAFANA_PORT:-3000}:3000"
+    volumes:
+      - grafana:/var/lib/grafana
+      - ../../grafana/provisioning:/etc/grafana/provisioning
+      # Leios-only dashboards (hard guard): mount the leios dashboards DIRECTORY over the
+      # committed (empty) dashboards/leios/ placeholder. Other testnets share grafana/provisioning
+      # and see only the empty placeholder, so they load no Leios dashboard. Mounting a directory
+      # onto an existing target (not a single file into the dir) avoids Docker creating a stray
+      # mount-point file in the shared provisioning dir. The provider loads *.json recursively.
+      - ../../grafana/leios:/etc/grafana/provisioning/dashboards/leios:ro
+    environment:
+      GF_SECURITY_ADMIN_USER: cardano
+      GF_SECURITY_ADMIN_PASSWORD: cardano
+    profiles: [build, core]
+
+volumes:
+  p1:
+  p2:
+  p3:
+  c1:
+  c2:
+  db:
+  dbsync:
+  prometheus:
+  loki:
+  grafana:
+  synth:

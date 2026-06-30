@@ -70,8 +70,8 @@ verify_environment_variables() {
 }
 
 config_config_json() {
-    # .AlonzoGenesisHash, .ByronGenesisHash, .ConwayGenesisHash, .ShelleyGenesisHash
-    jq "del(.AlonzoGenesisHash, .ByronGenesisHash, .ConwayGenesisHash, .ShelleyGenesisHash)" "${CONFIG_JSON}" | write_file "${CONFIG_JSON}"
+    # .AlonzoGenesisHash, .ByronGenesisHash, .ConwayGenesisHash, .DijkstraGenesisHash, .ShelleyGenesisHash
+    jq "del(.AlonzoGenesisHash, .ByronGenesisHash, .ConwayGenesisHash, .DijkstraGenesisHash, .ShelleyGenesisHash)" "${CONFIG_JSON}" | write_file "${CONFIG_JSON}"
 
     # .PeerSharing
     if [ "${PEER_SHARING,,}" = "true" ]; then

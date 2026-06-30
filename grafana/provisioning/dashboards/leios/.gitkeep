@@ -1,0 +1,4 @@
+# Placeholder so the Leios dashboards bind-mount target exists in the shared provisioning dir.
+# Only testnets/simple_leios_source mounts ../../grafana/leios over this directory; all other
+# testnets share grafana/provisioning and see just this empty placeholder, so they load no
+# Leios dashboard. Keep this directory (do not delete) — it is the hard-guard mount point.
