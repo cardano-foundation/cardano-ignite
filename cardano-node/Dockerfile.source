@@ -38,12 +38,14 @@ RUN ln -s /usr/local/src/node_exporter/node_exporter-${NODE_EXPORTER_VERSION}.li
 # cardano-cli
 
 ARG CARDANO_CLI_VERSION="11.0.0.0"
+ARG CARDANO_CLI_REPO="https://github.com/IntersectMBO/cardano-cli.git"
+ARG CARDANO_CLI_REF="cardano-cli-${CARDANO_CLI_VERSION}"
 
 WORKDIR /usr/local/src
 RUN git init cardano-cli
 
 WORKDIR /usr/local/src/cardano-cli
-RUN git fetch --depth 1 https://github.com/IntersectMBO/cardano-cli.git cardano-cli-${CARDANO_CLI_VERSION} && \
+RUN git fetch --depth 1 ${CARDANO_CLI_REPO} ${CARDANO_CLI_REF} && \
     git checkout FETCH_HEAD && \
     git submodule update --init --recursive
 RUN echo "package *\n\
@@ -110,6 +112,25 @@ RUN cabal update && \
 RUN cabal install exe:tx-generator --disable-test --install-method=copy \
       --installdir=/usr/local/bin --overwrite-policy=always
 
+# tx-centrifuge (Leios load generator). Not shipped by every cardano-node rev, so build it
+# from a SEPARATE checkout when TX_CENTRIFUGE_REF is set (a rev that has bench/tx-centrifuge);
+# otherwise install a stub. Default empty => other source testnets get the stub (no extra build).
+ARG TX_CENTRIFUGE_REPO="https://github.com/IntersectMBO/cardano-node.git"
+ARG TX_CENTRIFUGE_REF=""
+RUN if [ -n "${TX_CENTRIFUGE_REF}" ]; then \
+      git init /usr/local/src/tx-centrifuge && \
+      cd /usr/local/src/tx-centrifuge && \
+      git fetch --depth 1 "${TX_CENTRIFUGE_REPO}" "${TX_CENTRIFUGE_REF}" && \
+      git checkout FETCH_HEAD && \
+      printf "package *\n  ghc-options: +RTS -A128m -n2m -RTS\n\njobs: \$ncpus\nsemaphore: True\n" > cabal.project.local && \
+      cabal update && \
+      cabal install exe:tx-centrifuge --disable-test --install-method=copy \
+        --installdir=/usr/local/bin --overwrite-policy=always ; \
+    else \
+      printf '#!/bin/sh\necho "tx-centrifuge not built (TX_CENTRIFUGE_REF unset)" >&2\nexit 127\n' \
+        > /usr/local/bin/tx-centrifuge && chmod 0755 /usr/local/bin/tx-centrifuge ; \
+    fi
+
 # process_exporter
 
 RUN install --directory --owner=root --group=root --mode=0755 /usr/local/src/process_exporter
@@ -170,6 +191,7 @@ RUN ldconfig
 COPY --from=build --chown=root:root /usr/local/bin/cardano-cli /usr/local/bin/cardano-cli
 COPY --from=build --chown=root:root /usr/local/bin/cardano-node /usr/local/bin/cardano-node
 COPY --from=build --chown=root:root /usr/local/bin/tx-generator /usr/local/bin/tx-generator
+COPY --from=build --chown=root:root /usr/local/bin/tx-centrifuge /usr/local/bin/tx-centrifuge
 COPY --from=build --chown=root:root /usr/local/bin/node_exporter /usr/local/bin/node_exporter
 COPY --from=build --chown=root:root /usr/local/bin/process_exporter /usr/local/bin/process_exporter
 

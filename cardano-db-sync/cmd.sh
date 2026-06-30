@@ -128,6 +128,13 @@ insert_genesis_hashes() {
     jq ".ByronGenesisHash = \"${BYRON_GENESIS_JSON}\"" "${CONFIG_JSON}" | write_file "${CONFIG_JSON}"
     jq ".ConwayGenesisHash = \"${CONWAY_GENESIS_JSON}\"" "${CONFIG_JSON}" | write_file "${CONFIG_JSON}"
     jq ".ShelleyGenesisHash = \"${SHELLEY_GENESIS_JSON}\"" "${CONFIG_JSON}" | write_file "${CONFIG_JSON}"
+
+    # Dijkstra/Leios genesis hash — only present on Leios testnets. Guarded so other
+    # (non-Leios) testnets, which have no dijkstra-genesis.json, are unaffected.
+    if [ -f "${SRC_DIR}/dijkstra-genesis.json" ]; then
+        DIJKSTRA_GENESIS_JSON="$(cardano-cli latest genesis hash --genesis ${SRC_DIR}/dijkstra-genesis.json)"
+        jq ".DijkstraGenesisHash = \"${DIJKSTRA_GENESIS_JSON}\"" "${CONFIG_JSON}" | write_file "${CONFIG_JSON}"
+    fi
 }
 
 config_database_instance() {

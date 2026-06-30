@@ -1,0 +1,1040 @@
+---
+
+x-base: &base
+  restart: unless-stopped
+  cap_add:
+    - NET_ADMIN
+  logging:
+    driver: "loki"
+    options:
+      mode: non-blocking
+      loki-url: "http://127.0.0.1:3100/loki/api/v1/push"
+      loki-retries: "5"
+
+x-cardano_node_leios: &cardano_node_leios
+  image: ${testnet}-leios-prof${PROFILING:-0}:latest
+  build:
+    context: "../../"
+    dockerfile: "cardano-node/Dockerfile.source"
+    args:
+      # All nodes run the Leios node: IntersectMBO/cardano-node @ leios-prototype
+      # (commit db5373ea6 == local build 11.0.1.164).
+      CARDANO_NODE_REF: "db5373ea6a6f79b398b468d2e04ce43eafcf90d0"
+      # Leios CLI pinned by this node's cabal.project.
+      CARDANO_CLI_REPO: "https://github.com/IntersectMBO/cardano-cli.git"
+      CARDANO_CLI_REF: "a90a9637235a8f0e14a133bc03d87d8ee2b8a957"
+      # tx-centrifuge is built from a SEPARATE checkout of the leios tx-generator branch.
+      TX_CENTRIFUGE_REF: "bench/leios"
+      TESTNET_BUILDER_IMAGE: ${TESTNET_BUILDER_IMAGE}
+      HASKELL_BUILDER_IMAGE: ${HASKELL_BUILDER_IMAGE}
+      PROFILING: ${PROFILING:-}
+
+x-base_eu: &base_eu
+  <<: *base
+  env_file:
+    - env_eu.base
+  dns:
+    - 172.16.3.2
+  networks:
+    - net_eu
+  depends_on:
+    nagw:
+      condition: service_healthy
+      required: false
+    eugw:
+      condition: service_healthy
+      required: false
+    asgw:
+      condition: service_healthy
+      required: false
+    adgw:
+      condition: service_healthy
+      required: false
+
+x-base_na: &base_na
+  <<: *base
+  env_file:
+    - env_na.base
+  dns:
+    - 172.16.1.2
+  networks:
+    - net_na
+  depends_on:
+    nagw:
+      condition: service_healthy
+      required: false
+    eugw:
+      condition: service_healthy
+      required: false
+    asgw:
+      condition: service_healthy
+      required: false
+    adgw:
+      condition: service_healthy
+      required: false
+
+x-base_as: &base_as
+  <<: *base
+  env_file:
+    - env_as.base
+  dns:
+    - 172.16.4.2
+  networks:
+    - net_as
+  depends_on:
+    nagw:
+      condition: service_healthy
+      required: false
+    eugw:
+      condition: service_healthy
+      required: false
+    asgw:
+      condition: service_healthy
+      required: false
+    adgw:
+      condition: service_healthy
+      required: false
+
+x-base_gw: &base_gw
+    image: ${testnet}_gateway:latest
+    restart: unless-stopped
+    build:
+      context: "../../"
+      dockerfile: gateway/Dockerfile
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    sysctls:
+      net.ipv4.ip_forward: "1"
+    healthcheck:
+      test: ["CMD-SHELL", "test -f /tmp/gateway_ready"]
+      interval: 2s
+      timeout: 2s
+      retries: 30
+      start_period: 2s
+
+networks:
+
+  # Defalt Network
+  # Used for communicating with the host
+  default:
+    driver: bridge
+
+  # North America Network
+  net_na:
+    driver: macvlan
+    driver_opts:
+      parent: ${HOST_INTERFACE}.10
+      macvlan_mode: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.16.1.0/24
+
+  # Link between Europe and North America
+  net_eu_na:
+    driver: macvlan
+    driver_opts:
+      parent: ${HOST_INTERFACE}.20
+      macvlan_mode: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.16.2.0/24
+
+  # Europe Network
+  net_eu:
+    driver: macvlan
+    driver_opts:
+      parent: ${HOST_INTERFACE}.30
+      macvlan_mode: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.16.3.0/24
+
+  # Asia Network
+  net_as:
+    driver: macvlan
+    driver_opts:
+      parent: ${HOST_INTERFACE}.40
+      macvlan_mode: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.16.4.0/24
+
+  # Asia Europe Link
+  net_as_eu:
+    driver: macvlan
+    driver_opts:
+      parent: ${HOST_INTERFACE}.50
+      macvlan_mode: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.16.5.0/24
+
+  # Asia North America Link
+  net_as_na:
+    driver: macvlan
+    driver_opts:
+      parent: ${HOST_INTERFACE}.60
+      macvlan_mode: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.16.6.0/24
+
+  # Management Network
+  net_mgmt:
+    driver: macvlan
+    driver_opts:
+      parent: ${HOST_INTERFACE}.70
+      macvlan_mode: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.16.7.0/24
+
+  # Management Asia Link
+  net_ad_as:
+    driver: macvlan
+    driver_opts:
+      parent: ${HOST_INTERFACE}.80
+      macvlan_mode: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.16.8.0/24
+
+  # Management Europe Link
+  net_ad_eu:
+    driver: macvlan
+    driver_opts:
+      parent: ${HOST_INTERFACE}.90
+      macvlan_mode: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.16.9.0/24
+
+  # Management North America Link
+  net_ad_na:
+    driver: macvlan
+    driver_opts:
+      parent: ${HOST_INTERFACE}.100
+      macvlan_mode: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.16.10.0/24
+
+services:
+
+  # Pool 1
+
+  # Block Producer
+  p1bp:
+    <<: [*base_na, *cardano_node_leios]
+    container_name: p1bp
+    hostname: p1bp.example
+    volumes:
+      - p1bp:/opt/cardano-node/data
+      - synth:/opt/synth:ro
+    environment:
+      POOL_ID: "1"
+      TYPE: bp
+      PEER_SHARING: "false"
+      EGRESS_POLL_INTERVAL: 0.001
+    networks:
+      net_na:
+        ipv4_address: 172.16.1.101
+    profiles: [build, core, na, p1]
+
+  # Relay
+  p1r1:
+    <<: [*base_na, *cardano_node_leios]
+    container_name: p1r1
+    hostname: p1r1.example
+    volumes:
+      - p1r1:/opt/cardano-node/data
+      - synth:/opt/synth:ro
+    environment:
+      POOL_ID: "1"
+      RELAY_ID: "1"
+      TYPE: relay
+      EGRESS_POLL_INTERVAL: 0.001
+    networks:
+      net_na:
+        ipv4_address: 172.16.1.102
+    profiles: [build, core, na, p1, p1relays]
+
+  # Relay
+  p1r2:
+    <<: [*base_na, *cardano_node_leios]
+    container_name: p1r2
+    hostname: p1r2.example
+    volumes:
+      - p1r2:/opt/cardano-node/data
+      - synth:/opt/synth:ro
+    environment:
+      POOL_ID: "1"
+      RELAY_ID: "2"
+      TYPE: relay
+      EGRESS_POLL_INTERVAL: 0.001
+    networks:
+      net_na:
+        ipv4_address: 172.16.1.103
+    profiles: [build, core, na, p1, p1relays]
+
+  # Relay
+  p1r3:
+    <<: [*base_na, *cardano_node_leios]
+    container_name: p1r3
+    hostname: p1r3.example
+    volumes:
+      - p1r3:/opt/cardano-node/data
+      - synth:/opt/synth:ro
+    environment:
+      POOL_ID: "1"
+      RELAY_ID: "3"
+      TYPE: privaterelay
+      EGRESS_POLL_INTERVAL: 0.001
+    networks:
+      net_na:
+        ipv4_address: 172.16.1.104
+    profiles: [na, p1, p1relays, privaterelays]
+
+  # Pool 2
+
+  # Block Producer
+  p2bp:
+    <<: [*base_eu, *cardano_node_leios]
+    container_name: p2bp
+    hostname: p2bp.example
+    volumes:
+      - p2bp:/opt/cardano-node/data
+      - synth:/opt/synth:ro
+    environment:
+      POOL_ID: "2"
+      TYPE: bp
+      PEER_SHARING: "false"
+    networks:
+      net_eu:
+        ipv4_address: 172.16.3.101
+    profiles: [build, core, eu, p2]
+
+  # Relay
+  p2r1:
+    <<: [*base_eu, *cardano_node_leios]
+    container_name: p2r1
+    hostname: p2r1.example
+    volumes:
+      - p2r1:/opt/cardano-node/data
+      - synth:/opt/synth:ro
+    environment:
+      POOL_ID: "2"
+      RELAY_ID: "1"
+      TYPE: relay
+    networks:
+      net_eu:
+        ipv4_address: 172.16.3.102
+    profiles: [build, core, eu, p2, p2relays]
+
+  # Relay
+  p2r2:
+    <<: [*base_eu, *cardano_node_leios]
+    container_name: p2r2
+    hostname: p2r2.example
+    volumes:
+      - p2r2:/opt/cardano-node/data
+      - synth:/opt/synth:ro
+    environment:
+      POOL_ID: "2"
+      RELAY_ID: "2"
+      TYPE: relay
+    networks:
+      net_eu:
+        ipv4_address: 172.16.3.103
+    profiles: [build, core, eu, p2, p2relays]
+
+  # Relay
+  p2r3:
+    <<: [*base_eu, *cardano_node_leios]
+    container_name: p2r3
+    hostname: p2r3.example
+    volumes:
+      - p2r3:/opt/cardano-node/data
+      - synth:/opt/synth:ro
+    environment:
+      POOL_ID: "2"
+      RELAY_ID: "3"
+      TYPE: privaterelay
+    networks:
+      net_eu:
+        ipv4_address: 172.16.3.104
+    profiles: [eu, p2, p2relays, privaterelays]
+
+  # Pool 3
+
+  # Block Producer
+  p3bp:
+    <<: [*base_as, *cardano_node_leios]
+    container_name: p3bp
+    hostname: p3bp.example
+    volumes:
+      - p3bp:/opt/cardano-node/data
+      - synth:/opt/synth:ro
+    environment:
+      POOL_ID: "3"
+      TYPE: bp
+      PEER_SHARING: "false"
+    networks:
+      net_as:
+        ipv4_address: 172.16.4.101
+    profiles: [build, core, as, p3]
+
+  # Relay
+  p3r1:
+    <<: [*base_as, *cardano_node_leios]
+    container_name: p3r1
+    hostname: p3r1.example
+    volumes:
+      - p3r1:/opt/cardano-node/data
+      - synth:/opt/synth:ro
+    environment:
+      POOL_ID: "3"
+      RELAY_ID: "1"
+      TYPE: relay
+    networks:
+      net_as:
+        ipv4_address: 172.16.4.102
+    profiles: [build, core, as, p3, p3relays]
+
+  # Relay
+  p3r2:
+    <<: [*base_as, *cardano_node_leios]
+    container_name: p3r2
+    hostname: p3r2.example
+    volumes:
+      - p3r2:/opt/cardano-node/data
+      - synth:/opt/synth:ro
+    environment:
+      POOL_ID: "3"
+      RELAY_ID: "2"
+      TYPE: relay
+    networks:
+      net_as:
+        ipv4_address: 172.16.4.103
+    profiles: [build, core, as, p3, p3relays]
+
+  # Relay
+  p3r3:
+    <<: [*base_as, *cardano_node_leios]
+    container_name: p3r3
+    hostname: p3r3.example
+    volumes:
+      - p3r3:/opt/cardano-node/data
+      - synth:/opt/synth:ro
+    environment:
+      POOL_ID: "3"
+      RELAY_ID: "3"
+      TYPE: privaterelay
+    networks:
+      net_as:
+        ipv4_address: 172.16.4.104
+    profiles: [p3, p3relays, privaterelays]
+
+  # Pool 4
+
+  # Block Producer
+  p4bp:
+    <<: [*base_eu, *cardano_node_leios]
+    container_name: p4bp
+    hostname: p4bp.example
+    volumes:
+      - p4bp:/opt/cardano-node/data
+      - synth:/opt/synth:ro
+    environment:
+      POOL_ID: "4"
+      TYPE: bp
+      PEER_SHARING: "false"
+    networks:
+      net_eu:
+        ipv4_address: 172.16.3.111
+    profiles: [build, core, eu, p4]
+
+  # Relay
+  p4r1:
+    <<: [*base_eu, *cardano_node_leios]
+    container_name: p4r1
+    hostname: p4r1.example
+    volumes:
+      - p4r1:/opt/cardano-node/data
+      - synth:/opt/synth:ro
+    environment:
+      POOL_ID: "4"
+      RELAY_ID: "1"
+      TYPE: relay
+    networks:
+      net_eu:
+        ipv4_address: 172.16.3.112
+    profiles: [build, core, eu, p4, p4relays]
+
+  # Relay
+  p4r2:
+    <<: [*base_eu, *cardano_node_leios]
+    container_name: p4r2
+    hostname: p4r2.example
+    volumes:
+      - p4r2:/opt/cardano-node/data
+      - synth:/opt/synth:ro
+    environment:
+      POOL_ID: "4"
+      RELAY_ID: "2"
+      TYPE: relay
+    networks:
+      net_eu:
+        ipv4_address: 172.16.3.113
+    profiles: [build, core, eu, p4, p4relays]
+
+  # Relay
+  p4r3:
+    <<: [*base_eu, *cardano_node_leios]
+    container_name: p4r3
+    hostname: p4r3.example
+    volumes:
+      - p4r3:/opt/cardano-node/data
+      - synth:/opt/synth:ro
+    environment:
+      POOL_ID: "4"
+      RELAY_ID: "3"
+      TYPE: privaterelay
+    networks:
+      net_eu:
+        ipv4_address: 172.16.3.114
+    profiles: [eu, p4, p4relays, privaterelays]
+
+  # Pool 5
+
+  # Block Producer
+  p5bp:
+    <<: [*base_na, *cardano_node_leios]
+    container_name: p5bp
+    hostname: p5bp.example
+    volumes:
+      - p5bp:/opt/cardano-node/data
+      - synth:/opt/synth:ro
+    environment:
+      POOL_ID: "5"
+      TYPE: bp
+      PEER_SHARING: "false"
+    networks:
+      net_na:
+        ipv4_address: 172.16.1.111
+    profiles: [build, core, na, p5]
+
+  # Relay
+  p5r1:
+    <<: [*base_na, *cardano_node_leios]
+    container_name: p5r1
+    hostname: p5r1.example
+    volumes:
+      - p5r1:/opt/cardano-node/data
+      - synth:/opt/synth:ro
+    environment:
+      POOL_ID: "5"
+      RELAY_ID: "1"
+      TYPE: relay
+    networks:
+      net_na:
+        ipv4_address: 172.16.1.112
+    profiles: [build, core, na, p5, p5relays]
+
+  # Relay
+  p5r2:
+    <<: [*base_na, *cardano_node_leios]
+    container_name: p5r2
+    hostname: p5r2.example
+    volumes:
+      - p5r2:/opt/cardano-node/data
+      - synth:/opt/synth:ro
+    environment:
+      POOL_ID: "5"
+      RELAY_ID: "2"
+      TYPE: relay
+    networks:
+      net_na:
+        ipv4_address: 172.16.1.123
+    profiles: [build, core, na, p5, p5relays]
+
+  # Relay
+  p5r3:
+    <<: [*base_na, *cardano_node_leios]
+    container_name: p5r3
+    hostname: p5r3.example
+    volumes:
+      - p5r3:/opt/cardano-node/data
+      - synth:/opt/synth:ro
+    environment:
+      POOL_ID: "5"
+      RELAY_ID: "3"
+      TYPE: privaterelay
+    networks:
+      net_na:
+        ipv4_address: 172.16.1.124
+    profiles: [na, p5, p5relays, privaterelays]
+
+  # Pool 6
+
+  # Block Producer
+  p6bp:
+    <<: [*base_eu, *cardano_node_leios]
+    container_name: p6bp
+    hostname: p6bp.example
+    volumes:
+      - p6bp:/opt/cardano-node/data
+      - synth:/opt/synth:ro
+    environment:
+      POOL_ID: "6"
+      TYPE: bp
+      PEER_SHARING: "false"
+    networks:
+      net_eu:
+        ipv4_address: 172.16.3.121
+    profiles: [build, core, eu, p6]
+
+  # Relay
+  p6r1:
+    <<: [*base_eu, *cardano_node_leios]
+    container_name: p6r1
+    hostname: p6r1.example
+    volumes:
+      - p6r1:/opt/cardano-node/data
+      - synth:/opt/synth:ro
+    environment:
+      POOL_ID: "6"
+      RELAY_ID: "1"
+      TYPE: relay
+    networks:
+      net_eu:
+        ipv4_address: 172.16.3.122
+    profiles: [build, core, eu, p6, p6relays]
+
+  # Relay
+  p6r2:
+    <<: [*base_eu, *cardano_node_leios]
+    container_name: p6r2
+    hostname: p6r2.example
+    volumes:
+      - p6r2:/opt/cardano-node/data
+      - synth:/opt/synth:ro
+    environment:
+      POOL_ID: "6"
+      RELAY_ID: "2"
+      TYPE: relay
+    networks:
+      net_eu:
+        ipv4_address: 172.16.3.123
+    profiles: [build, core, eu, p6, p6relays]
+
+  # Relay
+  p6r3:
+    <<: [*base_eu, *cardano_node_leios]
+    container_name: p6r3
+    hostname: p6r3.example
+    volumes:
+      - p6r3:/opt/cardano-node/data
+      - synth:/opt/synth:ro
+    environment:
+      POOL_ID: "6"
+      RELAY_ID: "3"
+      TYPE: privaterelay
+    networks:
+      net_eu:
+        ipv4_address: 172.16.3.124
+    profiles: [eu, p6, p6relays, privaterelays]
+
+  # North America Gateway
+  nagw:
+    <<: *base_gw
+    container_name: nagw
+    hostname: nagw.example
+    environment:
+      GATEWAY_ID: "nagw"
+      GATEWAY_PEERS: "eu as ad"
+    networks:
+      net_na:
+        ipv4_address: 172.16.1.11
+      net_eu_na:
+        interface_name: eunax0
+        ipv4_address: 172.16.2.11
+      net_as_na:
+        interface_name: asnax0
+        ipv4_address: 172.16.6.11
+      net_ad_na:
+        ipv4_address: 172.16.10.11
+    dns:
+      - 172.16.1.2
+    profiles: [build, core, na, gateways]
+
+  # Europe Gateway
+  eugw:
+    <<: *base_gw
+    container_name: eugw
+    hostname: eugw.example
+    environment:
+      GATEWAY_ID: "eugw"
+      GATEWAY_PEERS: "na as ad"
+    networks:
+      net_eu:
+        ipv4_address: 172.16.3.12
+      net_eu_na:
+        interface_name: eunax0
+        ipv4_address: 172.16.2.12
+      net_as_eu:
+        interface_name: aseux0
+        ipv4_address: 172.16.5.12
+      net_ad_eu:
+        ipv4_address: 172.16.9.12
+    dns:
+      - 172.16.2.2
+    profiles: [build, core, eu, gateways]
+
+  # Asia Gateway
+  asgw:
+    <<: *base_gw
+    container_name: asgw
+    hostname: asgw.example
+    environment:
+      GATEWAY_ID: "asgw"
+      GATEWAY_PEERS: "eu na ad"
+    networks:
+      net_as:
+        ipv4_address: 172.16.4.13
+      net_as_eu:
+        interface_name: aseux0
+        ipv4_address: 172.16.5.13
+      net_as_na:
+        interface_name: asnax0
+        ipv4_address: 172.16.6.13
+      net_ad_as:
+        ipv4_address: 172.16.8.13
+    dns:
+      - 172.16.4.2
+    profiles: [build, core, as, gateways]
+
+  # Management Gateway
+  adgw:
+    <<: *base_gw
+    container_name: adgw
+    hostname: adgw.example
+    environment:
+      GATEWAY_ID: "adgw"
+      GATEWAY_PEERS: "eu na as"
+    networks:
+      net_mgmt:
+        ipv4_address: 172.16.7.14
+      net_ad_as:
+        ipv4_address: 172.16.8.14
+      net_ad_eu:
+        ipv4_address: 172.16.9.14
+      net_ad_na:
+        ipv4_address: 172.16.10.14
+    dns:
+      - 172.16.7.2
+    profiles: [build, core, mgmt, gateways]
+
+  # DNS Server
+  ns:
+    image: coredns/coredns:1.14.3
+    container_name: ns
+    hostname: ns.example
+    restart: unless-stopped
+    command: -conf /etc/coredns/corefile
+    volumes:
+      - ./coredns:/etc/coredns # Mount custom corefile
+    networks:
+      net_na:
+        ipv4_address: 172.16.1.2
+      net_eu_na:
+        ipv4_address: 172.16.2.2
+      net_eu:
+        ipv4_address: 172.16.3.2
+      net_as:
+        ipv4_address: 172.16.4.2
+      net_mgmt:
+        ipv4_address: 172.16.7.2
+    profiles: [build, core, mgmt]
+
+  sidecar:
+    image: ${testnet}_sidecar:latest
+    container_name: sidecar
+    hostname: sidecar.example
+    restart: unless-stopped
+    build:
+      context: "../../"
+      dockerfile: "sidecar/Dockerfile"
+    environment:
+      TOPOLOGY: "fancy"
+      POOLS: "6"
+      LEIOS: "true"
+    volumes:
+      - synth:/opt/synth:ro
+    cap_add:
+      - NET_ADMIN
+    networks:
+      net_mgmt:
+        ipv4_address: 172.16.7.3
+    dns:
+      - 172.16.7.2
+    depends_on:
+      db:
+        condition: service_started
+    profiles: [build, core, mgmt]
+
+  synth:
+    image: ${testnet}_db-synthesizer:latest
+    container_name: synth
+    restart: no
+    environment:
+      SYSTEM_START: ${SYSTEM_START:-}
+      # Hardcoded to 0: the db-synthesizer is not Leios/Dijkstra-aware. If it ran
+      # (PRE_EPOCHS > 0) it would fail to synthesize the chain, so it must never run.
+      PRE_EPOCHS: "0"
+    volumes:
+      - synth:/opt/cardano-node/data
+    build:
+      context: "../../"
+      dockerfile: "db-synthesizer/Dockerfile"
+      target: "light"
+    profiles: [build, core, mgmt]
+
+  # Client 1
+  # Used by cardano-db-sync
+  c1:
+    <<: [*base_eu, *cardano_node_leios]
+    container_name: c1
+    hostname: c1.example
+    volumes:
+      - c1:/opt/cardano-node
+      - synth:/opt/synth:ro
+    environment:
+      POOL_ID: "1"
+      TYPE: "client"
+      UTXOHD: "true"
+      SYSTEM_START: ${SYSTEM_START:-}
+    networks:
+      net_eu:
+        ipv4_address: 172.16.3.4
+    profiles: [build, core, eu]
+
+  # TX generator 1
+  c2:
+    <<: [*base_na, *cardano_node_leios]
+    container_name: c2
+    hostname: c2.example
+    volumes:
+      - c2:/opt/cardano-node
+      - synth:/opt/synth:ro
+    environment:
+      POOL_ID: "1"
+      TYPE: "txg"
+      # Use tx-centrifuge (Leios load generator) instead of the legacy tx-generator.
+      TX_GEN_MODE: "centrifuge"
+      TPS: "25"
+      # Submit to each pool's PRIVATE relay (r3) across all regions, so every pool sees
+      # load and forges endorser blocks; cross-region targets route via the gateways.
+      # (Private relays live in the privaterelays profile, which `make up-all` starts.)
+      TX_GENERATOR_TARGETS: "p1r3.example,p2r3.example,p3r3.example,p4r3.example,p5r3.example,p6r3.example"
+      NETWORK_MAGIC: "42"
+      # 2 outputs/tx so the on_pull recycle grows the UTxO pool -> parallelism -> reaches TPS.
+      CENTRIFUGE_OUTPUTS_PER_TX: "2"
+      UTXOHD: "true"
+      SYSTEM_START: ${SYSTEM_START:-}
+    networks:
+      net_na:
+        ipv4_address: 172.16.1.12
+    profiles: [build, na, optional, tx-generators]
+
+  # PostgreSQL Database
+  db:
+    image: postgresql:latest
+    container_name: db
+    hostname: db.example
+    restart: unless-stopped
+    volumes:
+      - db:/opt/postgresql
+    build:
+      context: "../../"
+      dockerfile: "postgresql/Dockerfile"
+    networks:
+      default:
+      net_eu:
+        ipv4_address: 172.16.3.5
+      net_na:
+        ipv4_address: 172.16.1.5
+      net_as:
+        ipv4_address: 172.16.4.5
+      net_mgmt:
+        ipv4_address: 172.16.7.5
+    dns:
+      - 172.16.7.2
+    ports:
+      - "${PSQL_HOST:-127.0.0.1}:${PSQL_PORT:-5432}:5432"
+    profiles: [build, core, mgmt]
+
+  # Leios/Dijkstra-aware cardano-db-sync, built from source (leios-prototype-2026w26).
+  # Distinct image tag so it never clobbers the shared binary cardano-db-sync:latest.
+  dbsync:
+    image: ${testnet}-cardano-db-sync:latest
+    container_name: dbsync
+    hostname: dbsync.example
+    restart: unless-stopped
+    volumes:
+      - dbsync:/opt/cardano-db-sync
+      - c1:/opt/cardano-node
+    environment:
+      DB_HOST: "db.example"
+    build:
+      context: "../../"
+      dockerfile: "cardano-db-sync/Dockerfile.source"
+      args:
+        CARDANO_DB_SYNC_REF: "leios-prototype-2026w26"
+        HASKELL_BUILDER_IMAGE: ${HASKELL_BUILDER_IMAGE}
+    networks:
+      net_mgmt:
+        ipv4_address: 172.16.7.6
+    dns:
+      - 172.16.7.2
+    depends_on:
+      db:
+        condition: service_started
+    profiles: [build, core, mgmt]
+
+  prometheus:
+    image: prom/prometheus:v3.12.0
+    container_name: prometheus
+    hostname: prometheus.example
+    restart: unless-stopped
+    volumes:
+      - prometheus:/prometheus
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./prometheus/rules.yml:/etc/prometheus/rules.yml
+    networks:
+      net_eu:
+        ipv4_address: 172.16.3.8
+      net_na:
+        ipv4_address: 172.16.1.8
+      net_as:
+        ipv4_address: 172.16.4.8
+      net_mgmt:
+        ipv4_address: 172.16.7.8
+    dns:
+      - 172.16.7.2
+    depends_on:
+      blackbox:
+        condition: service_started
+    profiles: [build, core, mgmt]
+
+  blackbox:
+    image: quay.io/prometheus/blackbox-exporter:v0.28.0
+    container_name: blackbox
+    hostname: blackbox.example
+    restart: unless-stopped
+    command: --config.file=/etc/blackbox_exporter/blackbox.yml
+    volumes:
+      - ../../blackbox:/etc/blackbox_exporter/
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    networks:
+      net_eu:
+        ipv4_address: 172.16.3.9
+      net_na:
+        ipv4_address: 172.16.1.9
+      net_as:
+        ipv4_address: 172.16.4.9
+      net_mgmt:
+        ipv4_address: 172.16.7.9
+    dns:
+      - 172.16.7.2
+    profiles: [build, core, mgmt]
+
+  loki:
+    image: grafana/loki:3.7.2
+    container_name: loki
+    hostname: loki.example
+    restart: unless-stopped
+    command: -config.file=/etc/loki/local-config.yaml
+    ports:
+      - "${LOKI_HOST:-127.0.0.1}:${LOKI_PORT:-3100}:3100"
+    volumes:
+      - loki:/loki
+    networks:
+      default:
+      net_mgmt:
+        ipv4_address: 172.16.7.10
+    dns:
+      - 172.16.7.2
+    profiles: [build, core, mgmt]
+
+  grafana:
+    image: grafana/grafana:13.0.2
+    container_name: grafana
+    hostname: grafana.example
+    restart: unless-stopped
+    ports:
+      - "${GRAFANA_HOST:-127.0.0.1}:${GRAFANA_PORT:-3000}:3000"
+    volumes:
+      - grafana:/var/lib/grafana
+      - ../../grafana/provisioning:/etc/grafana/provisioning
+      # Leios-only dashboards (hard guard): mount the leios dashboards directory over the
+      # committed empty placeholder; other testnets see only the placeholder.
+      - ../../grafana/leios:/etc/grafana/provisioning/dashboards/leios:ro
+    environment:
+      GF_SECURITY_ADMIN_USER: cardano
+      GF_SECURITY_ADMIN_PASSWORD: cardano
+      GF_FEATURE_TOGGLES_splashScreen: "false"
+    networks:
+      default:
+      net_mgmt:
+        ipv4_address: 172.16.7.11
+    dns:
+      - 172.16.7.2
+    profiles: [build, core, mgmt]
+
+volumes:
+  p1bp:
+  p1r1:
+  p1r2:
+  p1r3:
+  p2bp:
+  p2r1:
+  p2r2:
+  p2r3:
+  p3bp:
+  p3r1:
+  p3r2:
+  p3r3:
+  p4bp:
+  p4r1:
+  p4r2:
+  p4r3:
+  p5bp:
+  p5r1:
+  p5r2:
+  p5r3:
+  p6bp:
+  p6r1:
+  p6r2:
+  p6r3:
+  c1:
+  c2:
+  db:
+  dbsync:
+  prometheus:
+  loki:
+  grafana:
+  synth:
