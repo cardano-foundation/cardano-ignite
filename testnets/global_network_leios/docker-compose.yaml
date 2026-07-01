@@ -841,13 +841,13 @@ services:
     environment:
       POOL_ID: "1"
       TYPE: "txg"
-      # Use tx-centrifuge (Leios load generator) instead of the legacy tx-generator.
-      TX_GEN_MODE: "centrifuge"
-      TPS: "25"
+      TX_GEN_MODE: "plain"
+      TPS: "50"
       # Submit to each pool's PRIVATE relay (r3) across all regions, so every pool sees
       # load and forges endorser blocks; cross-region targets route via the gateways.
-      # (Private relays live in the privaterelays profile, which `make up-all` starts.)
-      TX_GENERATOR_TARGETS: "p1r3.example,p2r3.example,p3r3.example,p4r3.example,p5r3.example,p6r3.example"
+      # NOTE: the legacy tx-generator parses targetNodes.addr as a literal IPv4 (no DNS),
+      # so these must be the private relays' STATIC IPs (tx-centrifuge took pNr3.example names).
+      TX_GENERATOR_TARGETS: "172.16.1.104,172.16.3.104,172.16.4.104,172.16.3.114,172.16.1.124,172.16.3.124"
       NETWORK_MAGIC: "42"
       # 2 outputs/tx so the on_pull recycle grows the UTxO pool -> parallelism -> reaches TPS.
       CENTRIFUGE_OUTPUTS_PER_TX: "2"

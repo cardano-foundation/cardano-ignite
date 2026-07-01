@@ -91,7 +91,7 @@ cat <<EOF > tx-generator.json
   "sigKey": "/opt/cardano-node/utxos/keys/genesis.${POOL_ID}.skey",
   "targetNodes": ${TARGET_NODES_JSON},
   "tps": ${TPS},
-  "tx_count": 172800,
+  "tx_count": 2160000,
   "tx_fee": 1000000
 }
 EOF
