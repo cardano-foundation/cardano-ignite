@@ -236,10 +236,10 @@
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus_uid"
+        "type": "postgres",
+        "uid": "dbsync_uid"
       },
-      "description": "Transaction throughput carried by endorser blocks vs ranking (Praos) blocks. The Leios scaling story: load rides in EBs.",
+      "description": "True tx-byte throughput of endorser vs ranking/Praos blocks, from cardano-db-sync: sum(tx.size) of each block's txs, split by has_leios_cert (an EB's txs are attributed to its certifying block). On-chain payload ground truth — not the tiny eb_announcement_size (which is only tx references).",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -249,7 +249,7 @@
             "axisBorderShow": false,
             "axisCenteredZero": false,
             "axisColorMode": "text",
-            "axisLabel": "tx/s",
+            "axisLabel": "bytes/s",
             "axisPlacement": "auto",
             "barAlignment": 0,
             "drawStyle": "line",
@@ -287,7 +287,7 @@
               }
             ]
           },
-          "unit": "short"
+          "unit": "Bps"
         },
         "overrides": [
           {
@@ -345,31 +345,25 @@
       "pluginVersion": "12.1.0",
       "targets": [
         {
+          "datasource": {
+            "type": "postgres",
+            "uid": "dbsync_uid"
+          },
           "editorMode": "code",
-          "expr": "sum(rate(cardano_node_metrics_Forge_endorser_block_total_tx_count_counter[5m]))",
-          "interval": "",
-          "legendFormat": "endorser blocks (EB)",
-          "range": true,
+          "format": "time_series",
+          "rawSql": "SELECT $__timeGroupAlias(b.time, $__interval), coalesce(sum(t.size) FILTER (WHERE b.has_leios_cert), 0)::float / ($__interval_ms / 1000.0) AS \"endorser blocks (EB)\", coalesce(sum(t.size) FILTER (WHERE NOT b.has_leios_cert), 0)::float / ($__interval_ms / 1000.0) AS \"ranking blocks (Praos)\" FROM block b JOIN tx t ON t.block_id = b.id WHERE $__timeFilter(b.time) GROUP BY 1 ORDER BY 1",
           "refId": "A"
-        },
-        {
-          "editorMode": "code",
-          "expr": "sum(rate(cardano_node_metrics_Forge_ranking_block_total_tx_count_counter[5m]))",
-          "interval": "",
-          "legendFormat": "ranking blocks (Praos)",
-          "range": true,
-          "refId": "B"
         }
       ],
-      "title": "Tx Throughput — Endorser vs Ranking Blocks",
+      "title": "Tx Byte Throughput — Endorser vs Ranking Blocks",
       "type": "timeseries"
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus_uid"
+        "type": "postgres",
+        "uid": "dbsync_uid"
       },
-      "description": "Byte throughput of transactions carried in endorser blocks.",
+      "description": "Instantaneous TRUE payload of every block (one dot per block) = sum(tx.size) of its txs, split EB vs ranking by has_leios_cert. From cardano-db-sync — real on-chain tx bytes, not eb_announcement_size.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -379,11 +373,11 @@
             "axisBorderShow": false,
             "axisCenteredZero": false,
             "axisColorMode": "text",
-            "axisLabel": "",
+            "axisLabel": "block size (bytes)",
             "axisPlacement": "auto",
             "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 10,
+            "drawStyle": "points",
+            "fillOpacity": 0,
             "gradientMode": "none",
             "hideFrom": {
               "legend": false,
@@ -392,12 +386,12 @@
             },
             "insertNulls": false,
             "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
+            "lineWidth": 0,
+            "pointSize": 6,
             "scaleDistribution": {
               "type": "linear"
             },
-            "showPoints": "never",
+            "showPoints": "always",
             "spanNulls": false,
             "stacking": {
               "group": "A",
@@ -417,9 +411,40 @@
               }
             ]
           },
-          "unit": "Bps"
+          "unit": "decbytes"
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "ranking block (RB)"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "semi-dark-orange",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "endorser block (EB)"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "green",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 8,
@@ -437,30 +462,32 @@
         },
         "tooltip": {
           "hideZeros": false,
-          "mode": "single",
+          "mode": "multi",
           "sort": "none"
         }
       },
       "pluginVersion": "12.1.0",
       "targets": [
         {
+          "datasource": {
+            "type": "postgres",
+            "uid": "dbsync_uid"
+          },
           "editorMode": "code",
-          "expr": "sum(rate(cardano_node_metrics_Forge_endorser_block_total_tx_bytes_counter[5m]))",
-          "interval": "",
-          "legendFormat": "EB tx bytes/s",
-          "range": true,
+          "format": "time_series",
+          "rawSql": "SELECT b.time AS \"time\", CASE WHEN b.has_leios_cert THEN s.tx_bytes END AS \"endorser block (EB)\", CASE WHEN NOT b.has_leios_cert THEN s.tx_bytes END AS \"ranking block (RB)\" FROM block b JOIN (SELECT block_id, sum(size) AS tx_bytes FROM tx GROUP BY block_id) s ON s.block_id = b.id WHERE $__timeFilter(b.time) ORDER BY b.time",
           "refId": "A"
         }
       ],
-      "title": "Endorser Block Tx Byte Throughput",
+      "title": "Endorser vs Ranking Block Sizes (per block)",
       "type": "timeseries"
     },
     {
       "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus_uid"
+        "type": "postgres",
+        "uid": "dbsync_uid"
       },
-      "description": "Average endorser-block size = total EB tx-bytes / total EBs (cumulative). Uses totals, not rate(), because EB forging is sparse.",
+      "description": "Average TRUE payload per certified endorser block = sum(tx.size) of all EB-carried txs / number of EB-bearing (has_leios_cert) blocks, from cardano-db-sync (on-chain certified payload, not eb_announcement_size).",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -508,13 +535,12 @@
       "targets": [
         {
           "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus_uid"
+            "type": "postgres",
+            "uid": "dbsync_uid"
           },
           "editorMode": "code",
-          "expr": "sum(cardano_node_metrics_Forge_endorser_block_total_tx_bytes_counter) / clamp_min(sum(cardano_node_metrics_Forge_endorser_block_total_count_counter), 1)",
-          "instant": true,
-          "range": false,
+          "format": "table",
+          "rawSql": "SELECT sum(t.size)::float / nullif(count(DISTINCT b.id), 0) AS \"avg EB payload\" FROM block b JOIN tx t ON t.block_id = b.id WHERE b.has_leios_cert AND $__timeFilter(b.time)",
           "refId": "A"
         }
       ],
