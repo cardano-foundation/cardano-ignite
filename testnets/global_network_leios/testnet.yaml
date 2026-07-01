@@ -44,6 +44,10 @@ MaxConcurrencyDeadline: 4
 MaxKnownMajorProtocolVersion: 2
 # Official Leios testnet mempool override (~512 kB).
 MempoolCapacityBytesOverride: 500000
+# Mempool tx-validation TIME budget (DiffTime seconds).
+MempoolTimeoutSoft: 5
+MempoolTimeoutHard: 15
+MempoolTimeoutCapacity: 20
 # SQLite store for Leios IBs/EBs/votes; absolute path -> writable container data dir.
 LeiosDbConfig:
   Backend: SQLite
