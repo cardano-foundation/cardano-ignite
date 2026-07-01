@@ -841,7 +841,7 @@ services:
       TYPE: "txg"
       # Use tx-centrifuge (Leios load generator) instead of the legacy tx-generator.
       TX_GEN_MODE: "centrifuge"
-      TPS: "50"
+      TPS: "25"
       # Submit to each pool's PRIVATE relay (r3) across all regions, so every pool sees
       # load and forges endorser blocks; cross-region targets route via the gateways.
       # (Private relays live in the privaterelays profile, which `make up-all` starts.)
