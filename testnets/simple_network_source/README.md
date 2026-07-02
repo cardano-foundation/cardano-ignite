@@ -1,6 +1,6 @@
 # Description
 
-Simple testnet with pre-compiled cardano-node version 11.0.1.
+Simple testnet with cardano-node version 11.0.1 built from source.
 
 ## Cardano-Node
 

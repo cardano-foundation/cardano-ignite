@@ -1,12 +1,12 @@
 # Description
 
-Global testnet with pre-compiled or compiled cardano-node version 10.5.4.
+Global testnet with a mixture of cardano-node versions 10.7.1 and 11.0.1 built from source.
 
 ## Cardano-Node
 
-- **Version**: 10.5.4
+- **Version**: 10.7.1, 11.0.1
 - **Branch**: -
-- **Binary/Source**: Binary
+- **Binary/Source**: Source
 
 ## Testnet
 
