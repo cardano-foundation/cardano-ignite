@@ -14,10 +14,32 @@ HOST_INTERFACE_SETUP = \
     if [ -z "$${HOST_INTERFACE+x}" ]; then \
         HOST_INTERFACE=$$(ip -br link show | awk '$$1 ~ /^dummy[0-9]*$$/ {print $$1; exit}') ; \
         [ -n "$$HOST_INTERFACE" ] || HOST_INTERFACE=$$(ip -br link show | awk '$$1 !~ /^lo$$|^vir|^wl/ && $$1 !~ /@/ {print $$1; exit}'); \
-        [ -n "$$HOST_INTERFACE" ] || { echo "No physical interface found"; exit 1; }; \
+        [ -n "$$HOST_INTERFACE" ] || { \
+            echo "Error: No suitable network interface found (loopback, wireless and virtual interfaces are skipped)."; \
+            echo "Please create a dummy interface:"; \
+            echo "  sudo ip link add dummy0 type dummy"; \
+            echo "  sudo ip link set dummy0 up"; \
+            echo "or select an interface explicitly: make <target> testnet=<testnet> HOST_INTERFACE=<interface>"; \
+            exit 1; }; \
     fi && \
     export HOST_INTERFACE && \
     echo "Using HOST_INTERFACE=\"$$HOST_INTERFACE\""
+
+# Verify that the testnet has been built. Every image that 'make build'
+# produces (the build profile services with a build section) must exist;
+# checking a single image is not enough since an interrupted build leaves
+# the early images behind.
+BUILD_CHECK = \
+    missing=$$(cd testnets/${testnet} && \
+        testnet=${testnet} docker compose --profile build config 2>/dev/null | \
+        yq -r '.services[] | select(.build != null) | .image' | sort -u | \
+        while read -r img; do docker image inspect "$$img" >/dev/null 2>&1 || echo "$$img"; done); \
+    if [ -n "$$missing" ]; then \
+        echo "Error: The testnet '${testnet}' has not been built. Missing images:"; \
+        echo "$$missing" | sed 's/^/  /'; \
+        echo "Please run 'make build testnet=${testnet}' first."; \
+        exit 1; \
+    fi
 
 help:
 	@echo
@@ -128,6 +150,7 @@ all:
 	fi
 
 up: TESTNET testnets/${testnet}/.env.tmp ## Start testnet without optional containers
+	$(BUILD_CHECK) && \
 	cd testnets/${testnet} && \
 	$(HOST_INTERFACE_SETUP) && \
 	echo "HOST_INTERFACE=$$HOST_INTERFACE" >> .env.tmp && \
@@ -138,6 +161,7 @@ up-all: TESTNET ## Start testnet with optional containers (Blockfrost, TX Genera
 	@if [ ! -f testnets/${testnet}/.env.tmp ]; then \
 		$(MAKE) up testnet=${testnet}; \
 	fi
+	$(BUILD_CHECK) && \
 	cd testnets/${testnet} && \
 	docker compose --env-file .env.tmp --profile optional --profile privaterelays up --detach
 
