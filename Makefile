@@ -1,4 +1,4 @@
-.PHONY: all clean example_zone node_graph prerequisites prometheus_target
+.PHONY: all block build cibuild clean dbsync down example_zone help node_graph pools prerequisites prometheus_target query TESTNET up up-all validate yaci
 .SILENT: all block build dbsync down pools prerequisites query up up-all validate yaci
 
 # Required for builds on OSX ARM
