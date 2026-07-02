@@ -49,7 +49,7 @@ The following list provides an overview of the key tools and technologies used i
 |Cardano Node         |A node implementation of the Cardano blockchain.                     |https://github.com/IntersectMBO/cardano-node         |
 |Cardano TX Generator |A tool for generating transactions on the Cardano blockchain.        |https://github.com/IntersectMBO/cardano-node/tree/master/bench/tx-generator |
 |CoreDNS              |A flexible, extensible DNS server.                                   |https://github.com/coredns/coredns                   |
-|Grafana              |A open and composable observability and data visualization platform. |https://github.com/grafana/grafana                   |
+|Grafana              |An open and composable observability and data visualization platform.|https://github.com/grafana/grafana                   |
 |Loki                 |A log aggregation system designed to store and query logs.           |https://github.com/grafana/loki                      |
 |PostgreSQL           |An object-relational database system.                                |https://www.postgresql.org                           |
 |Prometheus           |A systems and service monitoring system.                             |https://github.com/prometheus/prometheus             |
@@ -159,13 +159,13 @@ Please consult the [SETUP.md](./SETUP.md) file for detailed installation instruc
   make dbsync
   ```
 
-- Show latest information about the latest block from Blockfrost
+- Show information about the latest block from Blockfrost
 
   ```
   make block
   ```
 
-- Show detail about all stake-pools from Blockfrost
+- Show details about all stake-pools from Blockfrost
 
   ```
   make pools

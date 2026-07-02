@@ -48,6 +48,7 @@ help:
 	@echo
 	@echo "Arguments:"
 	@printf "  \033[34m%-30s\033[0m %s\n" testnet "Testnet directory name (Example: simple_network_binary)"
+	@printf "  \033[34m%-30s\033[0m %s\n" NO_INTERPOOL_LOCALROOTS "Do not add other pools to localRoots, rely on P2P discovery (Example: NO_INTERPOOL_LOCALROOTS=true)"
 	@printf "  \033[34m%-30s\033[0m %s\n" PROFILING "Set to enable GHC profiling when building cardano-node (Example: PROFILING=1)"
 	@printf "  \033[34m%-30s\033[0m %s\n" SHUTDOWN_ON_BLOCK "Shut down cardano-node after syncing to a block (Example: SHUTDOWN_ON_BLOCK=123456)"
 	@echo
@@ -56,7 +57,7 @@ help:
 	@echo "    make build testnet=simple_network_binary"
 	@echo "    make up testnet=simple_network_binary"
 	@echo
-	@printf "  \033[34m Query and Verify\033[0m\n"
+	@printf "  \033[34mQuery and Verify\033[0m\n"
 	@echo "    make block"
 	@echo "    make dbsync"
 	@echo "    make pools"
