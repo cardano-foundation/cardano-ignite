@@ -1,5 +1,5 @@
-.PHONY: all block blockperf build clean dbsync down example_zone help node_graph pools prerequisites prometheus_target query TESTNET up up-all validate yaci
-.SILENT: all block blockperf build dbsync down pools prerequisites query up up-all validate yaci
+.PHONY: all block blockperf build canary clean dbsync down example_zone help node_graph pools prerequisites prometheus_target query TESTNET up up-all validate yaci
+.SILENT: all block blockperf build canary dbsync down pools prerequisites query up up-all validate yaci
 
 # Required for builds on OSX ARM
 export DOCKER_DEFAULT_PLATFORM?=linux/amd64
@@ -204,6 +204,13 @@ dbsync: ## Run SQL query in cardano-db-sync
 
 yaci: ## Run SQL query in yaci-store
 	docker exec -ti sidecar /usr/bin/psql --host db.example --dbname yaci --user yaci --command="SELECT to_timestamp(block_time),number,slot FROM block WHERE number=(SELECT MAX(number) FROM block);"
+
+canary: ## Show canary transaction statistics (delays in slots)
+	echo "Canary TX inclusion delay: slots from the slot a canary transaction was"
+	echo "submitted in until it was included in a block. Lost canaries were never"
+	echo "included in any block."
+	echo
+	docker exec -ti dbsync /usr/bin/psql --host db.example --dbname dbsync --user dbsync --command="SELECT COUNT(*) + COALESCE((SELECT get_canary_loss()),0) AS sent, COALESCE((SELECT get_canary_loss()),0) AS lost, ROUND(AVG(delay)::numeric,1) AS mean, MIN(delay) AS min, ROUND((PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY delay))::numeric,1) AS p25, ROUND((PERCENTILE_CONT(0.50) WITHIN GROUP (ORDER BY delay))::numeric,1) AS p50, ROUND((PERCENTILE_CONT(0.90) WITHIN GROUP (ORDER BY delay))::numeric,1) AS p90, ROUND((PERCENTILE_CONT(0.99) WITHIN GROUP (ORDER BY delay))::numeric,1) AS p99, MAX(delay) AS max FROM get_canary_delay();"
 
 blockperf: ## Show block adoption statistics, overall and per region (delays in seconds)
 	echo "Block adoption delay: time in seconds from the start of the slot a block"

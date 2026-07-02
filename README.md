@@ -177,6 +177,12 @@ Please consult the [SETUP.md](./SETUP.md) file for detailed installation instruc
   make blockperf
   ```
 
+- Show canary transaction statistics
+
+  ```
+  make canary
+  ```
+
 - Show latest block and slot from cardano-db-sync
 
   ```
