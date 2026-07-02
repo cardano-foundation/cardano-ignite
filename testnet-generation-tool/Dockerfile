@@ -1,5 +1,10 @@
 FROM docker.io/debian:stable-20260518-slim AS testnet_builder
 
+# Default curl options: fail fast on unreachable hosts and retry transient
+# failures. Applies to every curl invocation in this stage, including those
+# made internally by tools (e.g. ghcup, cabal).
+RUN printf 'connect-timeout = 15\nretry = 5\n' > /root/.curlrc
+
 ARG UV_VERSION="${UV_VERSION:-0.11.18}"
 ARG TESTNET_GENERATION_TOOL_VERSION="v0.2.0"
 

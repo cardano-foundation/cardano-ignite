@@ -1,5 +1,10 @@
 FROM docker.io/debian:stable-20260518-slim AS build
 
+# Default curl options: fail fast on unreachable hosts and retry transient
+# failures. Applies to every curl invocation in this stage, including those
+# made internally by tools (e.g. ghcup, cabal).
+RUN printf 'connect-timeout = 15\nretry = 5\n' > /root/.curlrc
+
 ARG BLOCKFROST_BACKEND_RYO="${BLOCKFROST_BACKEND_RYO:-6.4.3}"
 ARG CARDANO_CLI_VERSION="${CARDANO_CLI_VERSION:-11.0.0.0}"
 ARG NODEJS_MAJOR_VERSION="${NODEJS_MAJOR_VERSION:-24}"
