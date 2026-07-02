@@ -108,6 +108,12 @@ Please consult the [SETUP.md](./SETUP.md) file for detailed installation instruc
   make build testnet=simple_network_binary
   ```
 
+> [!NOTE]
+> The first build downloads the base images and builds all containers. For
+> `simple_network_binary` this takes about 5-10 minutes and around 10 GB of
+> disk space, depending on hardware and network bandwidth. Testnets that build
+> cardano-node from source can take more than an hour.
+
 - Start the `simple_network_binary` testnet **without** optional containers
 
   ```
@@ -132,6 +138,18 @@ Please consult the [SETUP.md](./SETUP.md) file for detailed installation instruc
   Password:
   cardano
   ```
+
+- Watch the testnet come alive. The pools start producing blocks right away,
+  and within a few minutes the Grafana dashboards fill up with logs, metrics
+  and the testnet topology.
+
+- Check that all pools have reached consensus
+
+  ```
+  make validate
+  ```
+
+  The testnet is healthy when the reply shows `"status":"synced"`.
 
 - Stop the `simple_network_binary` testnet
 
