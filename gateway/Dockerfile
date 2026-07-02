@@ -1,5 +1,10 @@
 FROM docker.io/debian:stable-20260518-slim AS build
 
+# Default curl options: fail fast on unreachable hosts and retry transient
+# failures. Applies to every curl invocation in this stage, including those
+# made internally by tools (e.g. ghcup, cabal).
+RUN printf 'connect-timeout = 15\nretry = 5\n' > /root/.curlrc
+
 ARG NODE_EXPORTER_VERSION="${NODE_EXPORTER_VERSION:-1.11.1}"
 
 ENV TZ="UTC"

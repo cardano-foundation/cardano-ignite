@@ -1,5 +1,5 @@
-.PHONY: all clean example_zone node_graph prerequisites prometheus_target
-.SILENT: all block build dbsync down pools prerequisites query up up-all validate yaci
+.PHONY: all block blockperf build canary clean dbsync down example_zone help node_graph pools prerequisites prometheus_target query TESTNET up up-all validate yaci
+.SILENT: all block blockperf build canary dbsync down pools prerequisites query up up-all validate yaci
 
 # Required for builds on OSX ARM
 export DOCKER_DEFAULT_PLATFORM?=linux/amd64
@@ -14,10 +14,32 @@ HOST_INTERFACE_SETUP = \
     if [ -z "$${HOST_INTERFACE+x}" ]; then \
         HOST_INTERFACE=$$(ip -br link show | awk '$$1 ~ /^dummy[0-9]*$$/ {print $$1; exit}') ; \
         [ -n "$$HOST_INTERFACE" ] || HOST_INTERFACE=$$(ip -br link show | awk '$$1 !~ /^lo$$|^vir|^wl/ && $$1 !~ /@/ {print $$1; exit}'); \
-        [ -n "$$HOST_INTERFACE" ] || { echo "No physical interface found"; exit 1; }; \
+        [ -n "$$HOST_INTERFACE" ] || { \
+            echo "Error: No suitable network interface found (loopback, wireless and virtual interfaces are skipped)."; \
+            echo "Please create a dummy interface:"; \
+            echo "  sudo ip link add dummy0 type dummy"; \
+            echo "  sudo ip link set dummy0 up"; \
+            echo "or select an interface explicitly: make <target> testnet=<testnet> HOST_INTERFACE=<interface>"; \
+            exit 1; }; \
     fi && \
     export HOST_INTERFACE && \
     echo "Using HOST_INTERFACE=\"$$HOST_INTERFACE\""
+
+# Verify that the testnet has been built. Every image that 'make build'
+# produces (the build profile services with a build section) must exist;
+# checking a single image is not enough since an interrupted build leaves
+# the early images behind.
+BUILD_CHECK = \
+    missing=$$(cd testnets/${testnet} && \
+        testnet=${testnet} docker compose --profile build config 2>/dev/null | \
+        yq -r '.services[] | select(.build != null) | .image' | sort -u | \
+        while read -r img; do docker image inspect "$$img" >/dev/null 2>&1 || echo "$$img"; done); \
+    if [ -n "$$missing" ]; then \
+        echo "Error: The testnet '${testnet}' has not been built. Missing images:"; \
+        echo "$$missing" | sed 's/^/  /'; \
+        echo "Please run 'make build testnet=${testnet}' first."; \
+        exit 1; \
+    fi
 
 help:
 	@echo
@@ -26,7 +48,13 @@ help:
 	@echo
 	@echo "Arguments:"
 	@printf "  \033[34m%-30s\033[0m %s\n" testnet "Testnet directory name (Example: simple_network_binary)"
+	@printf "  \033[34m%-30s\033[0m %s\n" GRAFANA_HOST/GRAFANA_PORT "Grafana bind address and port (Example: GRAFANA_PORT=3001)"
+	@printf "  \033[34m%-30s\033[0m %s\n" HOST_INTERFACE "Parent network interface for the testnet networks (Example: HOST_INTERFACE=dummy0)"
+	@printf "  \033[34m%-30s\033[0m %s\n" LOKI_HOST/LOKI_PORT "Loki bind address and port (Example: LOKI_PORT=3101)"
+	@printf "  \033[34m%-30s\033[0m %s\n" NO_INTERPOOL_LOCALROOTS "Do not add other pools to localRoots, rely on P2P discovery (Example: NO_INTERPOOL_LOCALROOTS=true)"
+	@printf "  \033[34m%-30s\033[0m %s\n" PRE_EPOCHS "Number of epochs of blocks to synthesize before the nodes start (Example: PRE_EPOCHS=4)"
 	@printf "  \033[34m%-30s\033[0m %s\n" PROFILING "Set to enable GHC profiling when building cardano-node (Example: PROFILING=1)"
+	@printf "  \033[34m%-30s\033[0m %s\n" PSQL_HOST/PSQL_PORT "PostgreSQL bind address and port (Example: PSQL_PORT=5433)"
 	@printf "  \033[34m%-30s\033[0m %s\n" SHUTDOWN_ON_BLOCK "Shut down cardano-node after syncing to a block (Example: SHUTDOWN_ON_BLOCK=123456)"
 	@echo
 	@echo "Examples:"
@@ -34,7 +62,7 @@ help:
 	@echo "    make build testnet=simple_network_binary"
 	@echo "    make up testnet=simple_network_binary"
 	@echo
-	@printf "  \033[34m Query and Verify\033[0m\n"
+	@printf "  \033[34mQuery and Verify\033[0m\n"
 	@echo "    make block"
 	@echo "    make dbsync"
 	@echo "    make pools"
@@ -79,7 +107,19 @@ testnets/%/prometheus/rules.yml: scripts/prometheus_rules.sh testnets/%/testnet.
 	mkdir -p testnets/${testnet}/prometheus/
 	./scripts/prometheus_rules.sh testnets/$*/testnet.yaml >$@
 
+# An existing .env.tmp is kept while the testnet has running containers or
+# data volumes, so repeated 'make up' stays idempotent and a stopped testnet
+# resumes with its original SYSTEM_START. Without either, the file is a stale
+# leftover (e.g. from a 'make up' that failed the build check, or an
+# interrupted 'make down') and is regenerated with a fresh SYSTEM_START.
 testnets/%/.env.tmp: TESTNET
+	@if [ -f $@ ]; then \
+		if [ -n "$$(cd testnets/$* && docker compose ps -q 2>/dev/null)" ] || \
+		   [ -n "$$(docker volume ls -q --filter label=com.docker.compose.project=$* | head -1)" ]; then \
+			exit 0; \
+		fi; \
+		echo "Regenerating stale .env.tmp for '$*' (no running containers or data volumes)"; \
+	fi; \
 	export SYSTEM_START=$$(date -u +'%Y-%m-%dT%H:%M:%SZ') \
 	&& echo "SYSTEM_START=$${SYSTEM_START}" > testnets/$*/.env.tmp \
 	&& echo "TESTNET_BUILDER_IMAGE=$*-testnet_builder" >> testnets/$*/.env.tmp \
@@ -103,19 +143,6 @@ build: TESTNET prerequisites testnets/${testnet}/graph_nodes.sql testnets/${test
 	TESTNET_BUILDER_IMAGE="${testnet}-testnet_builder" HASKELL_BUILDER_IMAGE="${testnet}-haskell_builder" \
 	docker compose --profile build build --build-arg GRAPHNODES="testnets/${testnet}/graph_nodes.sql" --build-arg TESTNET_BUILDER_IMAGE="${testnet}-testnet_builder" --build-arg HASKELL_BUILDER_IMAGE="${testnet}-haskell_builder" --build-arg PROFILING=$(PROFILING)
 
-cibuild: TESTNET prerequisites testnets/${testnet}/graph_nodes.sql testnets/${testnet}/coredns/example.zone testnets/${testnet}/prometheus/prometheus.yml testnets/${testnet}/prometheus/rules.yml ## Build testnet
-	ln -snf testnets/${testnet}/testnet.yaml .testnet.yaml && \
-	$(HOST_INTERFACE_SETUP) && \
-	docker buildx create --use && \
-	docker buildx build -t ${testnet}-testnet_builder -f testnet-generation-tool/Dockerfile --load . && \
-	docker buildx build -t ${testnet}-haskell_builder -f haskell-builder/Dockerfile --load . && \
-	docker buildx use default && \
-	cd testnets/${testnet} && \
-	TESTNET_BUILDER_IMAGE="${testnet}-testnet_builder" HASKELL_BUILDER_IMAGE="${testnet}-haskell_builder" \
-	docker compose --profile build build --build-arg GRAPHNODES="testnets/${testnet}/graph_nodes.sql" --build-arg TESTNET_BUILDER_IMAGE="${testnet}-testnet_builder" --build-arg HASKELL_BUILDER_IMAGE="${testnet}-haskell_builder" --build-arg PROFILING=$(PROFILING)
-
-
-
 all:
 	failed=""; \
 	for dir in testnets/*; do \
@@ -128,21 +155,34 @@ all:
 	fi
 
 up: TESTNET testnets/${testnet}/.env.tmp ## Start testnet without optional containers
+	$(BUILD_CHECK) && \
 	cd testnets/${testnet} && \
 	$(HOST_INTERFACE_SETUP) && \
 	echo "HOST_INTERFACE=$$HOST_INTERFACE" >> .env.tmp && \
 	echo "testnet=$$testnet" >> .env.tmp && \
-	docker compose --env-file .env.tmp --profile core up --detach
+	docker compose --env-file .env.tmp --profile core up --detach && \
+	echo "Grafana: http://localhost:$${GRAFANA_PORT:-3000} (username: cardano, password: cardano)"
 
 up-all: TESTNET ## Start testnet with optional containers (Blockfrost, TX Generator...)
 	@if [ ! -f testnets/${testnet}/.env.tmp ]; then \
 		$(MAKE) up testnet=${testnet}; \
 	fi
+	$(BUILD_CHECK) && \
 	cd testnets/${testnet} && \
-	docker compose --env-file .env.tmp --profile optional --profile privaterelays up --detach
+	docker compose --env-file .env.tmp --profile optional --profile privaterelays up --detach && \
+	echo "Grafana: http://localhost:$${GRAFANA_PORT:-3000} (username: cardano, password: cardano)"
 
 down: TESTNET ## Stop testnet
 	@cd testnets/${testnet} && \
+	if [ ! -f .env.tmp ]; then \
+		if [ -n "$$(docker compose ps -q 2>/dev/null)" ]; then \
+			echo "Error: Testnet '${testnet}' has running containers but .env.tmp is missing."; \
+			echo "Stop it with 'docker compose --profile core --profile optional --profile privaterelays down --volumes --remove-orphans' in testnets/${testnet}/."; \
+			exit 1; \
+		fi; \
+		echo "Testnet '${testnet}' is not running (no .env.tmp found)."; \
+		exit 0; \
+	fi && \
 	$(HOST_INTERFACE_SETUP) && \
 	docker compose --env-file .env.tmp --profile core --profile optional --profile privaterelays down --volumes --remove-orphans --timeout 5 && \
 	for vlan in $$(yq '.networks[].driver_opts.parent | select(. != null)' docker-compose.yaml | grep -oE '[0-9]+$$'); do \
@@ -164,6 +204,19 @@ dbsync: ## Run SQL query in cardano-db-sync
 
 yaci: ## Run SQL query in yaci-store
 	docker exec -ti sidecar /usr/bin/psql --host db.example --dbname yaci --user yaci --command="SELECT to_timestamp(block_time),number,slot FROM block WHERE number=(SELECT MAX(number) FROM block);"
+
+canary: ## Show canary transaction statistics (delays in slots)
+	echo "Canary TX inclusion delay: slots from the slot a canary transaction was"
+	echo "submitted in until it was included in a block. Lost canaries were never"
+	echo "included in any block."
+	echo
+	docker exec -ti dbsync /usr/bin/psql --host db.example --dbname dbsync --user dbsync --command="SELECT COUNT(*) + COALESCE((SELECT get_canary_loss()),0) AS sent, COALESCE((SELECT get_canary_loss()),0) AS lost, ROUND(AVG(delay)::numeric,1) AS mean, MIN(delay) AS min, ROUND((PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY delay))::numeric,1) AS p25, ROUND((PERCENTILE_CONT(0.50) WITHIN GROUP (ORDER BY delay))::numeric,1) AS p50, ROUND((PERCENTILE_CONT(0.90) WITHIN GROUP (ORDER BY delay))::numeric,1) AS p90, ROUND((PERCENTILE_CONT(0.99) WITHIN GROUP (ORDER BY delay))::numeric,1) AS p99, MAX(delay) AS max FROM get_canary_delay();"
+
+blockperf: ## Show block adoption statistics, overall and per region (delays in seconds)
+	echo "Block adoption delay: time in seconds from the start of the slot a block"
+	echo "was forged in until a node adopted the block. One sample per node and block."
+	echo
+	docker exec -ti sidecar /usr/bin/psql --host db.example --dbname sidecar --user sidecar --command="SELECT COUNT(DISTINCT hash) AS blocks, COUNT(*) AS adoptions, ROUND(AVG(delay)::numeric,3) AS mean, ROUND(MIN(delay)::numeric,3) AS min, ROUND((PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY delay))::numeric,3) AS p25, ROUND((PERCENTILE_CONT(0.50) WITHIN GROUP (ORDER BY delay))::numeric,3) AS p50, ROUND((PERCENTILE_CONT(0.90) WITHIN GROUP (ORDER BY delay))::numeric,3) AS p90, ROUND((PERCENTILE_CONT(0.99) WITHIN GROUP (ORDER BY delay))::numeric,3) AS p99, ROUND(MAX(delay)::numeric,3) AS max FROM block_adoption;" --command="SELECT region, COUNT(DISTINCT hash) AS blocks, COUNT(*) AS adoptions, ROUND(AVG(delay)::numeric,3) AS mean, ROUND(MIN(delay)::numeric,3) AS min, ROUND((PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY delay))::numeric,3) AS p25, ROUND((PERCENTILE_CONT(0.50) WITHIN GROUP (ORDER BY delay))::numeric,3) AS p50, ROUND((PERCENTILE_CONT(0.90) WITHIN GROUP (ORDER BY delay))::numeric,3) AS p90, ROUND((PERCENTILE_CONT(0.99) WITHIN GROUP (ORDER BY delay))::numeric,3) AS p99, ROUND(MAX(delay)::numeric,3) AS max FROM block_adoption GROUP BY region ORDER BY region;"
 
 
 block: ## Run Blockfrost query on '/blocks/latest'

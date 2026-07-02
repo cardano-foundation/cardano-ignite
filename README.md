@@ -6,6 +6,7 @@
   - [Showcase](#showcase)
   - [Target Audience](#target-audience)
   - [Tech Stack](#tech-stack)
+  - [Testnets](#testnets)
 - [Requirements](#requirements)
 - [Installation](#installation)
 - [Getting Started](#getting-started)
@@ -48,11 +49,30 @@ The following list provides an overview of the key tools and technologies used i
 |Cardano Node         |A node implementation of the Cardano blockchain.                     |https://github.com/IntersectMBO/cardano-node         |
 |Cardano TX Generator |A tool for generating transactions on the Cardano blockchain.        |https://github.com/IntersectMBO/cardano-node/tree/master/bench/tx-generator |
 |CoreDNS              |A flexible, extensible DNS server.                                   |https://github.com/coredns/coredns                   |
-|Grafana              |A open and composable observability and data visualization platform. |https://github.com/grafana/grafana                   |
+|Grafana              |An open and composable observability and data visualization platform.|https://github.com/grafana/grafana                   |
 |Loki                 |A log aggregation system designed to store and query logs.           |https://github.com/grafana/loki                      |
 |PostgreSQL           |An object-relational database system.                                |https://www.postgresql.org                           |
 |Prometheus           |A systems and service monitoring system.                             |https://github.com/prometheus/prometheus             |
 |Yaci Store           |A modular, high-performance Cardano blockchain indexer and datastore.|https://github.com/bloxbean/yaci-store               |
+
+### Testnets
+
+The repository ships a set of pre-defined testnets under [testnets/](./testnets/).
+Binary testnets use a pre-built cardano-node and build quickly, while Source
+testnets compile the node from source and take considerably longer on the first
+build. Each testnet directory contains a README.md with further details, such as
+the cardano-node version in use.
+
+|Testnet                                                             |Nodes                      |Node Build      |Description                                                                        |
+|---                                                                 |---                        |---             |---                                                                                |
+|[simple_network_binary](./testnets/simple_network_binary/)          |3 pools                    |Binary          |Three-pool testnet with a pre-built cardano-node. A good first choice.             |
+|[single_pool_binary](./testnets/single_pool_binary/)                |1 pool                     |Binary          |The smallest testnet, a single pool.                                               |
+|[simple_network_source](./testnets/simple_network_source/)          |3 pools                    |Source          |Like simple_network_binary, but cardano-node is built from source.                 |
+|[simple_mixed_nodes_source](./testnets/simple_mixed_nodes_source/)  |3 pools + 2 Amaru nodes    |Source          |cardano-node and Amaru nodes running side by side.                                 |
+|[simple_mixed_consensus](./testnets/simple_mixed_consensus/)        |12 pools                   |Source          |A mixture of nodes running in Praos- or Genesis-mode, in-memory and disk UTXO HD.  |
+|[global_network](./testnets/global_network/)                        |6 pools, 24 nodes          |Source          |Block producers and relays spread across simulated regions, mixed node versions.   |
+|[global_network_mixed_nodes](./testnets/global_network_mixed_nodes/)|6 pools, 24 nodes + 2 Amaru|Source          |Global topology with both cardano-node and Amaru, starts with 4 epochs of blocks.  |
+|[global_network_2c](./testnets/global_network_2c/)                  |4 pools, 16 nodes          |Source          |Reduced two-continent variant of global_network for A/B benchmarking, needs 8 cores.|
 
 ## Requirements
 
@@ -79,28 +99,31 @@ Please consult the [SETUP.md](./SETUP.md) file for detailed installation instruc
   cd ./cardano-ignite/
   ```
 
-- List all pre-defined testnets
+- Pick a testnet from the [Testnets](#testnets) overview. For a first run,
+  `simple_network_binary` builds quickly and is a good starting point.
+
+- Build the `simple_network_binary` testnet
 
   ```
-  ls -l ./testnets/
+  make build testnet=simple_network_binary
   ```
 
-- Build the `global_network` testnet
+> [!NOTE]
+> The first build downloads the base images and builds all containers. For
+> `simple_network_binary` this takes about 5-10 minutes and around 10 GB of
+> disk space, depending on hardware and network bandwidth. Testnets that build
+> cardano-node from source can take more than an hour.
+
+- Start the `simple_network_binary` testnet **without** optional containers
 
   ```
-  make build testnet=global_network
+  make up testnet=simple_network_binary
   ```
 
-- Start the `global_network` testnet **without** optional containers
+- Start the `simple_network_binary` testnet **with** optional containers (Blockfrost, TX Generator...)
 
   ```
-  make up testnet=global_network
-  ```
-
-- Start the `global_network` testnet **with** optional containers (Blockfrost, TX Generator...)
-
-  ```
-  make up-all testnet=global_network
+  make up-all testnet=simple_network_binary
   ```
 
 - Open your browser and navigate to \
@@ -116,10 +139,22 @@ Please consult the [SETUP.md](./SETUP.md) file for detailed installation instruc
   cardano
   ```
 
-- Stop the `global_network` testnet
+- Watch the testnet come alive. The pools start producing blocks right away,
+  and within a few minutes the Grafana dashboards fill up with logs, metrics
+  and the testnet topology.
+
+- Check that all pools have reached consensus
 
   ```
-  make down testnet=global_network
+  make validate
+  ```
+
+  The testnet is healthy when the reply shows `"status":"synced"`.
+
+- Stop the `simple_network_binary` testnet
+
+  ```
+  make down testnet=simple_network_binary
   ```
 
 ### Useful Commands
@@ -136,19 +171,31 @@ Please consult the [SETUP.md](./SETUP.md) file for detailed installation instruc
   make validate
   ```
 
+- Show block adoption statistics
+
+  ```
+  make blockperf
+  ```
+
+- Show canary transaction statistics
+
+  ```
+  make canary
+  ```
+
 - Show latest block and slot from cardano-db-sync
 
   ```
   make dbsync
   ```
 
-- Show latest information about the latest block from Blockfrost
+- Show information about the latest block from Blockfrost
 
   ```
   make block
   ```
 
-- Show detail about all stake-pools from Blockfrost
+- Show details about all stake-pools from Blockfrost
 
   ```
   make pools

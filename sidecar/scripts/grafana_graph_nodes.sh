@@ -58,9 +58,11 @@ parse_metric_response() {
 while true; do
     echo "=== Starting new cycle ==="
 
-    # 1. Fetch both metrics from Prometheus
-    response_main=$(curl -s -G --data-urlencode "query=$PROMETHEUS_QUERY_MAIN" "$PROMETHEUS_URL")
-    response_secondary=$(curl -s -G --data-urlencode "query=$PROMETHEUS_QUERY_SECONDARY" "$PROMETHEUS_URL")
+    # 1. Fetch both metrics from Prometheus. Guarded so that a Prometheus
+    # restart mid-run does not kill the script via errexit; the status
+    # validation below handles the empty response.
+    response_main=$(curl -s -G --data-urlencode "query=$PROMETHEUS_QUERY_MAIN" "$PROMETHEUS_URL" || true)
+    response_secondary=$(curl -s -G --data-urlencode "query=$PROMETHEUS_QUERY_SECONDARY" "$PROMETHEUS_URL" || true)
 
     # 2. Validate both responses
     if [[ $(echo "$response_main" | jq -r '.status') != "success" ]]; then
@@ -106,10 +108,10 @@ while true; do
             continue
         fi
 
-        # 6. Update PostgreSQL with both stats
-        $PSQL_CMD -c "UPDATE ci_nodes SET mainstat = $main_val, secondarystat = $secondary_val WHERE id = '$node_id';"
-
-        if [ $? -eq 0 ]; then
+        # 6. Update PostgreSQL with both stats. Run inside the if condition
+        # so a transient database error is logged instead of killing the
+        # script via errexit.
+        if $PSQL_CMD -c "UPDATE ci_nodes SET mainstat = $main_val, secondarystat = $secondary_val WHERE id = '$node_id';"; then
             echo "Success: Updated $node_id | mainstat=$main_val | secondarystat=$secondary_val"
         else
             echo "Error: Failed to update $node_id"

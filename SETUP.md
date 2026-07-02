@@ -105,7 +105,7 @@ The Docker setup for advanced test networks uses a macvlan driver in bridge mode
 
 The primary advantage of selecting a dummy interface is network isolation: Unlike physical interfaces (e.g., eth0), a dummy device:
 * Prevents MAC address leakage
-* Avoids potential conflicts with other devices on your LAN.
+* Avoids potential conflicts with other devices on your LAN
 
 This isolation ensures test network activities don't inadvertently impact or become visible to external networks.
 
@@ -117,4 +117,4 @@ To create a dummy device run the following commands:
   sudo ip link set dummy0 up
   ```
 
-Check your linux dist for instructions on how to have the dummy device be created at boot.
+Consult your Linux distribution's documentation for instructions on how to create the dummy device at boot.

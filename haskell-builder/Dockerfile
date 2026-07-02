@@ -4,6 +4,11 @@
 ARG BASE_IMAGE=docker.io/debian:stable-20260518-slim
 FROM ${BASE_IMAGE} AS haskell-builder
 
+# Default curl options: fail fast on unreachable hosts and retry transient
+# failures. Applies to every curl invocation in this stage, including those
+# made internally by tools (e.g. ghcup, cabal).
+RUN printf 'connect-timeout = 15\nretry = 5\n' > /root/.curlrc
+
 # ── Common ARGs (keep the defaults from the originals) ──
 ARG BLST_VERSION=0.3.14
 ARG JOBS=8
