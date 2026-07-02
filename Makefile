@@ -1,5 +1,5 @@
-.PHONY: all block build clean dbsync down example_zone help node_graph pools prerequisites prometheus_target query TESTNET up up-all validate yaci
-.SILENT: all block build dbsync down pools prerequisites query up up-all validate yaci
+.PHONY: all block blockperf build clean dbsync down example_zone help node_graph pools prerequisites prometheus_target query TESTNET up up-all validate yaci
+.SILENT: all block blockperf build dbsync down pools prerequisites query up up-all validate yaci
 
 # Required for builds on OSX ARM
 export DOCKER_DEFAULT_PLATFORM?=linux/amd64
@@ -204,6 +204,12 @@ dbsync: ## Run SQL query in cardano-db-sync
 
 yaci: ## Run SQL query in yaci-store
 	docker exec -ti sidecar /usr/bin/psql --host db.example --dbname yaci --user yaci --command="SELECT to_timestamp(block_time),number,slot FROM block WHERE number=(SELECT MAX(number) FROM block);"
+
+blockperf: ## Show block adoption statistics, overall and per region (delays in seconds)
+	echo "Block adoption delay: time in seconds from the start of the slot a block"
+	echo "was forged in until a node adopted the block. One sample per node and block."
+	echo
+	docker exec -ti sidecar /usr/bin/psql --host db.example --dbname sidecar --user sidecar --command="SELECT COUNT(DISTINCT hash) AS blocks, COUNT(*) AS adoptions, ROUND(AVG(delay)::numeric,3) AS mean, ROUND(MIN(delay)::numeric,3) AS min, ROUND((PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY delay))::numeric,3) AS p25, ROUND((PERCENTILE_CONT(0.50) WITHIN GROUP (ORDER BY delay))::numeric,3) AS p50, ROUND((PERCENTILE_CONT(0.90) WITHIN GROUP (ORDER BY delay))::numeric,3) AS p90, ROUND((PERCENTILE_CONT(0.99) WITHIN GROUP (ORDER BY delay))::numeric,3) AS p99, ROUND(MAX(delay)::numeric,3) AS max FROM block_adoption;" --command="SELECT region, COUNT(DISTINCT hash) AS blocks, COUNT(*) AS adoptions, ROUND(AVG(delay)::numeric,3) AS mean, ROUND(MIN(delay)::numeric,3) AS min, ROUND((PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY delay))::numeric,3) AS p25, ROUND((PERCENTILE_CONT(0.50) WITHIN GROUP (ORDER BY delay))::numeric,3) AS p50, ROUND((PERCENTILE_CONT(0.90) WITHIN GROUP (ORDER BY delay))::numeric,3) AS p90, ROUND((PERCENTILE_CONT(0.99) WITHIN GROUP (ORDER BY delay))::numeric,3) AS p99, ROUND(MAX(delay)::numeric,3) AS max FROM block_adoption GROUP BY region ORDER BY region;"
 
 
 block: ## Run Blockfrost query on '/blocks/latest'
