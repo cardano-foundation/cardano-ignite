@@ -223,6 +223,7 @@ services:
     environment:
       GF_SECURITY_ADMIN_USER: cardano
       GF_SECURITY_ADMIN_PASSWORD: cardano
+      GF_FEATURE_TOGGLES_splashScreen: "false"
     profiles: [build, core]
 
   yaci:
