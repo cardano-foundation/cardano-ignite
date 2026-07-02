@@ -187,6 +187,15 @@ up-all: TESTNET ## Start testnet with optional containers (Blockfrost, TX Genera
 
 down: TESTNET ## Stop testnet
 	@cd testnets/${testnet} && \
+	if [ ! -f .env.tmp ]; then \
+		if [ -n "$$(docker compose ps -q 2>/dev/null)" ]; then \
+			echo "Error: Testnet '${testnet}' has running containers but .env.tmp is missing."; \
+			echo "Stop it with 'docker compose --profile core --profile optional --profile privaterelays down --volumes --remove-orphans' in testnets/${testnet}/."; \
+			exit 1; \
+		fi; \
+		echo "Testnet '${testnet}' is not running (no .env.tmp found)."; \
+		exit 0; \
+	fi && \
 	$(HOST_INTERFACE_SETUP) && \
 	docker compose --env-file .env.tmp --profile core --profile optional --profile privaterelays down --volumes --remove-orphans --timeout 5 && \
 	for vlan in $$(yq '.networks[].driver_opts.parent | select(. != null)' docker-compose.yaml | grep -oE '[0-9]+$$'); do \
