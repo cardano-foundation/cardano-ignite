@@ -101,7 +101,19 @@ testnets/%/prometheus/rules.yml: scripts/prometheus_rules.sh testnets/%/testnet.
 	mkdir -p testnets/${testnet}/prometheus/
 	./scripts/prometheus_rules.sh testnets/$*/testnet.yaml >$@
 
+# An existing .env.tmp is kept while the testnet has running containers or
+# data volumes, so repeated 'make up' stays idempotent and a stopped testnet
+# resumes with its original SYSTEM_START. Without either, the file is a stale
+# leftover (e.g. from a 'make up' that failed the build check, or an
+# interrupted 'make down') and is regenerated with a fresh SYSTEM_START.
 testnets/%/.env.tmp: TESTNET
+	@if [ -f $@ ]; then \
+		if [ -n "$$(cd testnets/$* && docker compose ps -q 2>/dev/null)" ] || \
+		   [ -n "$$(docker volume ls -q --filter label=com.docker.compose.project=$* | head -1)" ]; then \
+			exit 0; \
+		fi; \
+		echo "Regenerating stale .env.tmp for '$*' (no running containers or data volumes)"; \
+	fi; \
 	export SYSTEM_START=$$(date -u +'%Y-%m-%dT%H:%M:%SZ') \
 	&& echo "SYSTEM_START=$${SYSTEM_START}" > testnets/$*/.env.tmp \
 	&& echo "TESTNET_BUILDER_IMAGE=$*-testnet_builder" >> testnets/$*/.env.tmp \
