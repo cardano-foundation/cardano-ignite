@@ -106,6 +106,23 @@ services:
       SYSTEM_START: ${SYSTEM_START:-}
     profiles: [build, core, clients]
 
+  # TX generator
+  c2:
+    <<: [*base, *cardano_node_11_0_1]
+    container_name: c2
+    hostname: c2.example
+    volumes:
+      - c2:/opt/cardano-node
+      - synth:/opt/synth:ro
+    environment:
+      POOL_ID: "1"
+      TYPE: "txg"
+      TPS: "1"
+      TX_GEN_MODE: "plain"
+      #TX_GEN_MODE: "plutus"
+      SYSTEM_START: ${SYSTEM_START:-}
+    profiles: [build, optional, tx-generators]
+
   # PostgreSQL Database
   db:
     image: postgresql:latest
@@ -227,6 +244,7 @@ volumes:
   p2:
   p3:
   c1:
+  c2:
   db:
   dbsync:
   prometheus:
