@@ -14,9 +14,11 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
+      # Note: do not add docker/setup-buildx-action here. It makes a
+      # docker-container driver builder the default, and docker compose then
+      # builds against it. That builder cannot see the locally built
+      # *_builder images, so every FROM of them fails with a docker.io pull
+      # error. "make build" uses the dockerd builder, which sees them.
       - name: Docker Compose
         uses: docker/setup-compose-action@v1
 
@@ -26,13 +28,13 @@ jobs:
           sudo apt install --no-install-recommends -y ca-certificates curl iproute2 make tar
           curl --proto '=https' --tlsv1.3 --connect-timeout 15 --retry 5 --location https://github.com/mikefarah/yq/releases/download/v4.47.2/yq_linux_amd64.tar.gz --output /tmp/yq_linux_amd64.tar.gz
           sudo tar --extract --gzip --file=/tmp/yq_linux_amd64.tar.gz --directory=/usr/local/bin ./yq_linux_amd64 --transform='s|yq_linux_amd64|yq|' --no-same-owner
-          make cibuild testnet=simple_network_binary
+          make build testnet=simple_network_binary
           make up testnet=simple_network_binary
           make validate
           make down testnet=simple_network_binary
 #      - name: Build fancy testnet
 #       run: |
-#         make cibuild testnet=global_network
+#         make build testnet=global_network
 #         make up testnet=global_network
 #         make validate
 #         make down testnet=global_network

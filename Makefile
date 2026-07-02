@@ -1,4 +1,4 @@
-.PHONY: all block build cibuild clean dbsync down example_zone help node_graph pools prerequisites prometheus_target query TESTNET up up-all validate yaci
+.PHONY: all block build clean dbsync down example_zone help node_graph pools prerequisites prometheus_target query TESTNET up up-all validate yaci
 .SILENT: all block build dbsync down pools prerequisites query up up-all validate yaci
 
 # Required for builds on OSX ARM
@@ -142,19 +142,6 @@ build: TESTNET prerequisites testnets/${testnet}/graph_nodes.sql testnets/${test
 	cd testnets/${testnet} && \
 	TESTNET_BUILDER_IMAGE="${testnet}-testnet_builder" HASKELL_BUILDER_IMAGE="${testnet}-haskell_builder" \
 	docker compose --profile build build --build-arg GRAPHNODES="testnets/${testnet}/graph_nodes.sql" --build-arg TESTNET_BUILDER_IMAGE="${testnet}-testnet_builder" --build-arg HASKELL_BUILDER_IMAGE="${testnet}-haskell_builder" --build-arg PROFILING=$(PROFILING)
-
-cibuild: TESTNET prerequisites testnets/${testnet}/graph_nodes.sql testnets/${testnet}/coredns/example.zone testnets/${testnet}/prometheus/prometheus.yml testnets/${testnet}/prometheus/rules.yml ## Build testnet
-	ln -snf testnets/${testnet}/testnet.yaml .testnet.yaml && \
-	$(HOST_INTERFACE_SETUP) && \
-	docker buildx create --use && \
-	docker buildx build -t ${testnet}-testnet_builder -f testnet-generation-tool/Dockerfile --load . && \
-	docker buildx build -t ${testnet}-haskell_builder -f haskell-builder/Dockerfile --load . && \
-	docker buildx use default && \
-	cd testnets/${testnet} && \
-	TESTNET_BUILDER_IMAGE="${testnet}-testnet_builder" HASKELL_BUILDER_IMAGE="${testnet}-haskell_builder" \
-	docker compose --profile build build --build-arg GRAPHNODES="testnets/${testnet}/graph_nodes.sql" --build-arg TESTNET_BUILDER_IMAGE="${testnet}-testnet_builder" --build-arg HASKELL_BUILDER_IMAGE="${testnet}-haskell_builder" --build-arg PROFILING=$(PROFILING)
-
-
 
 all:
 	failed=""; \
