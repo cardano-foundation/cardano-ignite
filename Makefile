@@ -173,7 +173,8 @@ up: TESTNET testnets/${testnet}/.env.tmp ## Start testnet without optional conta
 	$(HOST_INTERFACE_SETUP) && \
 	echo "HOST_INTERFACE=$$HOST_INTERFACE" >> .env.tmp && \
 	echo "testnet=$$testnet" >> .env.tmp && \
-	docker compose --env-file .env.tmp --profile core up --detach
+	docker compose --env-file .env.tmp --profile core up --detach && \
+	echo "Grafana: http://localhost:$${GRAFANA_PORT:-3000} (username: cardano, password: cardano)"
 
 up-all: TESTNET ## Start testnet with optional containers (Blockfrost, TX Generator...)
 	@if [ ! -f testnets/${testnet}/.env.tmp ]; then \
@@ -181,7 +182,8 @@ up-all: TESTNET ## Start testnet with optional containers (Blockfrost, TX Genera
 	fi
 	$(BUILD_CHECK) && \
 	cd testnets/${testnet} && \
-	docker compose --env-file .env.tmp --profile optional --profile privaterelays up --detach
+	docker compose --env-file .env.tmp --profile optional --profile privaterelays up --detach && \
+	echo "Grafana: http://localhost:$${GRAFANA_PORT:-3000} (username: cardano, password: cardano)"
 
 down: TESTNET ## Stop testnet
 	@cd testnets/${testnet} && \
