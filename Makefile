@@ -48,8 +48,13 @@ help:
 	@echo
 	@echo "Arguments:"
 	@printf "  \033[34m%-30s\033[0m %s\n" testnet "Testnet directory name (Example: simple_network_binary)"
+	@printf "  \033[34m%-30s\033[0m %s\n" GRAFANA_HOST/GRAFANA_PORT "Grafana bind address and port (Example: GRAFANA_PORT=3001)"
+	@printf "  \033[34m%-30s\033[0m %s\n" HOST_INTERFACE "Parent network interface for the testnet networks (Example: HOST_INTERFACE=dummy0)"
+	@printf "  \033[34m%-30s\033[0m %s\n" LOKI_HOST/LOKI_PORT "Loki bind address and port (Example: LOKI_PORT=3101)"
 	@printf "  \033[34m%-30s\033[0m %s\n" NO_INTERPOOL_LOCALROOTS "Do not add other pools to localRoots, rely on P2P discovery (Example: NO_INTERPOOL_LOCALROOTS=true)"
+	@printf "  \033[34m%-30s\033[0m %s\n" PRE_EPOCHS "Number of epochs of blocks to synthesize before the nodes start (Example: PRE_EPOCHS=4)"
 	@printf "  \033[34m%-30s\033[0m %s\n" PROFILING "Set to enable GHC profiling when building cardano-node (Example: PROFILING=1)"
+	@printf "  \033[34m%-30s\033[0m %s\n" PSQL_HOST/PSQL_PORT "PostgreSQL bind address and port (Example: PSQL_PORT=5433)"
 	@printf "  \033[34m%-30s\033[0m %s\n" SHUTDOWN_ON_BLOCK "Shut down cardano-node after syncing to a block (Example: SHUTDOWN_ON_BLOCK=123456)"
 	@echo
 	@echo "Examples:"
