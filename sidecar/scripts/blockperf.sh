@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # ----------------------------------------------------------------------
-# block‑adoption collector – resolves short host names to IPs,
+# block-adoption collector - resolves short host names to IPs,
 # determines the region and stores it in the DB.
 # ----------------------------------------------------------------------
 
 # ----------------------------------------------------------------------
-# Helper: map a /24 network to a human‑readable region (you supplied)
+# Helper: map a /24 network to a human-readable region
 # ----------------------------------------------------------------------
 get_region() {
     local ip=$1
@@ -36,17 +36,14 @@ resolve_ip() {
     # Append the domain you use for DNS resolution
     local fqdn="${short_host}.example"
 
-    # `host` may emit multiple lines – we only need the first "has address"
-    # Suppress errors (e.g. NXDOMAIN) and fall back to empty string.
-    host "$fqdn" 2>/dev/null |
-        awk '/has address/ {print $4; exit}'
+    # getent exits 0 whenever the A lookup succeeds.
+    getent hosts "$fqdn" 2>/dev/null |
+        awk '{print $1; exit}' || true
 }
 
 # ----------------------------------------------------------------------
 # Global configuration
 # ----------------------------------------------------------------------
-SYSTEM_START_UNIX=$(cat /opt/synth/start_time.unix_epoch)
-
 set -euo pipefail
 set -x
 
@@ -61,6 +58,15 @@ LOKI_QUERY='{container_name=~"p[0-9]+(bp|r[0-9])?|(c[0-9]+)"} | json | data_kind
 
 # Simple logger
 log() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*" >&2; }
+
+# ----------------------------------------------------------------------
+# Wait for the testnet to be initialized
+# ----------------------------------------------------------------------
+while [ ! -f /opt/synth/start_time.unix_epoch ]; do
+    log "Waiting for initialization to complete..."
+    sleep 1
+done
+SYSTEM_START_UNIX=$(cat /opt/synth/start_time.unix_epoch)
 
 # ----------------------------------------------------------------------
 # Ensure the target table exists (now with a `region` column)
@@ -86,7 +92,7 @@ while true; do
     log "Starting data extraction cycle..."
 
     # ------------------------------------------------------------------
-    # Time window (2 minutes back → now) in nanoseconds
+    # Time window (2 minutes back to now) in nanoseconds
     # ------------------------------------------------------------------
     END=$(date +%s)000000000
     START=$(date -d '2 minutes ago' +%s)000000000
@@ -149,14 +155,14 @@ while true; do
         # ------------------------------------------------------------------
         ip=$(resolve_ip "$host")
         if [[ -z "$ip" ]]; then
-            log "WARN: Could not resolve IP for host '$host' – region set to 'Unknown'"
+            log "WARN: Could not resolve IP for host '$host' - region set to 'Unknown'"
             region="Unknown"
         else
             region=$(get_region "$ip")
         fi
 
         # ------------------------------------------------------------------
-        # Normalise the timestamp (Loki returns ISO‑8601)
+        # Normalise the timestamp (Loki returns ISO-8601)
         # ------------------------------------------------------------------
         timestamp="${timestamp%Z}+00"   # ensure UTC offset
 
