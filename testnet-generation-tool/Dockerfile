@@ -7,6 +7,9 @@ RUN printf 'connect-timeout = 15\nretry = 5\n' > /root/.curlrc
 
 ARG UV_VERSION="${UV_VERSION:-0.11.18}"
 ARG TESTNET_GENERATION_TOOL_VERSION="v0.2.0"
+# Must match the cardano-node binary version pinned in the
+# testnet-generation-tool release (libs/mainnet_env.py)
+ARG GENESIS_CARDANO_NODE_VERSION="10.2.1"
 
 ENV TZ="UTC"
 RUN ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime && \
@@ -46,6 +49,18 @@ RUN git clone --branch ${TESTNET_GENERATION_TOOL_VERSION} https://github.com/car
 
 WORKDIR /usr/local/src/testnet-generation-tool
 RUN uv sync
+
+# Pre-fetch the cardano-node binary that genesis-cli.py would otherwise
+# download itself using urllib without a timeout, which can hang
+# indefinitely on unreliable networks. genesis-cli.py skips its download
+# when cardano-node/bin already exists. Placed before the per-testnet
+# COPY below so the download layer is cached across testnets.
+RUN curl --proto '=https' --tlsv1.3 \
+        --location https://github.com/IntersectMBO/cardano-node/releases/download/${GENESIS_CARDANO_NODE_VERSION}/cardano-node-${GENESIS_CARDANO_NODE_VERSION}-linux.tar.gz \
+        --output /tmp/node.tar.gz && \
+    mkdir -p /usr/local/src/testnet-generation-tool/cardano-node && \
+    tar --extract --gzip --file=/tmp/node.tar.gz --directory=/usr/local/src/testnet-generation-tool/cardano-node && \
+    rm -f /tmp/node.tar.gz
 
 COPY --chown=root:root .testnet.yaml /usr/local/src/testnet-generation-tool/testnet.yaml
 
