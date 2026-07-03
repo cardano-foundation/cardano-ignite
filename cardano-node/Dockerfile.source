@@ -8,8 +8,8 @@ ARG HASKELL_BUILDER_IMAGE=scratch
 
 FROM ${HASKELL_BUILDER_IMAGE} AS build
 
-ARG NODE_EXPORTER_VERSION="${NODE_EXPORTER_VERSION:-1.11.1}"
-ARG PROCESS_EXPORTER_VERSION="${PROCESS_EXPORTER_VERSION:-0.8.7}"
+ARG NODE_EXPORTER_VERSION="1.11.1"
+ARG PROCESS_EXPORTER_VERSION="0.8.7"
 
 # NOTE:
 # Additional ARG definitions can be found further below in the Dockerfile.
@@ -37,9 +37,9 @@ RUN ln -s /usr/local/src/node_exporter/node_exporter-${NODE_EXPORTER_VERSION}.li
 
 # cardano-cli
 
-ARG CARDANO_CLI_VERSION="${CARDANO_CLI_VERSION:-11.0.0.0}"
-ARG CARDANO_CLI_REPO="${CARDANO_CLI_REPO:-https://github.com/IntersectMBO/cardano-cli.git}"
-ARG CARDANO_CLI_REF="${CARDANO_CLI_REF:-cardano-cli-${CARDANO_CLI_VERSION}}"
+ARG CARDANO_CLI_VERSION="11.0.0.0"
+ARG CARDANO_CLI_REPO="https://github.com/IntersectMBO/cardano-cli.git"
+ARG CARDANO_CLI_REF="cardano-cli-${CARDANO_CLI_VERSION}"
 
 WORKDIR /usr/local/src
 RUN git init cardano-cli
@@ -62,8 +62,8 @@ RUN cabal update && \
 
 # cardano-node
 
-ARG CARDANO_NODE_REF="${CARDANO_NODE_REF:-10.5.4}"
-ARG CARDANO_NODE_REPO="${CARDANO_NODE_REPO:-https://github.com/IntersectMBO/cardano-node.git}"
+ARG CARDANO_NODE_REF="10.5.4"
+ARG CARDANO_NODE_REPO="https://github.com/IntersectMBO/cardano-node.git"
 ARG PROFILING
 ENV PROFILING=${PROFILING}
 
@@ -115,7 +115,7 @@ RUN cabal install exe:tx-generator --disable-test --install-method=copy \
 # tx-centrifuge (Leios load generator). Not shipped by every cardano-node rev, so build it
 # from a SEPARATE checkout when TX_CENTRIFUGE_REF is set (a rev that has bench/tx-centrifuge);
 # otherwise install a stub. Default empty => other source testnets get the stub (no extra build).
-ARG TX_CENTRIFUGE_REPO="${TX_CENTRIFUGE_REPO:-https://github.com/IntersectMBO/cardano-node.git}"
+ARG TX_CENTRIFUGE_REPO="https://github.com/IntersectMBO/cardano-node.git"
 ARG TX_CENTRIFUGE_REF=""
 RUN if [ -n "${TX_CENTRIFUGE_REF}" ]; then \
       git init /usr/local/src/tx-centrifuge && \

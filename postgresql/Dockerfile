@@ -1,7 +1,7 @@
 ARG BASE_IMAGE=cardano-ignite-base
 FROM ${BASE_IMAGE} AS build
 
-ARG PROCESS_EXPORTER_VERSION="${PROCESS_EXPORTER_VERSION:-0.8.7}"
+ARG PROCESS_EXPORTER_VERSION="0.8.7"
 
 ENV PGDATA="/opt/postgresql/db" \
     PGHOST="/opt/postgresql/db" \

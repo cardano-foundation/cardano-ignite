@@ -6,8 +6,8 @@ FROM ${TESTNET_BUILDER_IMAGE} AS testnet_builder
 
 FROM ${HASKELL_BUILDER_IMAGE} AS build
 
-ARG NODE_EXPORTER_VERSION="${NODE_EXPORTER_VERSION:-1.11.1}"
-ARG PROCESS_EXPORTER_VERSION="${PROCESS_EXPORTER_VERSION:-0.8.7}"
+ARG NODE_EXPORTER_VERSION="1.11.1"
+ARG PROCESS_EXPORTER_VERSION="0.8.7"
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
@@ -52,8 +52,8 @@ RUN ln -s /root/.cargo/bin/cargo /usr/local/bin/cargo && \
 
 # Amaru node
 
-ARG AMARU_REF="${AMARU_REF:-17020694ec00b39668dd0d9e87902f94e99590fa}"
-ARG AMARU_REPO="${AMARU_REPO:-https://github.com/pragma-org/amaru.git}"
+ARG AMARU_REF="17020694ec00b39668dd0d9e87902f94e99590fa"
+ARG AMARU_REPO="https://github.com/pragma-org/amaru.git"
 
 # Clone amaru.git repository
 WORKDIR /usr/local/src

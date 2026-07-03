@@ -16,8 +16,8 @@ FROM ${HASKELL_BUILDER_IMAGE} AS build
 
 # ouroboros-consensus
 
-ARG OUROBOROS_CONSENSUS_REF="${OUROBOROS_CONSENSUS_REF:-abailly/snapshot-generator}"
-ARG OUROBOROS_CONSENSUS_REPO="${OUROBOROS_CONSENSUS_REPO:-https://github.com/abailly/ouroboros-consensus.git}"
+ARG OUROBOROS_CONSENSUS_REF="abailly/snapshot-generator"
+ARG OUROBOROS_CONSENSUS_REPO="https://github.com/abailly/ouroboros-consensus.git"
 
 WORKDIR /usr/local/src
 RUN git init ouroboros-consensus
@@ -47,7 +47,7 @@ RUN strip --strip-unneeded /usr/local/bin/db-synthesizer
 
 FROM ${BASE_IMAGE} AS tarball
 
-ARG DB_SYNTHESIZER_VERSION="${DB_SYNTHESIZER_VERSION:-11.0.1}"
+ARG DB_SYNTHESIZER_VERSION="11.0.1"
 
 RUN install --directory --owner=root --group=root --mode=0755 /usr/local/src/cardano-node
 
