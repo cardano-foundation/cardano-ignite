@@ -138,7 +138,12 @@ build: TESTNET prerequisites testnets/${testnet}/graph_nodes.sql testnets/${test
 	ln -snf testnets/${testnet}/testnet.yaml .testnet.yaml && \
 	$(HOST_INTERFACE_SETUP) && \
 	docker build -t ${testnet}-testnet_builder -f testnet-generation-tool/Dockerfile . && \
-	docker build -t ${testnet}-haskell_builder -f haskell-builder/Dockerfile . && \
+	if grep -q "HASKELL_BUILDER_IMAGE" testnets/${testnet}/docker-compose.yaml || \
+	   [ "$$(yq -r '.services.synth.build.target // "full"' testnets/${testnet}/docker-compose.yaml)" = "full" ]; then \
+		docker build -t ${testnet}-haskell_builder -f haskell-builder/Dockerfile . ; \
+	else \
+		echo "Skipping haskell_builder (no service in '${testnet}' uses it)"; \
+	fi && \
 	cd testnets/${testnet} && \
 	TESTNET_BUILDER_IMAGE="${testnet}-testnet_builder" HASKELL_BUILDER_IMAGE="${testnet}-haskell_builder" \
 	docker compose --profile build build --build-arg GRAPHNODES="testnets/${testnet}/graph_nodes.sql" --build-arg TESTNET_BUILDER_IMAGE="${testnet}-testnet_builder" --build-arg HASKELL_BUILDER_IMAGE="${testnet}-haskell_builder" --build-arg PROFILING=$(PROFILING)
