@@ -1,5 +1,5 @@
-.PHONY: all block blockperf build canary clean dbsync down example_zone help node_graph pools prerequisites prometheus_target query TESTNET up up-all validate yaci
-.SILENT: all block blockperf build canary dbsync down pools prerequisites query up up-all validate yaci
+.PHONY: all block blockperf build canary clean dbsync down ebperf example_zone help node_graph pools prerequisites prometheus_target query TESTNET up up-all validate yaci
+.SILENT: all block blockperf build canary dbsync down ebperf pools prerequisites query up up-all validate yaci
 
 # Required for builds on OSX ARM
 export DOCKER_DEFAULT_PLATFORM?=linux/amd64
@@ -64,7 +64,10 @@ help:
 	@echo
 	@printf "  \033[34mQuery and Verify\033[0m\n"
 	@echo "    make block"
+	@echo "    make blockperf"
+	@echo "    make canary"
 	@echo "    make dbsync"
+	@echo "    make ebperf"
 	@echo "    make pools"
 	@echo "    make query testnet=simple_network_binary"
 	@echo "    make validate"
@@ -217,6 +220,14 @@ blockperf: ## Show block adoption statistics, overall and per region (delays in 
 	echo "was forged in until a node adopted the block. One sample per node and block."
 	echo
 	docker exec -ti sidecar /usr/bin/psql --host db.example --dbname sidecar --user sidecar --command="SELECT COUNT(DISTINCT hash) AS blocks, COUNT(*) AS adoptions, ROUND(AVG(delay)::numeric,3) AS mean, ROUND(MIN(delay)::numeric,3) AS min, ROUND((PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY delay))::numeric,3) AS p25, ROUND((PERCENTILE_CONT(0.50) WITHIN GROUP (ORDER BY delay))::numeric,3) AS p50, ROUND((PERCENTILE_CONT(0.90) WITHIN GROUP (ORDER BY delay))::numeric,3) AS p90, ROUND((PERCENTILE_CONT(0.99) WITHIN GROUP (ORDER BY delay))::numeric,3) AS p99, ROUND(MAX(delay)::numeric,3) AS max FROM block_adoption;" --command="SELECT region, COUNT(DISTINCT hash) AS blocks, COUNT(*) AS adoptions, ROUND(AVG(delay)::numeric,3) AS mean, ROUND(MIN(delay)::numeric,3) AS min, ROUND((PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY delay))::numeric,3) AS p25, ROUND((PERCENTILE_CONT(0.50) WITHIN GROUP (ORDER BY delay))::numeric,3) AS p50, ROUND((PERCENTILE_CONT(0.90) WITHIN GROUP (ORDER BY delay))::numeric,3) AS p90, ROUND((PERCENTILE_CONT(0.99) WITHIN GROUP (ORDER BY delay))::numeric,3) AS p99, ROUND(MAX(delay)::numeric,3) AS max FROM block_adoption GROUP BY region ORDER BY region;"
+
+ebperf: ## Show endorser block statistics, overall and per region (Leios testnets)
+	echo "EB adoption delay: time in seconds from the start of the slot an endorser"
+	echo "block was forged in until a node adopted it, overall and per region."
+	echo "EB certification latency: slots from an EB's forge slot until a node saw"
+	echo "it certified (last table)."
+	echo
+	docker exec -ti sidecar /usr/bin/psql --host db.example --dbname sidecar --user sidecar --command="SELECT COUNT(DISTINCT eb_hash) AS ebs, COUNT(*) AS adoptions, ROUND(AVG(delay)::numeric,3) AS mean, ROUND(MIN(delay)::numeric,3) AS min, ROUND((PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY delay))::numeric,3) AS p25, ROUND((PERCENTILE_CONT(0.50) WITHIN GROUP (ORDER BY delay))::numeric,3) AS p50, ROUND((PERCENTILE_CONT(0.90) WITHIN GROUP (ORDER BY delay))::numeric,3) AS p90, ROUND((PERCENTILE_CONT(0.99) WITHIN GROUP (ORDER BY delay))::numeric,3) AS p99, ROUND(MAX(delay)::numeric,3) AS max FROM eb_adoption;" --command="SELECT region, COUNT(DISTINCT eb_hash) AS ebs, COUNT(*) AS adoptions, ROUND(AVG(delay)::numeric,3) AS mean, ROUND(MIN(delay)::numeric,3) AS min, ROUND((PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY delay))::numeric,3) AS p25, ROUND((PERCENTILE_CONT(0.50) WITHIN GROUP (ORDER BY delay))::numeric,3) AS p50, ROUND((PERCENTILE_CONT(0.90) WITHIN GROUP (ORDER BY delay))::numeric,3) AS p90, ROUND((PERCENTILE_CONT(0.99) WITHIN GROUP (ORDER BY delay))::numeric,3) AS p99, ROUND(MAX(delay)::numeric,3) AS max FROM eb_adoption GROUP BY region ORDER BY region;" --command="SELECT COUNT(DISTINCT eb_hash) AS ebs, COUNT(*) AS certifications, ROUND(AVG(latency_slots)::numeric,1) AS mean, MIN(latency_slots) AS min, ROUND((PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY latency_slots))::numeric,1) AS p25, ROUND((PERCENTILE_CONT(0.50) WITHIN GROUP (ORDER BY latency_slots))::numeric,1) AS p50, ROUND((PERCENTILE_CONT(0.90) WITHIN GROUP (ORDER BY latency_slots))::numeric,1) AS p90, ROUND((PERCENTILE_CONT(0.99) WITHIN GROUP (ORDER BY latency_slots))::numeric,1) AS p99, MAX(latency_slots) AS max FROM eb_certification;"
 
 
 block: ## Run Blockfrost query on '/blocks/latest'
