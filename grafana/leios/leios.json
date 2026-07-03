@@ -38,7 +38,7 @@
         "type": "prometheus",
         "uid": "prometheus_uid"
       },
-      "description": "EB tx/s ÷ RB tx/s — how many times more transactions Leios carries vs the Praos ranking-block backbone.",
+      "description": "EB tx/s / RB tx/s - how many times more transactions Leios carries vs the Praos ranking-block backbone.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -239,7 +239,7 @@
         "type": "postgres",
         "uid": "dbsync_uid"
       },
-      "description": "True tx-byte throughput of endorser vs ranking/Praos blocks, from cardano-db-sync: sum(tx.size) of each block's txs, split by has_leios_cert (an EB's txs are attributed to its certifying block). On-chain payload ground truth — not the tiny eb_announcement_size (which is only tx references).",
+      "description": "True tx-byte throughput of endorser vs ranking/Praos blocks, from cardano-db-sync: sum(tx.size) of each block's txs, split by has_leios_cert (an EB's txs are attributed to its certifying block). On-chain payload ground truth - not the tiny eb_announcement_size (which is only tx references).",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -355,7 +355,7 @@
           "refId": "A"
         }
       ],
-      "title": "Tx Byte Throughput — Endorser vs Ranking Blocks",
+      "title": "Tx Byte Throughput - Endorser vs Ranking Blocks",
       "type": "timeseries"
     },
     {
@@ -363,7 +363,7 @@
         "type": "postgres",
         "uid": "dbsync_uid"
       },
-      "description": "Instantaneous TRUE payload of every block (one dot per block) = sum(tx.size) of its txs, split EB vs ranking by has_leios_cert. From cardano-db-sync — real on-chain tx bytes, not eb_announcement_size.",
+      "description": "Instantaneous TRUE payload of every block (one dot per block) = sum(tx.size) of its txs, split EB vs ranking by has_leios_cert. From cardano-db-sync - real on-chain tx bytes, not eb_announcement_size.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -475,7 +475,7 @@
           },
           "editorMode": "code",
           "format": "time_series",
-          "rawSql": "SELECT b.time AS \"time\", CASE WHEN b.has_leios_cert THEN s.tx_bytes END AS \"endorser block (EB)\", CASE WHEN NOT b.has_leios_cert THEN s.tx_bytes END AS \"ranking block (RB)\" FROM block b JOIN (SELECT block_id, sum(size) AS tx_bytes FROM tx GROUP BY block_id) s ON s.block_id = b.id WHERE $__timeFilter(b.time) ORDER BY b.time",
+          "rawSql": "SELECT\n  b.time AS \"time\",\n  CASE WHEN b.has_leios_cert THEN sum(t.size) END AS \"endorser block (EB)\",\n  CASE WHEN NOT b.has_leios_cert THEN sum(t.size) END AS \"ranking block (RB)\"\nFROM block b\nJOIN tx t ON t.block_id = b.id\nWHERE $__timeFilter(b.time)\nGROUP BY b.id, b.time, b.has_leios_cert\nORDER BY b.time",
           "refId": "A"
         }
       ],
@@ -557,7 +557,7 @@
       },
       "id": 22,
       "panels": [],
-      "title": "Endorser Block Pipeline (forge → vote → certify)",
+      "title": "Endorser Block Pipeline (forge -> vote -> certify)",
       "type": "row"
     },
     {
