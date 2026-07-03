@@ -60,7 +60,7 @@ RUN cabal update && \
 
 # cardano-node
 
-ARG CARDANO_NODE_REF="10.5.4"
+ARG CARDANO_NODE_REF="11.0.1"
 ARG CARDANO_NODE_REPO="https://github.com/IntersectMBO/cardano-node.git"
 ARG PROFILING
 ENV PROFILING=${PROFILING}
