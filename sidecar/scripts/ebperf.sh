@@ -29,10 +29,11 @@ get_region() {
     esac
 }
 
-# Resolve a short host name (e.g. p1bp) to an IP.
+# Resolve a short host name (e.g. p1bp) to an IP. getent exits 0 whenever
+# the A lookup succeeds, unlike `host` (see blockperf.sh).
 resolve_ip() {
     local short_host=$1
-    host "${short_host}.example" 2>/dev/null | awk '/has address/ {print $4; exit}'
+    getent hosts "${short_host}.example" 2>/dev/null | awk '{print $1; exit}' || true
 }
 
 # NOTE: deliberately no `errexit` - this is a long-running collector and a
@@ -46,7 +47,10 @@ DB_SIDECAR_USERNAME="${DB_SIDECAR_USERNAME:-sidecar}"
 LOKI_URL="${LOKI_URL:-http://loki.example:3100/loki/api/v1/query_range}"
 # bp + relays + clients. `| json` exposes nested data.kind as label data_kind
 # (same mechanism blockperf.sh relies on).
-LOKI_QUERY='{container_name=~"p[0-9]+(bp|r[0-9])?|(c[0-9]+)"} | json | data_kind=~"LeiosBlock(Forged|Acquired|Certified)"'
+# The `|= "LeiosBlock"` line filter lets Loki drop non-matching lines before
+# the expensive `| json` parse stage.
+LOKI_QUERY='{container_name=~"p[0-9]+(bp|r[0-9])?|(c[0-9]+)"} |= "LeiosBlock" | json | data_kind=~"LeiosBlock(Forged|Acquired|Certified)"'
+LOKI_LIMIT=5000
 
 log() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*" >&2; }
 
@@ -74,16 +78,19 @@ ts_to_epoch() {
     awk -v sec="$seconds_unix" -v ms="$milliseconds_part" 'BEGIN { printf "%.3f\n", sec + ms/1000 }'
 }
 
-# Cache host->region so we DNS-resolve each host only once.
+# Cache host->region so we DNS-resolve each host only once. Returns via the
+# REGION variable (a command substitution would run in a subshell and lose
+# the cache writes). Failed lookups are not cached and retry on the next row.
 declare -A REGION_CACHE
 region_for() {
     local h="$1"
-    if [[ -n "${REGION_CACHE[$h]:-}" ]]; then echo "${REGION_CACHE[$h]}"; return; fi
-    local ip region
-    ip=$(resolve_ip "$h")
-    if [[ -z "$ip" ]]; then region="Unknown"; else region=$(get_region "$ip"); fi
-    REGION_CACHE[$h]="$region"
-    echo "$region"
+    if [[ -z "${REGION_CACHE[$h]:-}" ]]; then
+        local ip
+        ip=$(resolve_ip "$h")
+        if [[ -z "$ip" ]]; then REGION="Unknown"; return; fi
+        REGION_CACHE[$h]=$(get_region "$ip")
+    fi
+    REGION="${REGION_CACHE[$h]}"
 }
 
 # ----------------------------------------------------------------------
@@ -117,21 +124,37 @@ until psql -h "$DB_HOST" -U "$DB_SIDECAR_USERNAME" -d "$DB_SIDECAR_DATABASE" -c 
 done
 
 # ----------------------------------------------------------------------
-# Main collection loop
+# Main collection loop. Each window starts where the previous one left off
+# (with a 30s lap for late log shipping) instead of a fixed 2 minutes back.
+# Results are fetched oldest-first; when a burst saturates LOKI_LIMIT the
+# window is advanced only to the last fetched event, so the remainder is
+# drained on following cycles instead of silently dropped.
 # ----------------------------------------------------------------------
+WINDOW_START=$(( $(date +%s) - 120 ))
 while true; do
     log "Starting EB perf cycle..."
-    END=$(date +%s)000000000
-    START=$(date -d '2 minutes ago' +%s)000000000
+    NOW=$(date +%s)
+    START="${WINDOW_START}000000000"
+    END="${NOW}000000000"
 
     RAW=$(mktemp)
     if ! curl -s -G "$LOKI_URL" \
         --data-urlencode "query=$LOKI_QUERY" \
         --data-urlencode "start=$START" \
         --data-urlencode "end=$END" \
-        --data-urlencode "limit=5000" > "$RAW"; then
+        --data-urlencode "direction=forward" \
+        --data-urlencode "limit=$LOKI_LIMIT" > "$RAW"; then
         log "WARN: Loki query failed; retrying next cycle"
         rm -f "$RAW"; sleep 60; continue
+    fi
+
+    FETCHED=$(jq '[.data.result[]?.values[]?] | length' "$RAW" 2>/dev/null) || FETCHED=0
+    if [[ "$FETCHED" -ge "$LOKI_LIMIT" ]]; then
+        LAST_SEC=$(jq -r '[.data.result[]?.values[]?[0]] | max | .[0:10]' "$RAW" 2>/dev/null)
+        [[ "$LAST_SEC" =~ ^[0-9]+$ ]] && WINDOW_START="$LAST_SEC"
+        log "WARN: Loki result hit limit=$LOKI_LIMIT; draining backlog from $WINDOW_START"
+    else
+        WINDOW_START=$(( NOW - 30 ))
     fi
 
     # ---- eb_adoption : LeiosBlockForged (producer) + LeiosBlockAcquired (others) ----
@@ -149,20 +172,25 @@ while true; do
         [ $log.host, $log.at, ($ebSlot|tostring), $ebHash, $kind ] | @tsv
     ' "$RAW" 2>/dev/null > "$ADOPT" || true
 
+    ADOPT_ROWS=()
     while IFS=$'\t' read -r host at eb_slot eb_hash kind; do
         [[ -z "${host:-}" || -z "${eb_hash:-}" || -z "${eb_slot:-}" ]] && continue
-        region=$(region_for "$host")
+        region_for "$host"
         seen=$(ts_to_epoch "$at"); [[ -z "$seen" ]] && continue
         forged=$(( SYSTEM_START_UNIX + eb_slot ))
         delay=$(awk -v a="$seen" -v f="$forged" 'BEGIN { printf "%.3f\n", a - f }')
         ts_norm="${at%Z}+00"
+        ADOPT_ROWS+=("('$host', '$REGION', '$ts_norm', $eb_slot, '$eb_hash', '$kind', to_timestamp($forged), $delay)")
+    done < "$ADOPT"
+
+    if [[ ${#ADOPT_ROWS[@]} -gt 0 ]]; then
+        printf -v ADOPT_SQL '%s,' "${ADOPT_ROWS[@]}"
         psql -h "$DB_HOST" -U "$DB_SIDECAR_USERNAME" -d "$DB_SIDECAR_DATABASE" -c "
             INSERT INTO eb_adoption (host, region, ts, eb_slot, eb_hash, kind, forged_time, delay)
-            VALUES ('$host', '$region', '$ts_norm', $eb_slot, '$eb_hash', '$kind',
-                    to_timestamp($forged), $delay)
+            VALUES ${ADOPT_SQL%,}
             ON CONFLICT (host, eb_hash) DO NOTHING;
-        " >/dev/null 2>&1 || log "WARN: eb_adoption insert failed ($host/$eb_hash)"
-    done < "$ADOPT"
+        " >/dev/null 2>&1 || log "WARN: eb_adoption batch insert failed (${#ADOPT_ROWS[@]} rows)"
+    fi
 
     # ---- eb_certification : LeiosBlockCertified (atSlot - ebSlot) ----
     CERT=$(mktemp)
@@ -176,17 +204,23 @@ while true; do
         [ $log.host, $log.at, ($log.data.ebSlot|tostring), ($log.data.atSlot|tostring), $log.data.ebHash ] | @tsv
     ' "$RAW" 2>/dev/null > "$CERT" || true
 
+    CERT_ROWS=()
     while IFS=$'\t' read -r host at eb_slot at_slot eb_hash; do
         [[ -z "${host:-}" || -z "${eb_hash:-}" || -z "${eb_slot:-}" || -z "${at_slot:-}" ]] && continue
-        region=$(region_for "$host")
+        region_for "$host"
         ts_norm="${at%Z}+00"
         latency=$(( at_slot - eb_slot ))
+        CERT_ROWS+=("('$host', '$REGION', '$ts_norm', $eb_slot, $at_slot, '$eb_hash', $latency)")
+    done < "$CERT"
+
+    if [[ ${#CERT_ROWS[@]} -gt 0 ]]; then
+        printf -v CERT_SQL '%s,' "${CERT_ROWS[@]}"
         psql -h "$DB_HOST" -U "$DB_SIDECAR_USERNAME" -d "$DB_SIDECAR_DATABASE" -c "
             INSERT INTO eb_certification (host, region, ts, eb_slot, at_slot, eb_hash, latency_slots)
-            VALUES ('$host', '$region', '$ts_norm', $eb_slot, $at_slot, '$eb_hash', $latency)
+            VALUES ${CERT_SQL%,}
             ON CONFLICT (host, eb_hash) DO NOTHING;
-        " >/dev/null 2>&1 || log "WARN: eb_certification insert failed ($host/$eb_hash)"
-    done < "$CERT"
+        " >/dev/null 2>&1 || log "WARN: eb_certification batch insert failed (${#CERT_ROWS[@]} rows)"
+    fi
 
     rm -f "$RAW" "$ADOPT" "$CERT"
     log "EB perf cycle done; sleeping 60s..."

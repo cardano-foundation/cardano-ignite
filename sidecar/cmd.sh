@@ -8,6 +8,7 @@ PATH="/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin"
 
 # Environment variables
 POOLS="${POOLS:-}"
+LEIOS="${LEIOS:-false}"
 DB_ADMIN_DATABASE="${DB_ADMIN_DATABASE:-postgres}"
 DB_ADMIN_PASSWORD="${DB_ADMIN_PASSWORD:-admin}"
 DB_ADMIN_USERNAME="${DB_ADMIN_USERNAME:-admin}"
@@ -126,7 +127,9 @@ main() {
     /opt/scripts/grafana_graph_nodes.sh >/dev/null 2>&1 &
     /opt/scripts/grafana_consensus.sh >/dev/null 2>&1 &
     /opt/scripts/blockperf.sh >/dev/null 2>&1 &
-    /opt/scripts/ebperf.sh >/dev/null 2>&1 &
+    if [[ "${LEIOS,,}" == "true" ]]; then
+        /opt/scripts/ebperf.sh >/dev/null 2>&1 &
+    fi
     /opt/scripts/pots.sh >/dev/null 2>&1
 }
 

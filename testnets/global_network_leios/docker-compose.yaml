@@ -779,6 +779,7 @@ services:
     environment:
       TOPOLOGY: "fancy"
       POOLS: "6"
+      LEIOS: "true"
     volumes:
       - synth:/opt/synth:ro
     cap_add:
