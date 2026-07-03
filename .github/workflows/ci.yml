@@ -6,6 +6,12 @@ on:
   pull_request:
     branches: [main]
 
+# A new push to the same branch or PR cancels the superseded run instead
+# of leaving both builds queued on the runners.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build-all-testnets:
     runs-on: arc-infra-public
