@@ -8,8 +8,8 @@ ARG HASKELL_BUILDER_IMAGE=scratch
 
 FROM ${HASKELL_BUILDER_IMAGE} AS build
 
-ARG NODE_EXPORTER_VERSION="${NODE_EXPORTER_VERSION:-1.11.1}"
-ARG PROCESS_EXPORTER_VERSION="${PROCESS_EXPORTER_VERSION:-0.8.7}"
+ARG NODE_EXPORTER_VERSION="1.11.1"
+ARG PROCESS_EXPORTER_VERSION="0.8.7"
 
 # NOTE:
 # Additional ARG definitions can be found further below in the Dockerfile.
@@ -37,7 +37,7 @@ RUN ln -s /usr/local/src/node_exporter/node_exporter-${NODE_EXPORTER_VERSION}.li
 
 # cardano-cli
 
-ARG CARDANO_CLI_VERSION="${CARDANO_CLI_VERSION:-11.0.0.0}"
+ARG CARDANO_CLI_VERSION="11.0.0.0"
 
 WORKDIR /usr/local/src
 RUN git init cardano-cli
@@ -60,8 +60,8 @@ RUN cabal update && \
 
 # cardano-node
 
-ARG CARDANO_NODE_REF="${CARDANO_NODE_REF:-10.5.4}"
-ARG CARDANO_NODE_REPO="${CARDANO_NODE_REPO:-https://github.com/IntersectMBO/cardano-node.git}"
+ARG CARDANO_NODE_REF="10.5.4"
+ARG CARDANO_NODE_REPO="https://github.com/IntersectMBO/cardano-node.git"
 ARG PROFILING
 ENV PROFILING=${PROFILING}
 
