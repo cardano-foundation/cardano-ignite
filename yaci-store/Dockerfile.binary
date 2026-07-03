@@ -30,6 +30,13 @@ RUN curl --proto '=https' --tlsv1.3 \
         --location https://github.com/IntersectMBO/cardano-node/releases/download/${CARDANO_NODE_VERSION}/cardano-node-${CARDANO_NODE_VERSION}-linux-amd64.tar.gz \
         --output /usr/local/src/cardano-node/cardano-node-${CARDANO_NODE_VERSION}-linux-amd64.tar.gz
 
+RUN curl --proto '=https' --tlsv1.3 \
+        --location https://github.com/IntersectMBO/cardano-node/releases/download/${CARDANO_NODE_VERSION}/cardano-node-${CARDANO_NODE_VERSION}-sha256sums.txt \
+        --output /usr/local/src/cardano-node/cardano-node-${CARDANO_NODE_VERSION}-sha256sums.txt
+
+WORKDIR /usr/local/src/cardano-node
+RUN sha256sum --ignore-missing --check cardano-node-${CARDANO_NODE_VERSION}-sha256sums.txt
+
 RUN install --directory --owner=root --group=root --mode=0755 /usr/local/src/cardano-node/${CARDANO_NODE_VERSION}
 
 RUN tar --extract --gzip --file=/usr/local/src/cardano-node/cardano-node-${CARDANO_NODE_VERSION}-linux-amd64.tar.gz --directory=/usr/local/src/cardano-node/${CARDANO_NODE_VERSION}

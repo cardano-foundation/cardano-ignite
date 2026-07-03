@@ -51,11 +51,18 @@ ARG DB_SYNTHESIZER_VERSION="11.0.1"
 
 RUN install --directory --owner=root --group=root --mode=0755 /usr/local/src/cardano-node
 
-RUN curl --proto '=https' --tlsv1.3 --fail \
+RUN curl --proto '=https' --tlsv1.3 \
         --location https://github.com/IntersectMBO/cardano-node/releases/download/${DB_SYNTHESIZER_VERSION}/cardano-node-${DB_SYNTHESIZER_VERSION}-linux-amd64.tar.gz \
-        --output /usr/local/src/cardano-node/node.tar.gz
+        --output /usr/local/src/cardano-node/cardano-node-${DB_SYNTHESIZER_VERSION}-linux-amd64.tar.gz
 
-RUN tar --extract --gzip --file=/usr/local/src/cardano-node/node.tar.gz --directory=/usr/local/src/cardano-node ./bin/db-synthesizer && \
+RUN curl --proto '=https' --tlsv1.3 \
+        --location https://github.com/IntersectMBO/cardano-node/releases/download/${DB_SYNTHESIZER_VERSION}/cardano-node-${DB_SYNTHESIZER_VERSION}-sha256sums.txt \
+        --output /usr/local/src/cardano-node/cardano-node-${DB_SYNTHESIZER_VERSION}-sha256sums.txt
+
+WORKDIR /usr/local/src/cardano-node
+RUN sha256sum --ignore-missing --check cardano-node-${DB_SYNTHESIZER_VERSION}-sha256sums.txt
+
+RUN tar --extract --gzip --file=/usr/local/src/cardano-node/cardano-node-${DB_SYNTHESIZER_VERSION}-linux-amd64.tar.gz --directory=/usr/local/src/cardano-node ./bin/db-synthesizer && \
     chmod 0755 /usr/local/src/cardano-node/bin/db-synthesizer
 
 #---------------------------------------------------------------------

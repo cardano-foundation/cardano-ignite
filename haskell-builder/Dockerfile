@@ -80,8 +80,13 @@ ENV LD_LIBRARY_PATH="/usr/local/lib" \
 
 # ── GHCup (bootstrap Haskell toolchain) ──
 RUN curl -L https://downloads.haskell.org/~ghcup/${BOOTSTRAP_HASKELL_GHCUP_VERSION}/x86_64-linux-ghcup-${BOOTSTRAP_HASKELL_GHCUP_VERSION} \
-        -o /usr/local/bin/ghcup && \
-    chmod +x /usr/local/bin/ghcup && \
+        -o /tmp/x86_64-linux-ghcup-${BOOTSTRAP_HASKELL_GHCUP_VERSION} && \
+    curl -L https://downloads.haskell.org/~ghcup/${BOOTSTRAP_HASKELL_GHCUP_VERSION}/SHA256SUMS \
+        -o /tmp/SHA256SUMS && \
+    cd /tmp && \
+    sha256sum --ignore-missing --check SHA256SUMS && \
+    install --mode=0755 /tmp/x86_64-linux-ghcup-${BOOTSTRAP_HASKELL_GHCUP_VERSION} /usr/local/bin/ghcup && \
+    rm -f /tmp/x86_64-linux-ghcup-${BOOTSTRAP_HASKELL_GHCUP_VERSION} /tmp/SHA256SUMS && \
     ghcup install cabal ${BOOTSTRAP_HASKELL_CABAL_VERSION} && \
     ghcup set cabal ${BOOTSTRAP_HASKELL_CABAL_VERSION} && \
     ghcup install ghc ${BOOTSTRAP_HASKELL_GHC_VERSION} && \

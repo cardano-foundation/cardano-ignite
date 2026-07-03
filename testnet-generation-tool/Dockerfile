@@ -52,10 +52,15 @@ RUN uv sync
 # COPY below so the download layer is cached across testnets.
 RUN curl --proto '=https' --tlsv1.3 \
         --location https://github.com/IntersectMBO/cardano-node/releases/download/${GENESIS_CARDANO_NODE_VERSION}/cardano-node-${GENESIS_CARDANO_NODE_VERSION}-linux.tar.gz \
-        --output /tmp/node.tar.gz && \
+        --output /tmp/cardano-node-${GENESIS_CARDANO_NODE_VERSION}-linux.tar.gz && \
+    curl --proto '=https' --tlsv1.3 \
+        --location https://github.com/IntersectMBO/cardano-node/releases/download/${GENESIS_CARDANO_NODE_VERSION}/cardano-node-${GENESIS_CARDANO_NODE_VERSION}-sha256sums.txt \
+        --output /tmp/cardano-node-${GENESIS_CARDANO_NODE_VERSION}-sha256sums.txt && \
+    cd /tmp && \
+    sha256sum --ignore-missing --check cardano-node-${GENESIS_CARDANO_NODE_VERSION}-sha256sums.txt && \
     mkdir -p /usr/local/src/testnet-generation-tool/cardano-node && \
-    tar --extract --gzip --file=/tmp/node.tar.gz --directory=/usr/local/src/testnet-generation-tool/cardano-node ./bin/cardano-cli ./bin/cardano-node && \
-    rm -f /tmp/node.tar.gz && \
+    tar --extract --gzip --file=/tmp/cardano-node-${GENESIS_CARDANO_NODE_VERSION}-linux.tar.gz --directory=/usr/local/src/testnet-generation-tool/cardano-node ./bin/cardano-cli ./bin/cardano-node && \
+    rm -f /tmp/cardano-node-${GENESIS_CARDANO_NODE_VERSION}-linux.tar.gz /tmp/cardano-node-${GENESIS_CARDANO_NODE_VERSION}-sha256sums.txt && \
     strip --strip-unneeded /usr/local/src/testnet-generation-tool/cardano-node/bin/cardano-cli \
         /usr/local/src/testnet-generation-tool/cardano-node/bin/cardano-node
 
