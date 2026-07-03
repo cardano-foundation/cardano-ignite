@@ -799,6 +799,7 @@ services:
     build:
       context: "../../"
       dockerfile: "db-synthesizer/Dockerfile"
+      target: "full"
     profiles: [build, core, mgmt]
 
   # Amaru client

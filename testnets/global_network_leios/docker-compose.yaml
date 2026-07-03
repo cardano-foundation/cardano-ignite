@@ -808,6 +808,7 @@ services:
     build:
       context: "../../"
       dockerfile: "db-synthesizer/Dockerfile"
+      target: "light"
     profiles: [build, core, mgmt]
 
   # Client 1
