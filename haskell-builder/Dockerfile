@@ -49,7 +49,7 @@ RUN git init libsodium && \
     cd libsodium && \
     git fetch --depth 1 https://github.com/IntersectMBO/libsodium.git ${LIBSODIUM_VERSION} && \
     git checkout FETCH_HEAD && \
-    ./autogen.sh && \
+    DO_NOT_UPDATE_CONFIG_SCRIPTS=1 ./autogen.sh && \
     ./configure && \
     make && make check && make install -j${JOBS}
 
