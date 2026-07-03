@@ -138,12 +138,18 @@ build: TESTNET prerequisites testnets/${testnet}/graph_nodes.sql testnets/${test
 	ln -snf testnets/${testnet}/testnet.yaml .testnet.yaml && \
 	$(HOST_INTERFACE_SETUP) && \
 	docker build -t cardano-ignite-base -f base/Dockerfile . && \
-	docker build -t ${testnet}-testnet_builder --build-arg BASE_IMAGE=cardano-ignite-base -f testnet-generation-tool/Dockerfile . && \
 	if grep -q "HASKELL_BUILDER_IMAGE" testnets/${testnet}/docker-compose.yaml || \
 	   [ "$$(yq -r '.services.synth.build.target // "full"' testnets/${testnet}/docker-compose.yaml)" = "full" ]; then \
-		docker build -t ${testnet}-haskell_builder --build-arg BASE_IMAGE=cardano-ignite-base -f haskell-builder/Dockerfile . ; \
+		echo "Building testnet_builder in the background, haskell_builder in the foreground..."; \
+		tb_log=$$(mktemp); \
+		docker build -t ${testnet}-testnet_builder --build-arg BASE_IMAGE=cardano-ignite-base -f testnet-generation-tool/Dockerfile . > "$$tb_log" 2>&1 & \
+		tb_pid=$$!; \
+		docker build -t ${testnet}-haskell_builder --build-arg BASE_IMAGE=cardano-ignite-base -f haskell-builder/Dockerfile . || exit 1; \
+		wait $$tb_pid || { cat "$$tb_log"; rm -f "$$tb_log"; exit 1; }; \
+		rm -f "$$tb_log"; \
 	else \
 		echo "Skipping haskell_builder (no service in '${testnet}' uses it)"; \
+		docker build -t ${testnet}-testnet_builder --build-arg BASE_IMAGE=cardano-ignite-base -f testnet-generation-tool/Dockerfile .; \
 	fi && \
 	cd testnets/${testnet} && \
 	TESTNET_BUILDER_IMAGE="${testnet}-testnet_builder" HASKELL_BUILDER_IMAGE="${testnet}-haskell_builder" \
