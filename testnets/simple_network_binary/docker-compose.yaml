@@ -89,6 +89,7 @@ services:
     build:
       context: "../../"
       dockerfile: "db-synthesizer/Dockerfile"
+      target: "binary"
     profiles: [build, core, mgmt]
 
   # Client 1
