@@ -39,7 +39,7 @@ RUN npm install --global yarn
 # blockfrost-backend-ryo
 
 WORKDIR /usr/local/src
-RUN git clone --single-branch --branch v${BLOCKFROST_BACKEND_RYO} --recurse-submodules https://github.com/blockfrost/blockfrost-backend-ryo.git
+RUN git clone --depth 1 --shallow-submodules --single-branch --branch v${BLOCKFROST_BACKEND_RYO} --recurse-submodules https://github.com/blockfrost/blockfrost-backend-ryo.git
 
 WORKDIR /usr/local/src/blockfrost-backend-ryo
 RUN yarn --frozen-lockfile && \

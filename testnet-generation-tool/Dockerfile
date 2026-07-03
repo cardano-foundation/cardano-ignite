@@ -39,7 +39,7 @@ RUN ln -s /usr/local/src/uv/uv-x86_64-unknown-linux-gnu/uv /usr/local/bin/uv
 # testnet-generation-tool
 
 WORKDIR /usr/local/src
-RUN git clone --branch ${TESTNET_GENERATION_TOOL_VERSION} https://github.com/cardano-foundation/testnet-generation-tool.git
+RUN git clone --depth 1 --branch ${TESTNET_GENERATION_TOOL_VERSION} https://github.com/cardano-foundation/testnet-generation-tool.git
 
 WORKDIR /usr/local/src/testnet-generation-tool
 RUN uv sync

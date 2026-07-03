@@ -23,11 +23,12 @@ ARG DB_SERVER_REPO="https://github.com/pragma-org/db-server.git"
 ARG DB_SERVER_REF="main"
 
 WORKDIR /usr/local/src
-RUN git clone ${DB_SERVER_REPO}
+RUN git init db-server
 
 WORKDIR /usr/local/src/db-server
-RUN git fetch --all --recurse-submodules --tags && \
-    git checkout ${DB_SERVER_REF}
+RUN git fetch --depth 1 ${DB_SERVER_REPO} ${DB_SERVER_REF} && \
+    git checkout FETCH_HEAD && \
+    git submodule update --init --recursive
 RUN printf "package *\n\
   ghc-options: +RTS -A128m -n2m -RTS\n\
 \n\
@@ -56,12 +57,13 @@ ARG AMARU_REPO="${AMARU_REPO:-https://github.com/pragma-org/amaru.git}"
 
 # Clone amaru.git repository
 WORKDIR /usr/local/src
-RUN git clone --branch main ${AMARU_REPO}
+RUN git init amaru
 
 # Checkout amaru version
 WORKDIR /usr/local/src/amaru
-RUN git fetch --all --recurse-submodules --tags && \
-    git checkout ${AMARU_REF}
+RUN git fetch --depth 1 ${AMARU_REPO} ${AMARU_REF} && \
+    git checkout FETCH_HEAD && \
+    git submodule update --init --recursive
 
 RUN cargo build --release
 

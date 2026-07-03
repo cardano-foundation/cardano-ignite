@@ -20,11 +20,12 @@ ARG OUROBOROS_CONSENSUS_REF="${OUROBOROS_CONSENSUS_REF:-abailly/snapshot-generat
 ARG OUROBOROS_CONSENSUS_REPO="${OUROBOROS_CONSENSUS_REPO:-https://github.com/abailly/ouroboros-consensus.git}"
 
 WORKDIR /usr/local/src
-RUN git clone ${OUROBOROS_CONSENSUS_REPO}
+RUN git init ouroboros-consensus
 
 WORKDIR /usr/local/src/ouroboros-consensus
-RUN git fetch --all --recurse-submodules --tags && \
-    git checkout ${OUROBOROS_CONSENSUS_REF}
+RUN git fetch --depth 1 ${OUROBOROS_CONSENSUS_REPO} ${OUROBOROS_CONSENSUS_REF} && \
+    git checkout FETCH_HEAD && \
+    git submodule update --init --recursive
 RUN printf "package *\n\
   ghc-options: +RTS -A128m -n2m -RTS\n\
 \n\

@@ -40,11 +40,12 @@ RUN ln -s /usr/local/src/node_exporter/node_exporter-${NODE_EXPORTER_VERSION}.li
 ARG CARDANO_CLI_VERSION="${CARDANO_CLI_VERSION:-11.0.0.0}"
 
 WORKDIR /usr/local/src
-RUN git clone --depth 1 --branch master https://github.com/IntersectMBO/cardano-cli.git
+RUN git init cardano-cli
 
 WORKDIR /usr/local/src/cardano-cli
-RUN git fetch --all --recurse-submodules --tags && \
-    git checkout cardano-cli-${CARDANO_CLI_VERSION}
+RUN git fetch --depth 1 https://github.com/IntersectMBO/cardano-cli.git cardano-cli-${CARDANO_CLI_VERSION} && \
+    git checkout FETCH_HEAD && \
+    git submodule update --init --recursive
 RUN echo "package *\n\
   ghc-options: +RTS -A128m -n2m -RTS\n\
 \n\
@@ -65,11 +66,12 @@ ARG PROFILING
 ENV PROFILING=${PROFILING}
 
 WORKDIR /usr/local/src
-RUN git clone --branch master ${CARDANO_NODE_REPO}
+RUN git init cardano-node
 
 WORKDIR /usr/local/src/cardano-node
-RUN git fetch --all --recurse-submodules --tags && \
-    git checkout ${CARDANO_NODE_REF}
+RUN git fetch --depth 1 ${CARDANO_NODE_REPO} ${CARDANO_NODE_REF} && \
+    git checkout FETCH_HEAD && \
+    git submodule update --init --recursive
 RUN echo "package *\n\
   ghc-options: +RTS -A128m -n2m -RTS\n\
 \n\
