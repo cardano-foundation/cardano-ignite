@@ -70,6 +70,7 @@ help:
 	@echo "    make dbsync"
 	@echo "    make pools"
 	@echo "    make query testnet=simple_network_binary"
+	@echo "    make status"
 	@echo "    make validate"
 	@echo
 	@printf "  \033[34mStop and Destroy\033[0m\n"
@@ -204,6 +205,33 @@ down: TESTNET ## Stop testnet
 		ip link show "$${HOST_INTERFACE}.$${vlan}" >/dev/null 2>&1 && ip link delete "$${HOST_INTERFACE}.$${vlan}" || true ; \
 	done && \
 	rm -f .env.tmp
+
+status: ## Show which testnets are up and their container status
+	@found=""; \
+	for f in testnets/*/.env.tmp; do \
+		[ -f "$$f" ] || continue; \
+		found=1; \
+		t=$$(basename $$(dirname $$f)); \
+		( cd testnets/$$t && \
+		  if [ -n "$$(docker compose --env-file .env.tmp ps --all --quiet 2>/dev/null)" ]; then \
+			echo "Testnet '$$t':"; \
+			docker compose --env-file .env.tmp ps --all; \
+			echo; \
+			echo "Grafana: http://localhost:$${GRAFANA_PORT:-3000} (username: cardano, password: cardano)"; \
+		  else \
+			echo "Testnet '$$t' has a stale .env.tmp but no containers (clean up with 'make down testnet=$$t')."; \
+		  fi ); \
+		echo; \
+	done; \
+	if [ -z "$$found" ]; then \
+		projects=$$(docker ps --format '{{.Label "com.docker.compose.project"}}' | sort -u | grep -v '^$$' || true); \
+		if [ -n "$$projects" ]; then \
+			echo "No .env.tmp found, but these compose projects have running containers:"; \
+			echo "$$projects" | sed 's/^/  /'; \
+		else \
+			echo "No testnet is running."; \
+		fi; \
+	fi
 
 query: TESTNET ## Query tip of all pools
 	pools="$$(awk '/container_name: /{ print $$2 }' testnets/${testnet}/docker-compose.yaml | grep -E '^p[0-9][a-zA-Z0-9]*$$')" ; \
