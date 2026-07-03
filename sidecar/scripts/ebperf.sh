@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ----------------------------------------------------------------------
-# Endorser-block (Leios EB) performance collector — the EB analogue of
+# Endorser-block (Leios EB) performance collector - the EB analogue of
 # blockperf.sh. Reads node traces from Loki
 # (ns=Consensus.LeiosKernel.TraceLeiosKernel) and stores two metrics:
 #
@@ -8,7 +8,7 @@
 #                    LeiosBlockForged on the producer, LeiosBlockAcquired on
 #                    every other node; delay = seen_at - (SYSTEM_START + ebSlot).
 #                    (An EB's slot IS its production slot, so forge time is
-#                    deterministic from the slot — same trick as blockperf.)
+#                    deterministic from the slot - same trick as blockperf.)
 #
 #   eb_certification forge->quorum latency, from LeiosBlockCertified:
 #                    latency_slots = atSlot - ebSlot. Self-contained (no join).
@@ -35,11 +35,9 @@ resolve_ip() {
     host "${short_host}.example" 2>/dev/null | awk '/has address/ {print $4; exit}'
 }
 
-# NOTE: deliberately no `errexit` — this is a long-running collector and a
+# NOTE: deliberately no `errexit` - this is a long-running collector and a
 # transient Loki/psql failure must not kill it.
 set -uo pipefail
-
-SYSTEM_START_UNIX=$(cat /opt/synth/start_time.unix_epoch 2>/dev/null || echo "")
 
 DB_HOST="${DB_HOST:-db.example}"
 DB_SIDECAR_DATABASE="${DB_SIDECAR_DATABASE:-sidecar}"
@@ -51,6 +49,13 @@ LOKI_URL="${LOKI_URL:-http://loki.example:3100/loki/api/v1/query_range}"
 LOKI_QUERY='{container_name=~"p[0-9]+(bp|r[0-9])?|(c[0-9]+)"} | json | data_kind=~"LeiosBlock(Forged|Acquired|Certified)"'
 
 log() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*" >&2; }
+
+# Wait for the testnet to be initialized
+while [ ! -f /opt/synth/start_time.unix_epoch ]; do
+    log "Waiting for initialization to complete..."
+    sleep 1
+done
+SYSTEM_START_UNIX=$(cat /opt/synth/start_time.unix_epoch)
 
 # ISO-8601 (Loki) timestamp -> float unix epoch with ms precision.
 ts_to_epoch() {
@@ -146,7 +151,6 @@ while true; do
 
     while IFS=$'\t' read -r host at eb_slot eb_hash kind; do
         [[ -z "${host:-}" || -z "${eb_hash:-}" || -z "${eb_slot:-}" ]] && continue
-        [[ -z "$SYSTEM_START_UNIX" ]] && continue
         region=$(region_for "$host")
         seen=$(ts_to_epoch "$at"); [[ -z "$seen" ]] && continue
         forged=$(( SYSTEM_START_UNIX + eb_slot ))
