@@ -89,7 +89,7 @@ get_protocol_params() {
 
 get_payment_address_utxo() {
     # Remove existing file and query latest UTXO
-    if [ "${WORK_DIR}/payment_address_utxo.json" ]; then
+    if [ -f "${WORK_DIR}/payment_address_utxo.json" ]; then
         rm --force "${WORK_DIR}/payment_address_utxo.json"
     fi
 

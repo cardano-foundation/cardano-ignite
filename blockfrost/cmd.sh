@@ -62,7 +62,7 @@ wait_for_cardano_node() {
     i=0
     wait=90
     sleep 3
-    until [ "$(${cmd[@]} | grep 'handshake rtt:')" ]; do
+    until [ "$("${cmd[@]}" | grep 'handshake rtt:')" ]; do
         if [ ${i} -lt ${wait} ]; then
             echo "* Trying to connect to 'cardano-node' on socket '${CARDANO_NODE_SOCKET_PATH}'..."
         else

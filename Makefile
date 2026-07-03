@@ -1,5 +1,5 @@
-.PHONY: all block blockperf build canary clean dbsync down example_zone help node_graph pools prerequisites prometheus_target query TESTNET up up-all validate yaci
-.SILENT: all block blockperf build canary dbsync down pools prerequisites query up up-all validate yaci
+.PHONY: all block blockperf build canary check clean dbsync down example_zone help node_graph pools prerequisites prometheus_target query TESTNET up up-all validate yaci
+.SILENT: all block blockperf build canary check dbsync down pools prerequisites query up up-all validate yaci
 
 # Required for builds on OSX ARM
 export DOCKER_DEFAULT_PLATFORM?=linux/amd64
@@ -64,6 +64,9 @@ help:
 	@echo
 	@printf "  \033[34mQuery and Verify\033[0m\n"
 	@echo "    make block"
+	@echo "    make blockperf"
+	@echo "    make canary"
+	@echo "    make check"
 	@echo "    make dbsync"
 	@echo "    make pools"
 	@echo "    make query testnet=simple_network_binary"
@@ -210,6 +213,65 @@ query: TESTNET ## Query tip of all pools
 
 validate: ## Check for consensus among all pools
 	docker exec sidecar /opt/scripts/eventually_converged.sh
+
+check: ## Check the syntax of all Dockerfiles, JSON, YAML and shell files and validate testnet compose configs
+	failed=""; \
+	for f in $$(git ls-files '*Dockerfile*'); do \
+		docker build --check --build-arg BASE_IMAGE=scratch -f "$$f" . >/dev/null 2>&1 || { \
+			echo "FAIL (dockerfile): $$f"; \
+			docker build --check --build-arg BASE_IMAGE=scratch -f "$$f" . 2>&1 | tail -20; \
+			failed=1; \
+		}; \
+	done; \
+	for f in $$(git ls-files '*.yml' '*.yaml'); do \
+		yq eval 'true' "$$f" >/dev/null 2>&1 || { echo "FAIL (yaml): $$f"; failed=1; }; \
+	done; \
+	for f in $$(git ls-files '*.json'); do \
+		yq -p json eval 'true' "$$f" >/dev/null 2>&1 || { echo "FAIL (json): $$f"; failed=1; }; \
+	done; \
+	# Render each testnet compose config with all of its profiles enabled \
+	# and dummy values for the env vars normally set by make build/up. \
+	# Catches errors plain YAML parsing cannot see: dangling depends_on \
+	# references, bad anchors, unknown keys and broken interpolation. \
+	# Needs a compose new enough to know every property the testnets use \
+	# (interface_name arrived in v2.36.0); skip on older installations. \
+	compose_ver=$$(docker compose version --short 2>/dev/null); compose_ver=$${compose_ver#v}; \
+	if [ -n "$$compose_ver" ] && [ "$$(printf '%s\n' 2.36.0 "$$compose_ver" | sort -V | head -1)" = "2.36.0" ]; then \
+		for f in $$(git ls-files 'testnets/*/docker-compose.yaml'); do \
+			t=$$(basename $$(dirname $$f)); \
+			p=$$(yq -r '[.services[].profiles // [] | .[]] | unique | join(",")' "$$f" 2>/dev/null); \
+			testnet=$$t HOST_INTERFACE=lo \
+				TESTNET_BUILDER_IMAGE=$$t-testnet_builder HASKELL_BUILDER_IMAGE=$$t-haskell_builder \
+				COMPOSE_PROFILES="$$p" docker compose -f "$$f" config -q >/dev/null 2>&1 || { \
+				echo "FAIL (compose): $$f"; \
+				testnet=$$t HOST_INTERFACE=lo \
+					TESTNET_BUILDER_IMAGE=$$t-testnet_builder HASKELL_BUILDER_IMAGE=$$t-haskell_builder \
+					COMPOSE_PROFILES="$$p" docker compose -f "$$f" config -q 2>&1 | tail -10; \
+				failed=1; \
+			}; \
+		done; \
+	else \
+		echo "NOTE: docker compose '$$compose_ver' is missing or older than 2.36.0, skipping compose validation"; \
+	fi; \
+	for f in $$(git ls-files '*.sh'); do \
+		bash -n "$$f" 2>/dev/null || { \
+			echo "FAIL (shell): $$f"; \
+			bash -n "$$f"; \
+			failed=1; \
+		}; \
+	done; \
+	if command -v shellcheck >/dev/null 2>&1; then \
+		for f in $$(git ls-files '*.sh'); do \
+			shellcheck -S error "$$f" || failed=1; \
+		done; \
+	else \
+		echo "NOTE: shellcheck is not installed, skipping shell analysis"; \
+	fi; \
+	if [ -n "$$failed" ]; then \
+		echo "Syntax check failed."; \
+		exit 1; \
+	fi; \
+	echo "OK: $$(git ls-files '*Dockerfile*' | wc -l) Dockerfiles, $$(git ls-files '*.yml' '*.yaml' | wc -l) YAML, $$(git ls-files '*.json' | wc -l) JSON, $$(git ls-files '*.sh' | wc -l) shell files and $$(git ls-files 'testnets/*/docker-compose.yaml' | wc -l) compose configs"
 
 dbsync: ## Run SQL query in cardano-db-sync
 	docker exec -ti dbsync /usr/bin/psql --host db.example --dbname dbsync --user dbsync --command="SELECT time,block_no,slot_no FROM block WHERE block_no=(SELECT MAX(block_no) FROM block);"
