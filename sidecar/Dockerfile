@@ -1,9 +1,5 @@
-FROM docker.io/debian:stable-20260518-slim AS build
-
-# Default curl options: fail fast on unreachable hosts and retry transient
-# failures. Applies to every curl invocation in this stage, including those
-# made internally by tools (e.g. ghcup, cabal).
-RUN printf 'connect-timeout = 15\nretry = 5\n' > /root/.curlrc
+ARG BASE_IMAGE=cardano-ignite-base
+FROM ${BASE_IMAGE} AS build
 
 ARG CARDANO_CLI_VERSION="11.0.0.0"
 ARG PROCESS_EXPORTER_VERSION="${PROCESS_EXPORTER_VERSION:-0.8.7}"
@@ -15,7 +11,8 @@ RUN ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime && \
 RUN apt update && \
     apt install -y --no-install-recommends \
         ca-certificates \
-        curl
+        curl && \
+    rm -rf /var/lib/apt/lists/*
 
 # cardano-cli
 
@@ -61,7 +58,7 @@ RUN ln -s /usr/local/src/process_exporter/process-exporter-${PROCESS_EXPORTER_VE
 
 #---------------------------------------------------------------------
 
-FROM docker.io/debian:stable-20260518-slim AS main
+FROM ${BASE_IMAGE} AS main
 
 ARG GRAPHNODES
 
@@ -86,7 +83,8 @@ RUN apt update && \
         procps \
         tcpdump \
         telnet \
-        vim
+        vim && \
+    rm -rf /var/lib/apt/lists/*
 
 COPY --from=build --chown=root:root /usr/local/bin/cardano-cli /usr/local/bin/cardano-cli
 COPY --from=build --chown=root:root /usr/local/bin/process_exporter /usr/local/bin/process_exporter

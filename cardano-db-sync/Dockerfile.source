@@ -1,3 +1,4 @@
+ARG BASE_IMAGE=cardano-ignite-base
 ARG HASKELL_BUILDER_IMAGE=scratch
 
 #---------------------------------------------------------------------
@@ -69,7 +70,7 @@ RUN ln -s /usr/local/src/process_exporter/process-exporter-${PROCESS_EXPORTER_VE
 
 #---------------------------------------------------------------------
 
-FROM docker.io/debian:stable-20260518-slim AS main
+FROM ${BASE_IMAGE} AS main
 
 ENV CARDANO_NODE_SOCKET_PATH="/opt/cardano-node/data/db/node.socket" \
     PGPASSFILE="/opt/cardano-db-sync/config/pgpass"
@@ -98,7 +99,8 @@ RUN apt update && \
         procps \
         tcpdump \
         telnet \
-        vim
+        vim && \
+    rm -rf /var/lib/apt/lists/*
 
 # Shared C libraries needed by the source-built cardano-db-sync (cardano crypto).
 # Mirrors cardano-node/Dockerfile.source; libpq comes from postgresql-client above.

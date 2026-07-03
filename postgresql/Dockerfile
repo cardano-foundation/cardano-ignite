@@ -1,9 +1,5 @@
-FROM docker.io/debian:stable-20260518-slim AS build
-
-# Default curl options: fail fast on unreachable hosts and retry transient
-# failures. Applies to every curl invocation in this stage, including those
-# made internally by tools (e.g. ghcup, cabal).
-RUN printf 'connect-timeout = 15\nretry = 5\n' > /root/.curlrc
+ARG BASE_IMAGE=cardano-ignite-base
+FROM ${BASE_IMAGE} AS build
 
 ARG PROCESS_EXPORTER_VERSION="${PROCESS_EXPORTER_VERSION:-0.8.7}"
 
@@ -36,7 +32,8 @@ RUN apt update && \
         procps \
         tcpdump \
         telnet \
-        vim
+        vim && \
+    rm -rf /var/lib/apt/lists/*
 
 # postgresql
 
@@ -46,7 +43,8 @@ RUN echo "deb [signed-by=/etc/apt/keyrings/accc4cf8.asc] https://apt.postgresql.
 
 RUN apt update && \
     apt install -y --no-install-recommends \
-        postgresql-17
+        postgresql-17 && \
+    rm -rf /var/lib/apt/lists/*
 
 RUN groupmod --gid 10000 postgres && \
     usermod --uid 10000 postgres

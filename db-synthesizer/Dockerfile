@@ -1,3 +1,4 @@
+ARG BASE_IMAGE=cardano-ignite-base
 ARG TESTNET_BUILDER_IMAGE=scratch
 ARG HASKELL_BUILDER_IMAGE=scratch
 
@@ -43,21 +44,9 @@ RUN strip --strip-unneeded /usr/local/bin/db-synthesizer
 # every flag cmd.sh uses (--config --db --bulk-credentials-file -e) but
 # does not generate the amaru ledger-state snapshots.
 
-FROM docker.io/debian:stable-20260518-slim AS tarball
-
-# Default curl options: fail fast on unreachable hosts and retry transient
-# failures. Applies to every curl invocation in this stage, including those
-# made internally by tools (e.g. ghcup, cabal).
-RUN printf 'connect-timeout = 15\nretry = 5\n' > /root/.curlrc
+FROM ${BASE_IMAGE} AS tarball
 
 ARG DB_SYNTHESIZER_VERSION="${DB_SYNTHESIZER_VERSION:-11.0.1}"
-
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-        ca-certificates \
-        curl \
-        tar && \
-    rm -rf /var/lib/apt/lists/*
 
 RUN install --directory --owner=root --group=root --mode=0755 /usr/local/src/cardano-node
 
@@ -73,7 +62,7 @@ RUN tar --extract --gzip --file=/usr/local/src/cardano-node/node.tar.gz --direct
 # synthesize epoch blocks (e.g. Leios) use this directly as target "light";
 # cmd.sh fails loudly if PRE_EPOCHS > 0 and the binary is missing.
 
-FROM docker.io/debian:stable-20260518-slim AS light
+FROM ${BASE_IMAGE} AS light
 
 ENV TZ="UTC"
 RUN ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime && \
@@ -82,7 +71,6 @@ RUN ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime && \
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
         bc \
-        jq \
         less \
         lsof \
         procps \

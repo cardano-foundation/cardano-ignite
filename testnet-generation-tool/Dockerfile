@@ -1,9 +1,5 @@
-FROM docker.io/debian:stable-20260518-slim AS testnet_builder
-
-# Default curl options: fail fast on unreachable hosts and retry transient
-# failures. Applies to every curl invocation in this stage, including those
-# made internally by tools (e.g. ghcup, cabal).
-RUN printf 'connect-timeout = 15\nretry = 5\n' > /root/.curlrc
+ARG BASE_IMAGE=cardano-ignite-base
+FROM ${BASE_IMAGE} AS testnet_builder
 
 ARG UV_VERSION="${UV_VERSION:-0.11.18}"
 ARG TESTNET_GENERATION_TOOL_VERSION="v0.2.0"
@@ -20,7 +16,8 @@ RUN apt update && \
         ca-certificates \
         curl \
         git \
-        tar
+        tar && \
+    rm -rf /var/lib/apt/lists/*
 # uv
 
 RUN install --directory --owner=root --group=root --mode=0755 /usr/local/src/uv
@@ -59,7 +56,7 @@ RUN curl --proto '=https' --tlsv1.3 \
         --location https://github.com/IntersectMBO/cardano-node/releases/download/${GENESIS_CARDANO_NODE_VERSION}/cardano-node-${GENESIS_CARDANO_NODE_VERSION}-linux.tar.gz \
         --output /tmp/node.tar.gz && \
     mkdir -p /usr/local/src/testnet-generation-tool/cardano-node && \
-    tar --extract --gzip --file=/tmp/node.tar.gz --directory=/usr/local/src/testnet-generation-tool/cardano-node && \
+    tar --extract --gzip --file=/tmp/node.tar.gz --directory=/usr/local/src/testnet-generation-tool/cardano-node ./bin/cardano-cli ./bin/cardano-node && \
     rm -f /tmp/node.tar.gz
 
 COPY --chown=root:root .testnet.yaml /usr/local/src/testnet-generation-tool/testnet.yaml
