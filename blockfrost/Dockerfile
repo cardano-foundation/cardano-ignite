@@ -1,9 +1,5 @@
-FROM docker.io/debian:stable-20260518-slim AS build
-
-# Default curl options: fail fast on unreachable hosts and retry transient
-# failures. Applies to every curl invocation in this stage, including those
-# made internally by tools (e.g. ghcup, cabal).
-RUN printf 'connect-timeout = 15\nretry = 5\n' > /root/.curlrc
+ARG BASE_IMAGE=cardano-ignite-base
+FROM ${BASE_IMAGE} AS build
 
 ARG BLOCKFROST_BACKEND_RYO="${BLOCKFROST_BACKEND_RYO:-6.4.3}"
 ARG CARDANO_CLI_VERSION="${CARDANO_CLI_VERSION:-11.0.0.0}"
@@ -16,11 +12,10 @@ RUN ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime && \
 
 RUN apt update && \
     apt install -y --no-install-recommends \
-        ca-certificates \
-        curl \
         git \
         gnupg \
-        lsb-release
+        lsb-release && \
+    rm -rf /var/lib/apt/lists/*
 
 # nodejs
 
@@ -32,7 +27,8 @@ RUN echo "deb https://deb.nodesource.com/node_${NODEJS_MAJOR_VERSION}.x nodistro
 
 RUN apt update && \
     apt install -y --no-install-recommends \
-        nodejs
+        nodejs && \
+    rm -rf /var/lib/apt/lists/*
 
 # Set npm proxy/https-proxy if defined
 RUN if [ -n "${http_proxy}" ] ; then npm config set proxy ${http_proxy} ; fi
@@ -93,7 +89,7 @@ RUN ln -s /usr/local/src/process_exporter/process-exporter-${PROCESS_EXPORTER_VE
 
 #---------------------------------------------------------------------
 
-FROM docker.io/debian:stable-20260518-slim AS main
+FROM ${BASE_IMAGE} AS main
 
 ENV CARDANO_NODE_SOCKET_PATH="/opt/cardano-node/data/db/node.socket"
 
@@ -103,22 +99,8 @@ RUN ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime && \
 
 RUN apt update && \
     apt install -y --no-install-recommends \
-        ca-certificates \
-        curl \
-        dnsutils \
-        iproute2 \
-        iputils-ping \
-        jq \
-        less \
-        lsof \
-        netbase \
-        netcat-openbsd \
-        openssl \
-        postgresql-client \
-        procps \
-        tcpdump \
-        telnet \
-        vim
+        postgresql-client && \
+    rm -rf /var/lib/apt/lists/*
 
 RUN install --directory --owner=root --group=root --mode=0755 /usr/local/src/blockfrost-backend-ryo && \
     install --directory --owner=root --group=root --mode=0755 /usr/local/src/blockfrost-backend-ryo/dist && \

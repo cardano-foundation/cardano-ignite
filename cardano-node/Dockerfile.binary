@@ -1,15 +1,11 @@
+ARG BASE_IMAGE=cardano-ignite-base
 ARG TESTNET_BUILDER_IMAGE=scratch
 
 #---------------------------------------------------------------------
 
 #---------------------------------------------------------------------
 
-FROM docker.io/debian:stable-20260518-slim AS build
-
-# Default curl options: fail fast on unreachable hosts and retry transient
-# failures. Applies to every curl invocation in this stage, including those
-# made internally by tools (e.g. ghcup, cabal).
-RUN printf 'connect-timeout = 15\nretry = 5\n' > /root/.curlrc
+FROM ${BASE_IMAGE} AS build
 
 ARG CARDANO_NODE_VERSION="${CARDANO_NODE_VERSION:-10.5.4}"
 ARG NODE_EXPORTER_VERSION="${NODE_EXPORTER_VERSION:-1.11.1}"
@@ -21,10 +17,8 @@ RUN ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime && \
 
 RUN apt update && \
     apt install -y --no-install-recommends \
-        ca-certificates \
-        curl \
-        git \
-        tar
+        git && \
+    rm -rf /var/lib/apt/lists/*
 
 # cardano-node
 
@@ -100,7 +94,7 @@ FROM ${TESTNET_BUILDER_IMAGE} AS testnet_builder
 
 #---------------------------------------------------------------------
 
-FROM docker.io/debian:stable-20260518-slim AS main
+FROM ${BASE_IMAGE} AS main
 
 ENV CARDANO_NODE_SOCKET_PATH="/opt/cardano-node/data/db/node.socket"
 
@@ -110,26 +104,12 @@ RUN ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime && \
 
 RUN apt update && \
     apt install -y --no-install-recommends \
-        bc \
-        curl \
-        dnsutils \
         doas \
-        iproute2 \
-        iputils-ping \
-        jq \
-        less \
-        locales \
-        lsof \
         libsnappy1v5 \
         liburing2 \
-        netbase \
-        netcat-openbsd \
-        openssl \
-        postgresql-client \
-        procps \
-        tcpdump \
-        telnet \
-        vim
+        locales \
+        postgresql-client && \
+    rm -rf /var/lib/apt/lists/*
 
 RUN sed -i 's/^# *en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen \
  && locale-gen

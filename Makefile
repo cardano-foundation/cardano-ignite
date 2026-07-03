@@ -137,16 +137,17 @@ testnets/%/.env.tmp: TESTNET
 build: TESTNET prerequisites testnets/${testnet}/graph_nodes.sql testnets/${testnet}/coredns/example.zone testnets/${testnet}/prometheus/prometheus.yml testnets/${testnet}/prometheus/rules.yml ## Build testnet
 	ln -snf testnets/${testnet}/testnet.yaml .testnet.yaml && \
 	$(HOST_INTERFACE_SETUP) && \
-	docker build -t ${testnet}-testnet_builder -f testnet-generation-tool/Dockerfile . && \
+	docker build -t cardano-ignite-base -f base/Dockerfile . && \
+	docker build -t ${testnet}-testnet_builder --build-arg BASE_IMAGE=cardano-ignite-base -f testnet-generation-tool/Dockerfile . && \
 	if grep -q "HASKELL_BUILDER_IMAGE" testnets/${testnet}/docker-compose.yaml || \
 	   [ "$$(yq -r '.services.synth.build.target // "full"' testnets/${testnet}/docker-compose.yaml)" = "full" ]; then \
-		docker build -t ${testnet}-haskell_builder -f haskell-builder/Dockerfile . ; \
+		docker build -t ${testnet}-haskell_builder --build-arg BASE_IMAGE=cardano-ignite-base -f haskell-builder/Dockerfile . ; \
 	else \
 		echo "Skipping haskell_builder (no service in '${testnet}' uses it)"; \
 	fi && \
 	cd testnets/${testnet} && \
 	TESTNET_BUILDER_IMAGE="${testnet}-testnet_builder" HASKELL_BUILDER_IMAGE="${testnet}-haskell_builder" \
-	docker compose --profile build build --build-arg GRAPHNODES="testnets/${testnet}/graph_nodes.sql" --build-arg TESTNET_BUILDER_IMAGE="${testnet}-testnet_builder" --build-arg HASKELL_BUILDER_IMAGE="${testnet}-haskell_builder" --build-arg PROFILING=$(PROFILING)
+	docker compose --profile build build --build-arg GRAPHNODES="testnets/${testnet}/graph_nodes.sql" --build-arg BASE_IMAGE=cardano-ignite-base --build-arg TESTNET_BUILDER_IMAGE="${testnet}-testnet_builder" --build-arg HASKELL_BUILDER_IMAGE="${testnet}-haskell_builder" --build-arg PROFILING=$(PROFILING)
 
 all:
 	failed=""; \

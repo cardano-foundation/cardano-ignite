@@ -1,9 +1,5 @@
-FROM docker.io/debian:stable-20260518-slim AS build
-
-# Default curl options: fail fast on unreachable hosts and retry transient
-# failures. Applies to every curl invocation in this stage, including those
-# made internally by tools (e.g. ghcup, cabal).
-RUN printf 'connect-timeout = 15\nretry = 5\n' > /root/.curlrc
+ARG BASE_IMAGE=cardano-ignite-base
+FROM ${BASE_IMAGE} AS build
 
 ARG NODE_EXPORTER_VERSION="${NODE_EXPORTER_VERSION:-1.11.1}"
 
@@ -13,10 +9,8 @@ RUN ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime && \
 
 RUN apt update && \
     apt install -y --no-install-recommends \
-        ca-certificates \
-        curl \
-        git \
-        tar
+        git && \
+    rm -rf /var/lib/apt/lists/*
 
 # node_exporter
 
@@ -41,7 +35,7 @@ RUN ln -s /usr/local/src/node_exporter/node_exporter-${NODE_EXPORTER_VERSION}.li
 
 #---------------------------------------------------------------------
 
-FROM docker.io/debian:stable-20260518-slim AS main
+FROM ${BASE_IMAGE} AS main
 
 ENV TZ="UTC"
 RUN ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime && \
@@ -49,21 +43,8 @@ RUN ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime && \
 
 RUN apt update && \
     apt install -y --no-install-recommends \
-        dnsutils \
-        iproute2 \
-        iptables \
-        iputils-ping \
-        jq \
-        less \
-        lsof \
-        netbase \
-        netcat-openbsd \
-        openssl \
-        procps \
-        tcpdump \
-        telnet \
-        traceroute \
-        vim
+        iptables && \
+    rm -rf /var/lib/apt/lists/*
 
 COPY --from=build --chown=root:root /usr/local/bin/node_exporter /usr/local/bin/node_exporter
 
