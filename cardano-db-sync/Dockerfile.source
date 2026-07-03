@@ -15,11 +15,12 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /usr/local/src
-RUN git clone ${CARDANO_DB_SYNC_REPO}
+RUN git init cardano-db-sync
 
 WORKDIR /usr/local/src/cardano-db-sync
-RUN git fetch --all --recurse-submodules --tags && \
-    git checkout ${CARDANO_DB_SYNC_REF}
+RUN git fetch --depth 1 ${CARDANO_DB_SYNC_REPO} ${CARDANO_DB_SYNC_REF} && \
+    git checkout FETCH_HEAD && \
+    git submodule update --init --recursive
 RUN printf "package *\n  ghc-options: +RTS -A128m -n2m -RTS\n\njobs: \$ncpus\nsemaphore: True\n" > /usr/local/src/cardano-db-sync/cabal.project.local
 
 RUN cabal update && \

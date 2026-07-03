@@ -42,11 +42,12 @@ ARG CARDANO_CLI_REPO="${CARDANO_CLI_REPO:-https://github.com/IntersectMBO/cardan
 ARG CARDANO_CLI_REF="${CARDANO_CLI_REF:-cardano-cli-${CARDANO_CLI_VERSION}}"
 
 WORKDIR /usr/local/src
-RUN git clone ${CARDANO_CLI_REPO}
+RUN git init cardano-cli
 
 WORKDIR /usr/local/src/cardano-cli
-RUN git fetch --all --recurse-submodules --tags && \
-    git checkout ${CARDANO_CLI_REF}
+RUN git fetch --depth 1 ${CARDANO_CLI_REPO} ${CARDANO_CLI_REF} && \
+    git checkout FETCH_HEAD && \
+    git submodule update --init --recursive
 RUN echo "package *\n\
   ghc-options: +RTS -A128m -n2m -RTS\n\
 \n\
@@ -67,11 +68,12 @@ ARG PROFILING
 ENV PROFILING=${PROFILING}
 
 WORKDIR /usr/local/src
-RUN git clone --branch master ${CARDANO_NODE_REPO}
+RUN git init cardano-node
 
 WORKDIR /usr/local/src/cardano-node
-RUN git fetch --all --recurse-submodules --tags && \
-    git checkout ${CARDANO_NODE_REF}
+RUN git fetch --depth 1 ${CARDANO_NODE_REPO} ${CARDANO_NODE_REF} && \
+    git checkout FETCH_HEAD && \
+    git submodule update --init --recursive
 RUN echo "package *\n\
   ghc-options: +RTS -A128m -n2m -RTS\n\
 \n\
@@ -116,10 +118,10 @@ RUN cabal install exe:tx-generator --disable-test --install-method=copy \
 ARG TX_CENTRIFUGE_REPO="${TX_CENTRIFUGE_REPO:-https://github.com/IntersectMBO/cardano-node.git}"
 ARG TX_CENTRIFUGE_REF=""
 RUN if [ -n "${TX_CENTRIFUGE_REF}" ]; then \
-      git clone "${TX_CENTRIFUGE_REPO}" /usr/local/src/tx-centrifuge && \
+      git init /usr/local/src/tx-centrifuge && \
       cd /usr/local/src/tx-centrifuge && \
-      git fetch --all --recurse-submodules --tags && \
-      git checkout "${TX_CENTRIFUGE_REF}" && \
+      git fetch --depth 1 "${TX_CENTRIFUGE_REPO}" "${TX_CENTRIFUGE_REF}" && \
+      git checkout FETCH_HEAD && \
       printf "package *\n  ghc-options: +RTS -A128m -n2m -RTS\n\njobs: \$ncpus\nsemaphore: True\n" > cabal.project.local && \
       cabal update && \
       cabal install exe:tx-centrifuge --disable-test --install-method=copy \

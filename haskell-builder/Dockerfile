@@ -7,8 +7,9 @@ FROM ${BASE_IMAGE} AS haskell-builder
 # ── Common ARGs (keep the defaults from the originals) ──
 ARG BLST_VERSION=0.3.14
 ARG JOBS=8
-ARG LIBSODIUM_VERSION=dbb48cc
-ARG SECP256K1_VERSION=ac83be33
+# Full commit hashes: git fetch of an exact commit requires the full id.
+ARG LIBSODIUM_VERSION=dbb48cce5429cb6585c9034f002568964f1ce567
+ARG SECP256K1_VERSION=ac83be33d0956faf6b7f61a60ab524ef7d6a473a
 ARG BOOTSTRAP_HASKELL_CABAL_VERSION=3.14.2.0
 ARG BOOTSTRAP_HASKELL_GHC_VERSION=9.6.7
 ARG BOOTSTRAP_HASKELL_GHCUP_VERSION=0.1.50.2
@@ -47,27 +48,30 @@ RUN apt-get update && \
 
 # ── libsodium ──
 WORKDIR /usr/local/src
-RUN git clone --branch master https://github.com/IntersectMBO/libsodium.git && \
+RUN git init libsodium && \
     cd libsodium && \
-    git checkout ${LIBSODIUM_VERSION} && \
+    git fetch --depth 1 https://github.com/IntersectMBO/libsodium.git ${LIBSODIUM_VERSION} && \
+    git checkout FETCH_HEAD && \
     ./autogen.sh && \
     ./configure && \
     make && make check && make install -j${JOBS}
 
 # ── secp256k1 ──
 WORKDIR /usr/local/src
-RUN git clone --branch master https://github.com/bitcoin-core/secp256k1.git && \
+RUN git init secp256k1 && \
     cd secp256k1 && \
-    git checkout ${SECP256K1_VERSION} && \
+    git fetch --depth 1 https://github.com/bitcoin-core/secp256k1.git ${SECP256K1_VERSION} && \
+    git checkout FETCH_HEAD && \
     ./autogen.sh && \
     ./configure --prefix=/usr --enable-module-schnorrsig --enable-experimental && \
     make && make check && make install -j${JOBS}
 
 # ── blst ──
 WORKDIR /usr/local/src
-RUN git clone --branch master https://github.com/supranational/blst.git && \
+RUN git init blst && \
     cd blst && \
-    git checkout v${BLST_VERSION} && \
+    git fetch --depth 1 https://github.com/supranational/blst.git v${BLST_VERSION} && \
+    git checkout FETCH_HEAD && \
     ./build.sh && \
     printf "prefix=/usr/local\nexec_prefix=/usr/local\nlibdir=/usr/local/lib\nincludedir=/usr/local/include\n\nName: libblst\nDescription: Multilingual BLS12-381 signature library\nURL: https://github.com/supranational/blst\nVersion: %s\nCflags: -I/usr/local/include\nLibs: -L/usr/local/lib -lblst" ${BLST_VERSION} > libblst.pc && \
     mv libblst.pc /usr/local/lib/pkgconfig/ && \
