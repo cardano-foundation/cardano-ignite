@@ -3209,7 +3209,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "select time,delay from get_canary_delay()",
+          "rawSql": "select time,delay from get_canary_delay() where $__timeFilter(\"time\")",
           "refId": "A",
           "sql": {
             "columns": [
