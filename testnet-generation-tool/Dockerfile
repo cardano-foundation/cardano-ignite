@@ -13,6 +13,7 @@ RUN ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime && \
 
 RUN apt update && \
     apt install -y --no-install-recommends \
+        binutils \
         git && \
     rm -rf /var/lib/apt/lists/*
 # uv
@@ -54,7 +55,9 @@ RUN curl --proto '=https' --tlsv1.3 \
         --output /tmp/node.tar.gz && \
     mkdir -p /usr/local/src/testnet-generation-tool/cardano-node && \
     tar --extract --gzip --file=/tmp/node.tar.gz --directory=/usr/local/src/testnet-generation-tool/cardano-node ./bin/cardano-cli ./bin/cardano-node && \
-    rm -f /tmp/node.tar.gz
+    rm -f /tmp/node.tar.gz && \
+    strip --strip-unneeded /usr/local/src/testnet-generation-tool/cardano-node/bin/cardano-cli \
+        /usr/local/src/testnet-generation-tool/cardano-node/bin/cardano-node
 
 COPY --chown=root:root .testnet.yaml /usr/local/src/testnet-generation-tool/testnet.yaml
 
