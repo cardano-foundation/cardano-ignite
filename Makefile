@@ -162,7 +162,7 @@ build: TESTNET prerequisites testnets/${testnet}/graph_nodes.sql testnets/${test
 all:
 	failed=""; \
 	for dir in testnets/*; do \
-		if [ -d "$${dir}" ]; then \
+		if [ -f "$${dir}/docker-compose.yaml" ]; then \
 			$(MAKE) build testnet=$$(basename $${dir}) || failed="$$failed $$(basename $${dir})"; \
 		fi; \
 	done; \
