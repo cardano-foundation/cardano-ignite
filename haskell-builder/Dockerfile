@@ -51,7 +51,8 @@ RUN git init libsodium && \
     git checkout FETCH_HEAD && \
     DO_NOT_UPDATE_CONFIG_SCRIPTS=1 ./autogen.sh && \
     ./configure && \
-    make && make check && make install -j${JOBS}
+    make && make check && make install -j${JOBS} && \
+    cd .. && rm -rf libsodium
 
 # ── secp256k1 ──
 WORKDIR /usr/local/src
@@ -61,7 +62,8 @@ RUN git init secp256k1 && \
     git checkout FETCH_HEAD && \
     ./autogen.sh && \
     ./configure --prefix=/usr --enable-module-schnorrsig --enable-experimental && \
-    make && make check && make install -j${JOBS}
+    make && make check && make install -j${JOBS} && \
+    cd .. && rm -rf secp256k1
 
 # ── blst ──
 WORKDIR /usr/local/src
@@ -73,7 +75,8 @@ RUN git init blst && \
     printf "prefix=/usr/local\nexec_prefix=/usr/local\nlibdir=/usr/local/lib\nincludedir=/usr/local/include\n\nName: libblst\nDescription: Multilingual BLS12-381 signature library\nURL: https://github.com/supranational/blst\nVersion: %s\nCflags: -I/usr/local/include\nLibs: -L/usr/local/lib -lblst" ${BLST_VERSION} > libblst.pc && \
     mv libblst.pc /usr/local/lib/pkgconfig/ && \
     mv bindings/blst.h bindings/blst.hpp bindings/blst_aux.h /usr/local/include/ && \
-    mv libblst.a /usr/local/lib
+    mv libblst.a /usr/local/lib && \
+    cd .. && rm -rf blst
 
 ENV LD_LIBRARY_PATH="/usr/local/lib" \
     PKG_CONFIG_PATH="/usr/local/lib/pkgconfig"
@@ -90,7 +93,8 @@ RUN curl -L https://downloads.haskell.org/~ghcup/${BOOTSTRAP_HASKELL_GHCUP_VERSI
     ghcup install cabal ${BOOTSTRAP_HASKELL_CABAL_VERSION} && \
     ghcup set cabal ${BOOTSTRAP_HASKELL_CABAL_VERSION} && \
     ghcup install ghc ${BOOTSTRAP_HASKELL_GHC_VERSION} && \
-    ghcup set ghc ${BOOTSTRAP_HASKELL_GHC_VERSION}
+    ghcup set ghc ${BOOTSTRAP_HASKELL_GHC_VERSION} && \
+    rm -rf /root/.ghcup/ghc/${BOOTSTRAP_HASKELL_GHC_VERSION}/share/doc
 
 ENV PATH="/root/.ghcup/bin:/root/.cabal/bin:${PATH}"
 
