@@ -55,6 +55,12 @@ update_start_time() {
 
 generate_pre_epochs() {
 
+    if ! command -v db-synthesizer >/dev/null 2>&1; then
+        echo "Error: PRE_EPOCHS=${PRE_EPOCHS} but this image contains no db-synthesizer binary." >&2
+        echo "This testnet's synth service is built with a target that excludes it (see db-synthesizer/Dockerfile)." >&2
+        exit 1
+    fi
+
     # Temporary directory for intermediate JSON files
     tmpdir=$(mktemp -d)
     trap 'rm -rf "$tmpdir"' EXIT

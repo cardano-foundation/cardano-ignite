@@ -1,3 +1,4 @@
+ARG BASE_IMAGE=cardano-ignite-base
 ARG TESTNET_BUILDER_IMAGE=scratch
 ARG HASKELL_BUILDER_IMAGE=scratch
 
@@ -7,8 +8,8 @@ ARG HASKELL_BUILDER_IMAGE=scratch
 
 FROM ${HASKELL_BUILDER_IMAGE} AS build
 
-ARG NODE_EXPORTER_VERSION="${NODE_EXPORTER_VERSION:-1.11.1}"
-ARG PROCESS_EXPORTER_VERSION="${PROCESS_EXPORTER_VERSION:-0.8.7}"
+ARG NODE_EXPORTER_VERSION="1.11.1"
+ARG PROCESS_EXPORTER_VERSION="0.8.7"
 
 # NOTE:
 # Additional ARG definitions can be found further below in the Dockerfile.
@@ -36,14 +37,15 @@ RUN ln -s /usr/local/src/node_exporter/node_exporter-${NODE_EXPORTER_VERSION}.li
 
 # cardano-cli
 
-ARG CARDANO_CLI_VERSION="${CARDANO_CLI_VERSION:-11.0.0.0}"
+ARG CARDANO_CLI_VERSION="11.0.0.0"
 
 WORKDIR /usr/local/src
-RUN git clone --depth 1 --branch master https://github.com/IntersectMBO/cardano-cli.git
+RUN git init cardano-cli
 
 WORKDIR /usr/local/src/cardano-cli
-RUN git fetch --all --recurse-submodules --tags && \
-    git checkout cardano-cli-${CARDANO_CLI_VERSION}
+RUN git fetch --depth 1 https://github.com/IntersectMBO/cardano-cli.git cardano-cli-${CARDANO_CLI_VERSION} && \
+    git checkout FETCH_HEAD && \
+    git submodule update --init --recursive
 RUN echo "package *\n\
   ghc-options: +RTS -A128m -n2m -RTS\n\
 \n\
@@ -58,17 +60,18 @@ RUN cabal update && \
 
 # cardano-node
 
-ARG CARDANO_NODE_REF="${CARDANO_NODE_REF:-10.5.4}"
-ARG CARDANO_NODE_REPO="${CARDANO_NODE_REPO:-https://github.com/IntersectMBO/cardano-node.git}"
+ARG CARDANO_NODE_REF="11.0.1"
+ARG CARDANO_NODE_REPO="https://github.com/IntersectMBO/cardano-node.git"
 ARG PROFILING
 ENV PROFILING=${PROFILING}
 
 WORKDIR /usr/local/src
-RUN git clone --branch master ${CARDANO_NODE_REPO}
+RUN git init cardano-node
 
 WORKDIR /usr/local/src/cardano-node
-RUN git fetch --all --recurse-submodules --tags && \
-    git checkout ${CARDANO_NODE_REF}
+RUN git fetch --depth 1 ${CARDANO_NODE_REPO} ${CARDANO_NODE_REF} && \
+    git checkout FETCH_HEAD && \
+    git submodule update --init --recursive
 RUN echo "package *\n\
   ghc-options: +RTS -A128m -n2m -RTS\n\
 \n\
@@ -132,7 +135,7 @@ FROM ${TESTNET_BUILDER_IMAGE} AS testnet_builder
 
 #---------------------------------------------------------------------
 
-FROM docker.io/debian:stable-20260518-slim AS main
+FROM ${BASE_IMAGE} AS main
 
 ENV CARDANO_NODE_SOCKET_PATH="/opt/cardano-node/data/db/node.socket"
 
@@ -142,26 +145,12 @@ RUN ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime && \
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-        bc \
-        curl \
-        dnsutils \
         doas \
-        iproute2 \
-        iputils-ping \
-        jq \
-        less \
-        locales \
-        lsof \
         libsnappy1v5 \
         liburing2 \
-        netbase \
-        netcat-openbsd \
-        openssl \
-        postgresql-client \
-        procps \
-        tcpdump \
-        telnet \
-        vim
+        locales \
+        postgresql-client && \
+    rm -rf /var/lib/apt/lists/*
 
 RUN sed -i 's/^# *en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen \
  && locale-gen

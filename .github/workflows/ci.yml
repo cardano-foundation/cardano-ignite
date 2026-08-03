@@ -6,6 +6,12 @@ on:
   pull_request:
     branches: [main]
 
+# A new push to the same branch or PR cancels the superseded run instead
+# of leaving both builds queued on the runners.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build-all-testnets:
     runs-on: arc-infra-public
@@ -21,13 +27,23 @@ jobs:
       # error. "make build" uses the dockerd builder, which sees them.
       - name: Docker Compose
         uses: docker/setup-compose-action@v1
+        with:
+          # The runner default is too old to know the interface_name
+          # property the global testnets use; make check needs >= 2.36.
+          version: v2.38.2
+
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install --no-install-recommends -y ca-certificates curl iproute2 make shellcheck tar
+          curl --proto '=https' --tlsv1.3 --connect-timeout 15 --retry 5 --location https://github.com/mikefarah/yq/releases/download/v4.47.2/yq_linux_amd64.tar.gz --output /tmp/yq_linux_amd64.tar.gz
+          sudo tar --extract --gzip --file=/tmp/yq_linux_amd64.tar.gz --directory=/usr/local/bin ./yq_linux_amd64 --transform='s|yq_linux_amd64|yq|' --no-same-owner
+
+      - name: Check syntax
+        run: make check
 
       - name: Build simple testnet
         run: |
-          sudo apt update
-          sudo apt install --no-install-recommends -y ca-certificates curl iproute2 make tar
-          curl --proto '=https' --tlsv1.3 --connect-timeout 15 --retry 5 --location https://github.com/mikefarah/yq/releases/download/v4.47.2/yq_linux_amd64.tar.gz --output /tmp/yq_linux_amd64.tar.gz
-          sudo tar --extract --gzip --file=/tmp/yq_linux_amd64.tar.gz --directory=/usr/local/bin ./yq_linux_amd64 --transform='s|yq_linux_amd64|yq|' --no-same-owner
           make build testnet=simple_network_binary
           make up testnet=simple_network_binary
           make validate

@@ -1,11 +1,7 @@
-FROM docker.io/debian:stable-20260518-slim AS testnet_builder
+ARG BASE_IMAGE=cardano-ignite-base
+FROM ${BASE_IMAGE} AS testnet_builder
 
-# Default curl options: fail fast on unreachable hosts and retry transient
-# failures. Applies to every curl invocation in this stage, including those
-# made internally by tools (e.g. ghcup, cabal).
-RUN printf 'connect-timeout = 15\nretry = 5\n' > /root/.curlrc
-
-ARG UV_VERSION="${UV_VERSION:-0.11.18}"
+ARG UV_VERSION="0.11.18"
 ARG TESTNET_GENERATION_TOOL_VERSION="v0.2.0"
 # Must match the cardano-node binary version pinned in the
 # testnet-generation-tool release (libs/mainnet_env.py)
@@ -17,10 +13,9 @@ RUN ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime && \
 
 RUN apt update && \
     apt install -y --no-install-recommends \
-        ca-certificates \
-        curl \
-        git \
-        tar
+        binutils \
+        git && \
+    rm -rf /var/lib/apt/lists/*
 # uv
 
 RUN install --directory --owner=root --group=root --mode=0755 /usr/local/src/uv
@@ -45,7 +40,7 @@ RUN ln -s /usr/local/src/uv/uv-x86_64-unknown-linux-gnu/uv /usr/local/bin/uv
 # testnet-generation-tool
 
 WORKDIR /usr/local/src
-RUN git clone --branch ${TESTNET_GENERATION_TOOL_VERSION} https://github.com/cardano-foundation/testnet-generation-tool.git
+RUN git clone --depth 1 --branch ${TESTNET_GENERATION_TOOL_VERSION} https://github.com/cardano-foundation/testnet-generation-tool.git
 
 WORKDIR /usr/local/src/testnet-generation-tool
 RUN uv sync
@@ -57,10 +52,17 @@ RUN uv sync
 # COPY below so the download layer is cached across testnets.
 RUN curl --proto '=https' --tlsv1.3 \
         --location https://github.com/IntersectMBO/cardano-node/releases/download/${GENESIS_CARDANO_NODE_VERSION}/cardano-node-${GENESIS_CARDANO_NODE_VERSION}-linux.tar.gz \
-        --output /tmp/node.tar.gz && \
+        --output /tmp/cardano-node-${GENESIS_CARDANO_NODE_VERSION}-linux.tar.gz && \
+    curl --proto '=https' --tlsv1.3 \
+        --location https://github.com/IntersectMBO/cardano-node/releases/download/${GENESIS_CARDANO_NODE_VERSION}/cardano-node-${GENESIS_CARDANO_NODE_VERSION}-sha256sums.txt \
+        --output /tmp/cardano-node-${GENESIS_CARDANO_NODE_VERSION}-sha256sums.txt && \
+    cd /tmp && \
+    sha256sum --ignore-missing --check cardano-node-${GENESIS_CARDANO_NODE_VERSION}-sha256sums.txt && \
     mkdir -p /usr/local/src/testnet-generation-tool/cardano-node && \
-    tar --extract --gzip --file=/tmp/node.tar.gz --directory=/usr/local/src/testnet-generation-tool/cardano-node && \
-    rm -f /tmp/node.tar.gz
+    tar --extract --gzip --file=/tmp/cardano-node-${GENESIS_CARDANO_NODE_VERSION}-linux.tar.gz --directory=/usr/local/src/testnet-generation-tool/cardano-node ./bin/cardano-cli ./bin/cardano-node && \
+    rm -f /tmp/cardano-node-${GENESIS_CARDANO_NODE_VERSION}-linux.tar.gz /tmp/cardano-node-${GENESIS_CARDANO_NODE_VERSION}-sha256sums.txt && \
+    strip --strip-unneeded /usr/local/src/testnet-generation-tool/cardano-node/bin/cardano-cli \
+        /usr/local/src/testnet-generation-tool/cardano-node/bin/cardano-node
 
 COPY --chown=root:root .testnet.yaml /usr/local/src/testnet-generation-tool/testnet.yaml
 

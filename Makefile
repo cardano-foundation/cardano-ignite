@@ -1,5 +1,5 @@
-.PHONY: all block blockperf build canary clean dbsync down example_zone help node_graph pools prerequisites prometheus_target query TESTNET up up-all validate yaci
-.SILENT: all block blockperf build canary dbsync down pools prerequisites query up up-all validate yaci
+.PHONY: all block blockperf build canary check clean dbsync down example_zone help node_graph pools prerequisites prometheus_target query TESTNET up up-all validate yaci
+.SILENT: all block blockperf build canary check dbsync down pools prerequisites query up up-all validate yaci
 
 # Required for builds on OSX ARM
 export DOCKER_DEFAULT_PLATFORM?=linux/amd64
@@ -64,9 +64,13 @@ help:
 	@echo
 	@printf "  \033[34mQuery and Verify\033[0m\n"
 	@echo "    make block"
+	@echo "    make blockperf"
+	@echo "    make canary"
+	@echo "    make check"
 	@echo "    make dbsync"
 	@echo "    make pools"
 	@echo "    make query testnet=simple_network_binary"
+	@echo "    make status"
 	@echo "    make validate"
 	@echo
 	@printf "  \033[34mStop and Destroy\033[0m\n"
@@ -137,16 +141,28 @@ testnets/%/.env.tmp: TESTNET
 build: TESTNET prerequisites testnets/${testnet}/graph_nodes.sql testnets/${testnet}/coredns/example.zone testnets/${testnet}/prometheus/prometheus.yml testnets/${testnet}/prometheus/rules.yml ## Build testnet
 	ln -snf testnets/${testnet}/testnet.yaml .testnet.yaml && \
 	$(HOST_INTERFACE_SETUP) && \
-	docker build -t ${testnet}-testnet_builder -f testnet-generation-tool/Dockerfile . && \
-	docker build -t ${testnet}-haskell_builder -f haskell-builder/Dockerfile . && \
+	docker build -t cardano-ignite-base -f base/Dockerfile . && \
+	if grep -q "HASKELL_BUILDER_IMAGE" testnets/${testnet}/docker-compose.yaml || \
+	   [ "$$(yq -r '.services.synth.build.target // "full"' testnets/${testnet}/docker-compose.yaml)" = "full" ]; then \
+		echo "Building testnet_builder in the background, haskell_builder in the foreground..."; \
+		tb_log=$$(mktemp); \
+		docker build -t ${testnet}-testnet_builder --build-arg BASE_IMAGE=cardano-ignite-base -f testnet-generation-tool/Dockerfile . > "$$tb_log" 2>&1 & \
+		tb_pid=$$!; \
+		docker build -t ${testnet}-haskell_builder --build-arg BASE_IMAGE=cardano-ignite-base -f haskell-builder/Dockerfile . || exit 1; \
+		wait $$tb_pid || { cat "$$tb_log"; rm -f "$$tb_log"; exit 1; }; \
+		rm -f "$$tb_log"; \
+	else \
+		echo "Skipping haskell_builder (no service in '${testnet}' uses it)"; \
+		docker build -t ${testnet}-testnet_builder --build-arg BASE_IMAGE=cardano-ignite-base -f testnet-generation-tool/Dockerfile .; \
+	fi && \
 	cd testnets/${testnet} && \
 	TESTNET_BUILDER_IMAGE="${testnet}-testnet_builder" HASKELL_BUILDER_IMAGE="${testnet}-haskell_builder" \
-	docker compose --profile build build --build-arg GRAPHNODES="testnets/${testnet}/graph_nodes.sql" --build-arg TESTNET_BUILDER_IMAGE="${testnet}-testnet_builder" --build-arg HASKELL_BUILDER_IMAGE="${testnet}-haskell_builder" --build-arg PROFILING=$(PROFILING)
+	docker compose --profile build build --build-arg GRAPHNODES="testnets/${testnet}/graph_nodes.sql" --build-arg BASE_IMAGE=cardano-ignite-base --build-arg TESTNET_BUILDER_IMAGE="${testnet}-testnet_builder" --build-arg HASKELL_BUILDER_IMAGE="${testnet}-haskell_builder" --build-arg PROFILING=$(PROFILING)
 
 all:
 	failed=""; \
 	for dir in testnets/*; do \
-		if [ -d "$${dir}" ]; then \
+		if [ -f "$${dir}/docker-compose.yaml" ]; then \
 			$(MAKE) build testnet=$$(basename $${dir}) || failed="$$failed $$(basename $${dir})"; \
 		fi; \
 	done; \
@@ -190,6 +206,33 @@ down: TESTNET ## Stop testnet
 	done && \
 	rm -f .env.tmp
 
+status: ## Show which testnets are up and their container status
+	@found=""; \
+	for f in testnets/*/.env.tmp; do \
+		[ -f "$$f" ] || continue; \
+		found=1; \
+		t=$$(basename $$(dirname $$f)); \
+		( cd testnets/$$t && \
+		  if [ -n "$$(docker compose --env-file .env.tmp ps --all --quiet 2>/dev/null)" ]; then \
+			echo "Testnet '$$t':"; \
+			docker compose --env-file .env.tmp ps --all; \
+			echo; \
+			echo "Grafana: http://localhost:$${GRAFANA_PORT:-3000} (username: cardano, password: cardano)"; \
+		  else \
+			echo "Testnet '$$t' has a stale .env.tmp but no containers (clean up with 'make down testnet=$$t')."; \
+		  fi ); \
+		echo; \
+	done; \
+	if [ -z "$$found" ]; then \
+		projects=$$(docker ps --format '{{.Label "com.docker.compose.project"}}' | sort -u | grep -v '^$$' || true); \
+		if [ -n "$$projects" ]; then \
+			echo "No .env.tmp found, but these compose projects have running containers:"; \
+			echo "$$projects" | sed 's/^/  /'; \
+		else \
+			echo "No testnet is running."; \
+		fi; \
+	fi
+
 query: TESTNET ## Query tip of all pools
 	pools="$$(awk '/container_name: /{ print $$2 }' testnets/${testnet}/docker-compose.yaml | grep -E '^p[0-9][a-zA-Z0-9]*$$')" ; \
 	for i in $${pools} ; do docker exec -ti $${i} timeout 0.05 cardano-cli ping --magic 42 --host 127.0.0.1 --port 3001 --tip --quiet -c1; done ; true ; \
@@ -198,6 +241,65 @@ query: TESTNET ## Query tip of all pools
 
 validate: ## Check for consensus among all pools
 	docker exec sidecar /opt/scripts/eventually_converged.sh
+
+check: ## Check the syntax of all Dockerfiles, JSON, YAML and shell files and validate testnet compose configs
+	failed=""; \
+	for f in $$(git ls-files '*Dockerfile*'); do \
+		docker build --check --build-arg BASE_IMAGE=scratch -f "$$f" . >/dev/null 2>&1 || { \
+			echo "FAIL (dockerfile): $$f"; \
+			docker build --check --build-arg BASE_IMAGE=scratch -f "$$f" . 2>&1 | tail -20; \
+			failed=1; \
+		}; \
+	done; \
+	for f in $$(git ls-files '*.yml' '*.yaml'); do \
+		yq eval 'true' "$$f" >/dev/null 2>&1 || { echo "FAIL (yaml): $$f"; failed=1; }; \
+	done; \
+	for f in $$(git ls-files '*.json'); do \
+		yq -p json eval 'true' "$$f" >/dev/null 2>&1 || { echo "FAIL (json): $$f"; failed=1; }; \
+	done; \
+	# Render each testnet compose config with all of its profiles enabled \
+	# and dummy values for the env vars normally set by make build/up. \
+	# Catches errors plain YAML parsing cannot see: dangling depends_on \
+	# references, bad anchors, unknown keys and broken interpolation. \
+	# Needs a compose new enough to know every property the testnets use \
+	# (interface_name arrived in v2.36.0); skip on older installations. \
+	compose_ver=$$(docker compose version --short 2>/dev/null); compose_ver=$${compose_ver#v}; \
+	if [ -n "$$compose_ver" ] && [ "$$(printf '%s\n' 2.36.0 "$$compose_ver" | sort -V | head -1)" = "2.36.0" ]; then \
+		for f in $$(git ls-files 'testnets/*/docker-compose.yaml'); do \
+			t=$$(basename $$(dirname $$f)); \
+			p=$$(yq -r '[.services[].profiles // [] | .[]] | unique | join(",")' "$$f" 2>/dev/null); \
+			testnet=$$t HOST_INTERFACE=lo \
+				TESTNET_BUILDER_IMAGE=$$t-testnet_builder HASKELL_BUILDER_IMAGE=$$t-haskell_builder \
+				COMPOSE_PROFILES="$$p" docker compose -f "$$f" config -q >/dev/null 2>&1 || { \
+				echo "FAIL (compose): $$f"; \
+				testnet=$$t HOST_INTERFACE=lo \
+					TESTNET_BUILDER_IMAGE=$$t-testnet_builder HASKELL_BUILDER_IMAGE=$$t-haskell_builder \
+					COMPOSE_PROFILES="$$p" docker compose -f "$$f" config -q 2>&1 | tail -10; \
+				failed=1; \
+			}; \
+		done; \
+	else \
+		echo "NOTE: docker compose '$$compose_ver' is missing or older than 2.36.0, skipping compose validation"; \
+	fi; \
+	for f in $$(git ls-files '*.sh'); do \
+		bash -n "$$f" 2>/dev/null || { \
+			echo "FAIL (shell): $$f"; \
+			bash -n "$$f"; \
+			failed=1; \
+		}; \
+	done; \
+	if command -v shellcheck >/dev/null 2>&1; then \
+		for f in $$(git ls-files '*.sh'); do \
+			shellcheck -S error "$$f" || failed=1; \
+		done; \
+	else \
+		echo "NOTE: shellcheck is not installed, skipping shell analysis"; \
+	fi; \
+	if [ -n "$$failed" ]; then \
+		echo "Syntax check failed."; \
+		exit 1; \
+	fi; \
+	echo "OK: $$(git ls-files '*Dockerfile*' | wc -l) Dockerfiles, $$(git ls-files '*.yml' '*.yaml' | wc -l) YAML, $$(git ls-files '*.json' | wc -l) JSON, $$(git ls-files '*.sh' | wc -l) shell files and $$(git ls-files 'testnets/*/docker-compose.yaml' | wc -l) compose configs"
 
 dbsync: ## Run SQL query in cardano-db-sync
 	docker exec -ti dbsync /usr/bin/psql --host db.example --dbname dbsync --user dbsync --command="SELECT time,block_no,slot_no FROM block WHERE block_no=(SELECT MAX(block_no) FROM block);"
