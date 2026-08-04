@@ -164,9 +164,7 @@ RUN ln -snf /usr/local/lib/libsodium.so /usr/local/lib/libsodium.so.23 && \
     ln -snf /usr/local/lib/libsodium.so /usr/local/lib/libsodium.so.23.3.0
 RUN ldconfig
 
-COPY --from=build --chown=root:root /usr/local/src/secp256k1/.libs/libsecp256k1.so /usr/local/lib
-RUN ln -snf /usr/local/lib/libsecp256k1.so /usr/local/lib/libsecp256k1.so.1 && \
-    ln -snf /usr/local/lib/libsecp256k1.so /usr/local/lib/libsecp256k1.so.1.0.1
+COPY --from=build --chown=root:root /usr/lib/libsecp256k1.so* /usr/local/lib/
 RUN ldconfig
 
 COPY --from=build --chown=root:root /usr/local/bin/cardano-cli /usr/local/bin/cardano-cli
