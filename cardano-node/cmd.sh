@@ -14,6 +14,7 @@ DB_SIDECAR_PASSWORD="${DB_SIDECAR_PASSWORD:-sidecar}"
 DB_SIDECAR_USERNAME="${DB_SIDECAR_USERNAME:-sidecar}"
 EGRESS_POLL_INTERVAL="${EGRESS_POLL_INTERVAL:-0}"
 EXTRA_LOCALROOTS="${EXTRA_LOCALROOTS:-}"
+LEDGER_DB_BACKEND="${LEDGER_DB_BACKEND:-V2InMemory}"
 NO_INTERPOOL_LOCALROOTS="${NO_INTERPOOL_LOCALROOTS:-false}"
 OUROBOROS_GENESIS="${OUROBOROS_GENESIS:-false}"
 PEER_SHARING="${PEER_SHARING:-true}"
@@ -24,7 +25,6 @@ SHUTDOWN_ON_BLOCK="${SHUTDOWN_ON_BLOCK:-}"
 SYSTEM_START="${SYSTEM_START:-$(date -d "@$(( ( $(date +%s) / 180 ) * 180 ))" +%Y-%m-%dT%H:%M:00Z)}"
 TYPE="${TYPE:-bprelay}"
 USE_LEDGER_AFTER_SLOT="${USE_LEDGER_AFTER_SLOT:-0}"
-UTXOHD="${UTXOHD:-false}"
 TX_SUBMISSION_LOGIC_VERSION="${TX_SUBMISSION_LOGIC_VERSION:-1}"
 
 # Configuration files
@@ -86,11 +86,24 @@ config_config_json() {
         jq ".ConsensusMode = \"PraosMode\"" "${CONFIG_JSON}" | write_file "${CONFIG_JSON}"
     fi
 
-    if [ "${UTXOHD,,}" = "true" ]; then
-        jq ".LedgerDB = {\"Backend\": \"V1LMDB\", \"LiveTablesPath\": \"${DATABASE_PATH}/lmdb\"  }" "${CONFIG_JSON}" | write_file "${CONFIG_JSON}"
-    else
-        jq ".LedgerDB = {\"Backend\": \"V2InMemory\" }" "${CONFIG_JSON}" | write_file "${CONFIG_JSON}"
-    fi
+    local ledger_db_json
+    case "${LEDGER_DB_BACKEND}" in
+        V1LMDB)
+            ledger_db_json="{\"Backend\": \"V1LMDB\", \"LiveTablesPath\": \"${DATABASE_PATH}/lmdb\"}"
+            ;;
+        V2InMemory)
+            ledger_db_json="{\"Backend\": \"V2InMemory\"}"
+            ;;
+        V2LSM)
+            ledger_db_json="{\"Backend\": \"V2LSM\", \"LSMDatabasePath\": \"${DATABASE_PATH}/lsm\"}"
+            ;;
+        *)
+            echo "Invalid LEDGER_DB_BACKEND: ${LEDGER_DB_BACKEND}" >&2
+            echo "Expected one of: V1LMDB, V2InMemory, V2LSM" >&2
+            exit 1
+            ;;
+    esac
+    jq ".LedgerDB = ${ledger_db_json}" "${CONFIG_JSON}" | write_file "${CONFIG_JSON}"
 
     jq ".EgressPollInterval = ${EGRESS_POLL_INTERVAL}" "${CONFIG_JSON}" | write_file "${CONFIG_JSON}"
 
