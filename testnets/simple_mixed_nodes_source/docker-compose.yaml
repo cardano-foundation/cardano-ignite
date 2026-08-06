@@ -2,6 +2,11 @@
 
 x-base: &base
   restart: unless-stopped
+  # Allows io_uring, which Docker's default seccomp profile blocks. Needed for
+  # LEDGER_DB_BACKEND=V2LSM (the blockio-uring-based LSM ledger backend); a
+  # no-op for nodes using V1LMDB/V2InMemory. See cardano-node/seccomp-io_uring.json.
+  security_opt:
+    - "seccomp=../../cardano-node/seccomp-io_uring.json"
   logging:
     driver: "loki"
     options:
@@ -173,7 +178,6 @@ services:
       TYPE: "txg"
       TPS: "1"
       TX_GEN_MODE: "plain"
-      UTXOHD: "false"
       SYSTEM_START: ${SYSTEM_START:-}
     profiles: [build, optional]
 
