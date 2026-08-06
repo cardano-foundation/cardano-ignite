@@ -13,20 +13,19 @@ x-cardano_node_leios: &cardano_node_leios
   image: ${testnet}-leios-prof${PROFILING:-0}:latest
   build:
     context: "../../"
-    dockerfile: "cardano-node/Dockerfile.source"
+    # Prebuilt Leios node from the weekly ouroboros-leios release instead of a
+    # from-source build: minutes instead of hours, and the w30 node pairs with
+    # CARDANO_DB_SYNC_REF leios-prototype-2026w30 below (same weekly cadence).
+    dockerfile: "cardano-node/Dockerfile.binary"
     args:
-      # Leios node: IntersectMBO/cardano-node @ origin/leios-prototype (== local 11.0.1.164)
-      CARDANO_NODE_REF: "db5373ea6a6f79b398b468d2e04ce43eafcf90d0"
-      # Leios CLI pinned by this node's cabal.project (IntersectMBO/cardano-cli leios-prototype)
-      CARDANO_CLI_REPO: "https://github.com/IntersectMBO/cardano-cli.git"
-      CARDANO_CLI_REF: "a90a9637235a8f0e14a133bc03d87d8ee2b8a957"
-      # tx-centrifuge is built from a SEPARATE checkout of the leios tx-generator branch
-      # bench/leios (the only branch shipping bench/tx-centrifuge; the ouroboros-leios flake
-      # tracks "latest bench/leios"). The node stays on CARDANO_NODE_REF above.
-      TX_CENTRIFUGE_REF: "bench/leios"
+      # Prebuilt cardano-node + cardano-cli under bin/. No tx-generator in this
+      # tarball; Dockerfile.binary stubs it so the chmod/symlink/COPY resolve.
+      CARDANO_NODE_TARBALL_URL: "https://github.com/input-output-hk/ouroboros-leios/releases/download/prototype-2026w30/cardano-node-leios-x86_64-linux.tar.gz"
+      # NOT the node's real version: this only names the install directory and
+      # must remain a valid git ref, because Dockerfile.binary fetches
+      # Loop.plutus from raw.githubusercontent at this ref.
+      CARDANO_NODE_VERSION: "10.5.4"
       TESTNET_BUILDER_IMAGE: ${TESTNET_BUILDER_IMAGE}
-      HASKELL_BUILDER_IMAGE: ${HASKELL_BUILDER_IMAGE}
-      PROFILING: ${PROFILING:-}
 
 x-env: &env
   POOL_ID: "0" # Placeholder required for override
@@ -61,18 +60,39 @@ services:
       PEER_SHARING: "false"
     profiles: [build, core, pools]
 
+  # p3 is a net-rs/net-node FORGER: it takes over pool 3's on-chain identity
+  # (same VRF/KES/opcert/cold keys, so the same issuerHash) and produces real
+  # Praos blocks. Stake and the epoch nonce come from the genesis staking
+  # section via [chain_data] source = "genesis" — no Kleioscan needed.
+  # Keeps the p3 name/hostname so p1/p2's generated local-roots still dial it,
+  # which makes piranha a TRUSTED upstream for both (kills the peer-preference
+  # hypothesis by construction).
+  #
+  # Requires the prebuilt piranha:latest image in the local image store
+  # (produced from a private repo; see PIRANHA-FORGE.md). Not built by this repo.
   p3:
-    <<: [*base, *cardano_node_leios]
+    <<: *base
+    image: piranha:latest
+    # No platform pin: use the host-native piranha build (arm64 on Apple
+    # Silicon, amd64 on Linux). Cross-arch containers still talk over TCP, so a
+    # native piranha alongside amd64 node images is fine.
     container_name: p3
     hostname: p3.example
+    # Read-only: pool 3's vrf/kes/opcert/cold keys, the PATCHED shelley genesis
+    # (its bytes are hashed for the epoch nonce), and the forge config.
     volumes:
-      - p3:/opt/cardano-node/data
-      - synth:/opt/synth:ro
+      # Host dir holding the forge state (genesis + keys + forge-ignite.toml),
+      # populated per PIRANHA-FORGE.md before p3 starts. Repo-relative default
+      # (testnets/simple_leios_source/forge), override with FORGE_DIR.
+      - ${FORGE_DIR:-./forge}:/etc/forge:ro
+    # Explicit entrypoint: bypasses the image's env-driven relay entrypoint so
+    # ONLY this config applies. The baked relay.toml would otherwise layer in
+    # `[production] stake = 0`, silently disabling forging.
+    entrypoint: ["/usr/local/bin/net-node"]
+    command: ["--config", "/etc/forge/forge-ignite.toml"]
     environment:
-      <<: *env
-      POOL_ID: "3"
-    profiles: [build, core, pools]
-
+      RUST_LOG: "${RUST_LOG:-info}"
+    profiles: [core, pools]
   sidecar:
     image: ${testnet}_sidecar:latest
     container_name: sidecar
@@ -83,7 +103,6 @@ services:
       dockerfile: "sidecar/Dockerfile"
     environment:
       POOLS: "3"
-      LEIOS: "true"
     volumes:
       - synth:/opt/synth:ro
     profiles: [build, core]
@@ -102,7 +121,6 @@ services:
     build:
       context: "../../"
       dockerfile: "db-synthesizer/Dockerfile"
-      target: "light"
     profiles: [build, core, mgmt]
 
   # Client / observer node
@@ -174,7 +192,7 @@ services:
       context: "../../"
       dockerfile: "cardano-db-sync/Dockerfile.source"
       args:
-        CARDANO_DB_SYNC_REF: "leios-prototype-2026w26"
+        CARDANO_DB_SYNC_REF: "leios-prototype-2026w30"
         HASKELL_BUILDER_IMAGE: ${HASKELL_BUILDER_IMAGE}
     depends_on:
       db:

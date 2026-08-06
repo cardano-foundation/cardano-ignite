@@ -27,17 +27,34 @@ RUN apt update && \
 
 RUN install --directory --owner=root --group=root --mode=0755 /usr/local/src/cardano-node
 
-RUN curl --proto '=https' --tlsv1.3 \
-        --location https://github.com/IntersectMBO/cardano-node/releases/download/${CARDANO_NODE_VERSION}/cardano-node-${CARDANO_NODE_VERSION}-linux-amd64.tar.gz \
-        --output /usr/local/src/cardano-node/cardano-node-${CARDANO_NODE_VERSION}-linux-amd64.tar.gz
+# Full override for the node release tarball URL. Empty (default) derives the
+# stock IntersectMBO release URL from CARDANO_NODE_VERSION, so existing testnets
+# are unaffected. Set it to consume a different release — e.g. the weekly
+# ouroboros-leios prototype builds:
+#   CARDANO_NODE_TARBALL_URL=https://github.com/input-output-hk/ouroboros-leios/releases/download/prototype-2026w30/cardano-node-leios-x86_64-linux.tar.gz
+# Those ship only cardano-node + cardano-cli under bin/ (no tx-generator), which
+# is handled below. CARDANO_NODE_VERSION must still be a valid git ref, because
+# the Loop.plutus fetch further down resolves it against raw.githubusercontent.
+ARG CARDANO_NODE_TARBALL_URL=""
+
+RUN url="${CARDANO_NODE_TARBALL_URL}" ; \
+    [ -n "${url}" ] || url="https://github.com/IntersectMBO/cardano-node/releases/download/${CARDANO_NODE_VERSION}/cardano-node-${CARDANO_NODE_VERSION}-linux-amd64.tar.gz" ; \
+    curl --proto '=https' --tlsv1.3 --fail \
+        --location "${url}" \
+        --output /usr/local/src/cardano-node/node.tar.gz
 
 RUN install --directory --owner=root --group=root --mode=0755 /usr/local/src/cardano-node/${CARDANO_NODE_VERSION}
 
-RUN tar --extract --gzip --file=/usr/local/src/cardano-node/cardano-node-${CARDANO_NODE_VERSION}-linux-amd64.tar.gz --directory=/usr/local/src/cardano-node/${CARDANO_NODE_VERSION}
+RUN tar --extract --gzip --file=/usr/local/src/cardano-node/node.tar.gz --directory=/usr/local/src/cardano-node/${CARDANO_NODE_VERSION}
 
-RUN chmod 0755 /usr/local/src/cardano-node/${CARDANO_NODE_VERSION}/bin/cardano-cli \
-        /usr/local/src/cardano-node/${CARDANO_NODE_VERSION}/bin/cardano-node \
-        /usr/local/src/cardano-node/${CARDANO_NODE_VERSION}/bin/tx-generator
+# tx-generator is absent from the leios prototype tarballs. Stub it so the
+# chmod, the symlink and the final-stage COPY all still resolve; anything that
+# actually invokes it fails loudly instead of silently misbehaving.
+RUN cd /usr/local/src/cardano-node/${CARDANO_NODE_VERSION}/bin && \
+    if [ ! -f tx-generator ]; then \
+        printf '#!/bin/sh\necho "tx-generator not shipped in this cardano-node release" >&2\nexit 127\n' > tx-generator ; \
+    fi && \
+    chmod 0755 cardano-cli cardano-node tx-generator
 
 RUN ln -s /usr/local/src/cardano-node/${CARDANO_NODE_VERSION}/bin/cardano-cli /usr/local/bin/cardano-cli && \
     ln -s /usr/local/src/cardano-node/${CARDANO_NODE_VERSION}/bin/cardano-node /usr/local/bin/cardano-node && \

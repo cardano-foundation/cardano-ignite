@@ -84,3 +84,11 @@ TraceOptions:
   LeiosFetch.Remote:
     severity: Debug
     maxFrequency: 0
+  # Block-diffusion investigation: see per-peer fetch decisions (FetchDecline…),
+  # downloaded headers, and block validation. Verbose but this testnet's purpose.
+  BlockFetch.Decision:
+    severity: Debug
+  ChainSync.Client:
+    severity: Debug
+  ChainDB.AddBlockEvent.AddBlockValidation:
+    severity: Info
