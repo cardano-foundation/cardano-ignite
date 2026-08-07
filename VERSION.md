@@ -7,10 +7,10 @@ This list outlines all software versions used in the Cardano Ignite project.
 |Amaru                |Source        |[1702069](https://github.com/pragma-org/amaru/commit/17020694ec00b39668dd0d9e87902f94e99590fa) |
 |Blackbox Exporter    |Image         |[v0.28.0](https://hub.docker.com/layers/prom/blackbox-exporter/v0.28.0)                     |
 |Blockfrost           |Binary        |[v6.6.1](https://github.com/blockfrost/blockfrost-backend-ryo/releases/tag/v6.6.1)          |
-|Cardano CLI          |Binary/Source |[11.0.0.0](https://github.com/IntersectMBO/cardano-cli/releases/tag/cardano-cli-11.0.0.0)   |
+|Cardano CLI          |Binary/Source |[11.2.3.0](https://github.com/IntersectMBO/cardano-cli/releases/tag/cardano-cli-11.2.3.0)   |
 |Cardano DB Sync      |Binary        |[13.7.2.1](https://github.com/IntersectMBO/cardano-db-sync/releases/tag/13.7.2.1)           |
-|Cardano Node         |Binary/Source |[11.0.1](https://github.com/IntersectMBO/cardano-node/releases/tag/11.0.1), [10.7.1](https://github.com/IntersectMBO/cardano-node/releases/tag/10.7.1), [10.6.4](https://github.com/IntersectMBO/cardano-node/releases/tag/10.6.4) |
-|Cardano TX Generator |Source        |[11.0.1](https://github.com/IntersectMBO/cardano-node/releases/tag/11.0.1)                  |
+|Cardano Node         |Binary/Source |[11.1.3](https://github.com/IntersectMBO/cardano-node/releases/tag/11.1.3), [11.0.1](https://github.com/IntersectMBO/cardano-node/releases/tag/11.0.1), [10.6.4](https://github.com/IntersectMBO/cardano-node/releases/tag/10.6.4) |
+|Cardano TX Generator |Source        |[11.1.3](https://github.com/IntersectMBO/cardano-node/releases/tag/11.1.3)                  |
 |CoreDNS              |Image         |[1.14.6](https://hub.docker.com/layers/coredns/coredns/1.14.6)                              |
 |Debian               |Image         |[stable-20260803-slim](https://hub.docker.com/layers/library/debian/stable-slim)            |
 |Grafana              |Image         |[13.1.3](https://hub.docker.com/layers/grafana/grafana/13.1.3)                              |

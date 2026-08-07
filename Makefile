@@ -235,9 +235,9 @@ status: ## Show which testnets are up and their container status
 
 query: TESTNET ## Query tip of all pools
 	pools="$$(awk '/container_name: /{ print $$2 }' testnets/${testnet}/docker-compose.yaml | grep -E '^p[0-9][a-zA-Z0-9]*$$')" ; \
-	for i in $${pools} ; do docker exec -ti $${i} timeout 0.05 cardano-cli ping --magic 42 --host 127.0.0.1 --port 3001 --tip --quiet -c1; done ; true ; \
+	for i in $${pools} ; do docker exec -ti $${i} timeout 0.05 cardano-cli ping --network-magic 42 --mode tip --quiet -c1 127.0.0.1:3001; done ; true ; \
 	echo '# client' ; \
-	docker exec -ti c1 timeout 0.05 cardano-cli ping --magic 42 --host 127.0.0.1 --port 3001 --tip --quiet -c1 ; true
+	docker exec -ti c1 timeout 0.05 cardano-cli ping --network-magic 42 --mode tip --quiet -c1 127.0.0.1:3001 ; true
 
 validate: ## Check for consensus among all pools
 	docker exec sidecar /opt/scripts/eventually_converged.sh

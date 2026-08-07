@@ -50,9 +50,9 @@ query_node_tips() {
                 host="p${i}.example"
             fi
 
-            output=$(cardano-cli ping -j --magic 42 --host ${host} --port ${PORT} --tip --quiet -c1)
+            output=$(cardano-cli ping -j --network-magic 42 --mode tip --quiet -c1 "${host}:${PORT}")
 
-            if [ $? -eq 0 ] && tip_data=$(echo "$output" | jq -r '.tip[0] | .hash + " " + (.blockNo|tostring) + " " + (.slotNo|tostring)' 2>/dev/null); then
+            if [ $? -eq 0 ] && tip_data=$(echo "$output" | jq -r '.hash + " " + (.blockNo|tostring) + " " + (.slotNo|tostring)' 2>/dev/null); then
                 echo "${tip_data}" > "${temp_dir}/pool_${i}"
             else
                 touch "${temp_dir}/failed_${i}"

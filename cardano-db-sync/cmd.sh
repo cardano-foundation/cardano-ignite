@@ -71,11 +71,11 @@ wait_for_cardano_node() {
     cmd+=(ping)
 
     if [ -n "${NETWORK_ID}" ]; then
-        cmd+=(--magic "${NETWORK_ID}")
+        cmd+=(--network-magic "${NETWORK_ID}")
     fi
 
-    cmd+=(--unixsock "${CARDANO_NODE_SOCKET_PATH}")
-    cmd+=(--tip)
+    cmd+=(--mode tip)
+    cmd+=("${CARDANO_NODE_SOCKET_PATH}")
 
     i=0
     wait=90

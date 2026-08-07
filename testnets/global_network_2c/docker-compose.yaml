@@ -9,9 +9,9 @@
 # - set both A and B vars to the same values for a homogeneous run
 #
 # Example:
-#   CARDANO_NODE_REF_A=11.0.1
+#   CARDANO_NODE_REF_A=11.1.3
 #   CARDANO_NODE_REF_B=my-branch
-#   CARDANO_NODE_IMAGE_TAG_A=11.0.1_txg_a
+#   CARDANO_NODE_IMAGE_TAG_A=11.1.3_txg_a
 #   CARDANO_NODE_IMAGE_TAG_B=my_branch_txg_b
 #   TX_SUBMISSION_LOGIC_VERSION_A=1
 #   TX_SUBMISSION_LOGIC_VERSION_B=2
@@ -33,13 +33,13 @@ x-base: &base
       loki-retries: "5"
 
 x-cardano_node_variant_a: &cardano_node_variant_a
-  image: ${testnet}-${CARDANO_NODE_IMAGE_TAG_A:-11.0.1}-prof${PROFILING:-0}:latest
+  image: ${testnet}-${CARDANO_NODE_IMAGE_TAG_A:-11.1.3}-prof${PROFILING:-0}:latest
   cpus: "${CARDANO_NODE_CPUS:-2.0}"
   build:
     context: "../../"
     dockerfile: "cardano-node/Dockerfile.source"
     args:
-      CARDANO_NODE_REF: "${CARDANO_NODE_REF_A:-11.0.1}"
+      CARDANO_NODE_REF: "${CARDANO_NODE_REF_A:-11.1.3}"
       TESTNET_BUILDER_IMAGE: ${TESTNET_BUILDER_IMAGE}
       HASKELL_BUILDER_IMAGE: ${HASKELL_BUILDER_IMAGE}
       PROFILING: ${PROFILING:-}
@@ -57,13 +57,13 @@ x-cardano_node_variant_b: &cardano_node_variant_b
       PROFILING: ${PROFILING:-}
 
 x-cardano_node: &cardano_node
-  image: ${testnet}-${CARDANO_NODE_IMAGE_TAG:-10.6.4_txg}-prof${PROFILING:-0}:latest
+  image: ${testnet}-${CARDANO_NODE_IMAGE_TAG:-11.1.3_txg}-prof${PROFILING:-0}:latest
   cpus: "${CARDANO_NODE_CPUS:-2.0}"
   build:
     context: "../../"
     dockerfile: "cardano-node/Dockerfile.source"
     args:
-      CARDANO_NODE_REF: "${CARDANO_NODE_REF:-10.6.4}"
+      CARDANO_NODE_REF: "${CARDANO_NODE_REF:-11.1.3}"
       TESTNET_BUILDER_IMAGE: ${TESTNET_BUILDER_IMAGE}
       HASKELL_BUILDER_IMAGE: ${HASKELL_BUILDER_IMAGE}
       PROFILING: ${PROFILING:-}
@@ -650,7 +650,7 @@ services:
       POOL_ID: "1"
       TYPE: client
       REGION: EU
-      LEDGER_DB_BACKEND: "V1LMDB"
+      LEDGER_DB_BACKEND: "V2LSM"
     networks:
       net_eu:
         ipv4_address: 172.16.3.4
@@ -671,7 +671,7 @@ services:
       TPS: ${TPS:-12}
       TX_GEN_MODE: ${TX_GEN_MODE:-plain}
       TX_GENERATOR_TARGETS: "172.16.1.104,172.16.3.104,172.16.1.114,172.16.3.114"
-      LEDGER_DB_BACKEND: "V1LMDB"
+      LEDGER_DB_BACKEND: "V2LSM"
     networks:
       net_na:
         ipv4_address: 172.16.1.12

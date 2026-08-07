@@ -26,9 +26,9 @@ validate_block_hash() {
     for i in $(seq 1 "${POOLS}"); do
         (
             if [ "${TOPOLOGY,,}" = "fancy" ]; then
-                cardano-cli ping -j --magic 42 --host p${i}bp.example --port ${PORT} --tip --quiet -c1 | jq -r '.tip[0].hash + " " + (.tip[0].blockNo|tostring) + " " + (.tip[0].slotNo|tostring)' >"$temp_dir/hash_${i}"
+                cardano-cli ping -j --network-magic 42 --mode tip --quiet -c1 "p${i}bp.example:${PORT}" | jq -r '.hash + " " + (.blockNo|tostring) + " " + (.slotNo|tostring)' >"$temp_dir/hash_${i}"
             else
-                cardano-cli ping -j --magic 42 --host p${i}.example --port ${PORT} --tip --quiet -c1 | jq -r '.tip[0].hash + " " + (.tip[0].blockNo|tostring) + " " + (.tip[0].slotNo|tostring)' >"$temp_dir/hash_${i}"
+                cardano-cli ping -j --network-magic 42 --mode tip --quiet -c1 "p${i}.example:${PORT}" | jq -r '.hash + " " + (.blockNo|tostring) + " " + (.slotNo|tostring)' >"$temp_dir/hash_${i}"
             fi
         ) &
         pids+=($!)
