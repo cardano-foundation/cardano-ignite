@@ -1,7 +1,7 @@
 ARG BASE_IMAGE=cardano-ignite-base
 FROM ${BASE_IMAGE} AS build
 
-ARG NODE_EXPORTER_VERSION="1.11.1"
+ARG NODE_EXPORTER_VERSION="1.12.1"
 
 ENV TZ="UTC"
 RUN ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime && \
