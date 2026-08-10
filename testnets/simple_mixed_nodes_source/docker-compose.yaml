@@ -229,7 +229,7 @@ services:
     profiles: [build, optional]
 
   prometheus:
-    image: prom/prometheus:v3.12.0
+    image: prom/prometheus:v3.13.2
     container_name: prometheus
     hostname: prometheus.example
     restart: unless-stopped
@@ -256,7 +256,7 @@ services:
     profiles: [build, core]
 
   loki:
-    image: grafana/loki:3.7.2
+    image: grafana/loki:3.7.6
     container_name: loki
     hostname: loki.example
     restart: unless-stopped
@@ -268,7 +268,7 @@ services:
     profiles: [build, core]
 
   grafana:
-    image: grafana/grafana:13.0.2
+    image: grafana/grafana:13.1.3
     container_name: grafana
     hostname: grafana.example
     restart: unless-stopped
@@ -284,7 +284,7 @@ services:
     profiles: [build, core]
 
   jaeger:
-    image: jaegertracing/jaeger:2.18.0
+    image: jaegertracing/jaeger:2.20.0
     container_name: jaeger
     hostname: jaeger.example
     restart: unless-stopped
