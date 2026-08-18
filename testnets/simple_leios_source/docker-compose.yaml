@@ -14,17 +14,17 @@ x-cardano_node_leios: &cardano_node_leios
   build:
     context: "../../"
     # Prebuilt Leios node from the weekly ouroboros-leios release instead of a
-    # from-source build: minutes instead of hours, and the w30 node pairs with
-    # CARDANO_DB_SYNC_REF leios-prototype-2026w30 below (same weekly cadence).
+    # from-source build: minutes instead of hours, and the w32 node pairs with
+    # CARDANO_DB_SYNC_REF leios-prototype-2026w32 below (same weekly cadence).
     dockerfile: "cardano-node/Dockerfile.binary"
     args:
       # Prebuilt cardano-node + cardano-cli under bin/. No tx-generator in this
       # tarball; Dockerfile.binary stubs it so the chmod/symlink/COPY resolve.
-      CARDANO_NODE_TARBALL_URL: "https://github.com/input-output-hk/ouroboros-leios/releases/download/prototype-2026w30/cardano-node-leios-x86_64-linux.tar.gz"
+      CARDANO_NODE_TARBALL_URL: "https://github.com/input-output-hk/ouroboros-leios/releases/download/prototype-2026w32/cardano-node-leios-x86_64-linux.tar.gz"
       # NOT the node's real version: this only names the install directory and
       # must remain a valid git ref, because Dockerfile.binary fetches
       # Loop.plutus from raw.githubusercontent at this ref.
-      CARDANO_NODE_VERSION: "10.5.4"
+      CARDANO_NODE_VERSION: "11.0.1"
       TESTNET_BUILDER_IMAGE: ${TESTNET_BUILDER_IMAGE}
 
 x-env: &env
@@ -88,8 +88,10 @@ services:
     # Explicit entrypoint: bypasses the image's env-driven relay entrypoint so
     # ONLY this config applies. The baked relay.toml would otherwise layer in
     # `[production] stake = 0`, silently disabling forging.
+
     entrypoint: ["/usr/local/bin/net-node"]
     command: ["--config", "/etc/forge/forge-ignite.toml"]
+    #command: ["tail", "-f", "/dev/null"] # for debug purposes
     environment:
       RUST_LOG: "${RUST_LOG:-info}"
     profiles: [core, pools]
@@ -176,6 +178,7 @@ services:
 
   # Leios/Dijkstra-aware cardano-db-sync, built from source (leios-prototype-2026w26,
   # the tag whose consensus/ledger pins match the Leios node).
+  # (No w32 tag for dbsync at the moment: 16.08.2026; check if something new is available)
   # Distinct image tag so it does not clobber the shared binary `cardano-db-sync:latest`
   # other testnets use.
   dbsync:
@@ -192,7 +195,7 @@ services:
       context: "../../"
       dockerfile: "cardano-db-sync/Dockerfile.source"
       args:
-        CARDANO_DB_SYNC_REF: "leios-prototype-2026w30"
+        CARDANO_DB_SYNC_REF: "leios-prototype-2026w26"
         HASKELL_BUILDER_IMAGE: ${HASKELL_BUILDER_IMAGE}
     depends_on:
       db:

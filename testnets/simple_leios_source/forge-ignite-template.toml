@@ -1,0 +1,47 @@
+node_id = "p3"
+listen_address = "0.0.0.0:3001"
+network_magic = 42
+slot_duration_ms = 1000
+genesis_time_unix=<GTU>
+leios_enabled = true
+scheduler = "priority-wfq"
+security_param_k = 90          # ignite securityParam, not 2160
+sync_method = "tip"
+genesis_path = "/etc/forge/shelley-genesis.json"
+
+[production]
+total_stake = 1000             # overridden at boot from genesis SPDD
+stake = 0                      # overridden at boot from genesis SPDD
+rb_generation_probability = 0.05   # ignored under real VRF
+vote_generation_probability = 0.8
+stage_length_slots = 20
+protocol_major = 12            # header ProtVer on real blocks, NOT the genesis value (10)
+
+[production.committee_selection]
+type = "StakeCentile"
+top_centile_of_stake = 0.99
+
+[transactions]
+tx_rate = 0.0
+
+[keys]
+pool_id = "<PoolId>"
+vrf_skey_path = "/etc/forge/keys/vrf.skey"
+kes_skey_path = "/etc/forge/keys/kes.skey"
+op_cert_path = "/etc/forge/keys/opcert.cert"
+cold_vkey_path = "/etc/forge/keys/cold.vkey"
+
+[chain_data]
+source = "genesis"
+
+[telemetry]
+stats_interval_secs = 10
+
+[[telemetry.stats_sinks]]
+type = "log"
+
+[[peers]]
+address = "p1.example:3001"
+
+[[peers]]
+address = "p2.example:3001"

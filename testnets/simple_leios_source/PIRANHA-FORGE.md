@@ -12,19 +12,33 @@ construction, so no IP impersonation is needed.
 
 1. **Once per host:** have `piranha:latest` in the local image store; on an
    arm host running amd64 node images, `docker run --privileged --rm tonistiigi/binfmt --install amd64`.
-2. Bring up the pools + support **without p3** (it needs the forge dir first):
+2. **Once per changes in docker data** build images as with other targets, using make,
+   from repository root:
+   `make build testnet=simple_leios_source`.
+3. The next steps are automated using local Makefile:
    ```bash
    cd testnets/simple_leios_source
-   docker compose --profile core up -d p1 p2 c1 loki grafana prometheus blackbox
+   make up testnet=simple_leios_source
    ```
-3. Populate the forge dir — run the **Setup** block below (extract genesis+keys,
-   fix perms, derive `pool_id`/`genesis_time_unix`, write `forge-ignite.toml`).
-4. Start p3: `docker compose --profile core up -d p3`.
-5. Verify (see **Verify** below): `resolved stake distribution … our_stake` non-zero,
-   `produced block`, then p1/p2 `AddedToCurrentChain` with your issuer hash.
+   However, here're the next steps:
 
-Steps 1–2 are one-time-ish; step 3 is the only manual part each `make up` (until a
-`forge-init` step automates it).
+   a. Bring up the pools + support **without p3** (it needs the forge dir first):
+      build .env.tmp, and then:
+      ```bash
+      cd testnets/simple_leios_source
+      docker compose --enf-file .env.tmp --profile core up -d p1 p2 c1 loki grafana prometheus blackbox synth
+      ```
+   b. Populate the forge dir — run the **Setup** block below (extract genesis+keys,
+      fix perms, derive `pool_id`/`genesis_time_unix`, write `forge-ignite.toml`).
+      (automated using `init-forge-dir.sh`).
+   c. Start p3: `docker compose --profile core up -d p3`
+
+4. Verify (see **Verify** below): `resolved stake distribution … our_stake` non-zero,
+   `produced block`, then p1/p2 `AddedToCurrentChain` with your issuer hash.
+   Use `verify-p3.sh` to do that.
+
+Steps 1–2 are one-time-ish; step 3.b is the only manual part each `make up` (which
+is now atomated by `init-forge-dir`).
 
 ## Image
 
@@ -37,6 +51,8 @@ before `docker compose up`. Built from a **private** repo and documented there
 Bring the testnet up first (`p1`, `p2`, `c1` running), then populate the forge dir
 that the `p3` service mounts. The mount defaults to `./forge` (repo-relative:
 `testnets/simple_leios_source/forge`), overridable with `FORGE_DIR`.
+
+Run this script after testnet produced a block (since we need actual POOL_ID and GTU):
 
 ```bash
 SRC=p1                       # any running ignite node — all pools are baked in
@@ -165,11 +181,13 @@ stake share of slots).
   `FetchDeclineChainNotPlausible` → forged but never adopted.
 - **Key perms.** `docker cp` copies keys as uid 10000/0600; net-node runs as uid
   10001 → `Permission denied` crash. `chmod a+rX`.
+  Also check permissions for $FORGE/keys directory.
 - **The `starting node … stake=0 total_stake=1000` banner is a pre-override default.**
   The real stake is on the `resolved stake distribution (SPDD) … our_stake=` line.
   Don't chase the banner.
 - **Pool ids are deterministic** across genesis regens, so `pool_id` is stable — a
   genuine `our_stake=0` is almost always the systemStart or perms issue above.
+- **Network does not start** check synth installation and start
 
 ## Debugging non-adoption (if it happens)
 

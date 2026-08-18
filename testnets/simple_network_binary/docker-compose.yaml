@@ -15,6 +15,7 @@ x-cardano_node_11_0_1: &cardano_node_11_0_1
     context: "../../"
     dockerfile: "cardano-node/Dockerfile.binary"
     args:
+      CARDANO_NODE_TARBALL_URL: "https://github.com/input-output-hk/ouroboros-leios/releases/download/prototype-2026w32/cardano-node-leios-x86_64-linux.tar.gz"
       CARDANO_NODE_VERSION: "11.0.1"
       TESTNET_BUILDER_IMAGE: ${TESTNET_BUILDER_IMAGE}
 
