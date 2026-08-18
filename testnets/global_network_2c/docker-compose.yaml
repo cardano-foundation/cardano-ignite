@@ -33,7 +33,7 @@ x-base: &base
       loki-retries: "5"
 
 x-cardano_node_variant_a: &cardano_node_variant_a
-  image: ${testnet}-${CARDANO_NODE_IMAGE_TAG_A:-11.0.1}-prof${PROFILING:-0}:latest
+  image: ${testnet}-${CARDANO_NODE_IMAGE_TAG_A:-42d848c1}-prof${PROFILING:-0}:latest
   cpus: "${CARDANO_NODE_CPUS:-2.0}"
   build:
     context: "../../"
@@ -45,7 +45,7 @@ x-cardano_node_variant_a: &cardano_node_variant_a
       PROFILING: ${PROFILING:-}
 
 x-cardano_node_variant_b: &cardano_node_variant_b
-  image: ${testnet}-${CARDANO_NODE_IMAGE_TAG_B:-660805c5}-prof${PROFILING:-0}:latest
+  image: ${testnet}-${CARDANO_NODE_IMAGE_TAG_B:-42d848c1}-prof${PROFILING:-0}:latest
   cpus: "${CARDANO_NODE_CPUS:-2.0}"
   build:
     context: "../../"
@@ -651,7 +651,7 @@ services:
       TYPE: client
       REGION: EU
       EXTRA_LOCALROOTS: "c6.example:3001,c2.example:3001"
-      LEDGER_DB_BACKEND: "V1LMDB"
+      LEDGER_DB_BACKEND: "V2LSM"
     networks:
       net_eu:
         ipv4_address: 172.16.3.4
@@ -673,7 +673,7 @@ services:
       TPS: ${TPS:-12}
       TX_GEN_MODE: ${TX_GEN_MODE:-plain}
       TX_GENERATOR_TARGETS: "172.16.1.102,172.16.1.103,172.16.1.104,172.16.3.102,172.16.3.103,172.16.3.104,172.16.1.112,172.16.1.113,172.16.1.114,172.16.3.112,172.16.3.113,172.16.3.114"
-      LEDGER_DB_BACKEND: "V1LMDB"
+      LEDGER_DB_BACKEND: "V2LSM"
     networks:
       net_na:
         ipv4_address: 172.16.1.12
@@ -692,7 +692,7 @@ services:
       TYPE: client
       REGION: EU
       EXTRA_LOCALROOTS: "c2.example:3001,c4.example:3001"
-      LEDGER_DB_BACKEND: "V1LMDB"
+      LEDGER_DB_BACKEND: "V2LSM"
     networks:
       net_eu:
         ipv4_address: 172.16.3.41
@@ -711,7 +711,7 @@ services:
       TYPE: client
       REGION: EU
       EXTRA_LOCALROOTS: "c3.example:3001,c5.example:3001"
-      LEDGER_DB_BACKEND: "V1LMDB"
+      LEDGER_DB_BACKEND: "V2LSM"
     networks:
       net_eu:
         ipv4_address: 172.16.3.42
@@ -730,7 +730,7 @@ services:
       TYPE: client
       REGION: NA
       EXTRA_LOCALROOTS: "c4.example:3001,c6.example:3001"
-      LEDGER_DB_BACKEND: "V1LMDB"
+      LEDGER_DB_BACKEND: "V2LSM"
     networks:
       net_na:
         ipv4_address: 172.16.1.43
@@ -749,7 +749,7 @@ services:
       TYPE: client
       REGION: NA
       EXTRA_LOCALROOTS: "c5.example:3001,c1.example:3001"
-      LEDGER_DB_BACKEND: "V1LMDB"
+      LEDGER_DB_BACKEND: "V2LSM"
     networks:
       net_na:
         ipv4_address: 172.16.1.44
