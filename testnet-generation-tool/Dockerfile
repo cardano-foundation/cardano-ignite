@@ -6,6 +6,10 @@ ARG TESTNET_GENERATION_TOOL_VERSION="v0.2.0"
 # Must match the cardano-node binary version pinned in the
 # testnet-generation-tool release (libs/mainnet_env.py)
 ARG GENESIS_CARDANO_NODE_VERSION="10.2.1"
+# Release archive the pre-fetch below downloads. Override both together with the
+# tool version when a testnet needs a different genesis cardano-cli, e.g. Leios.
+ARG GENESIS_CARDANO_NODE_URL="https://github.com/IntersectMBO/cardano-node/releases/download/${GENESIS_CARDANO_NODE_VERSION}/cardano-node-${GENESIS_CARDANO_NODE_VERSION}-linux.tar.gz"
+ARG GENESIS_CARDANO_NODE_SHA256_URL="https://github.com/IntersectMBO/cardano-node/releases/download/${GENESIS_CARDANO_NODE_VERSION}/cardano-node-${GENESIS_CARDANO_NODE_VERSION}-sha256sums.txt"
 
 ENV TZ="UTC"
 RUN ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime && \
@@ -50,17 +54,20 @@ RUN uv sync
 # indefinitely on unreliable networks. genesis-cli.py skips its download
 # when cardano-node/bin already exists. Placed before the per-testnet
 # COPY below so the download layer is cached across testnets.
-RUN curl --proto '=https' --tlsv1.3 \
-        --location https://github.com/IntersectMBO/cardano-node/releases/download/${GENESIS_CARDANO_NODE_VERSION}/cardano-node-${GENESIS_CARDANO_NODE_VERSION}-linux.tar.gz \
-        --output /tmp/cardano-node-${GENESIS_CARDANO_NODE_VERSION}-linux.tar.gz && \
-    curl --proto '=https' --tlsv1.3 \
-        --location https://github.com/IntersectMBO/cardano-node/releases/download/${GENESIS_CARDANO_NODE_VERSION}/cardano-node-${GENESIS_CARDANO_NODE_VERSION}-sha256sums.txt \
-        --output /tmp/cardano-node-${GENESIS_CARDANO_NODE_VERSION}-sha256sums.txt && \
+RUN set -eu && \
+    tarball="$(basename ${GENESIS_CARDANO_NODE_URL})" && \
+    sums="$(basename ${GENESIS_CARDANO_NODE_SHA256_URL})" && \
     cd /tmp && \
-    sha256sum --ignore-missing --check cardano-node-${GENESIS_CARDANO_NODE_VERSION}-sha256sums.txt && \
+    curl --proto '=https' --tlsv1.3 \
+        --location ${GENESIS_CARDANO_NODE_URL} \
+        --output "${tarball}" && \
+    curl --proto '=https' --tlsv1.3 \
+        --location ${GENESIS_CARDANO_NODE_SHA256_URL} \
+        --output "${sums}" && \
+    sha256sum --ignore-missing --check "${sums}" && \
     mkdir -p /usr/local/src/testnet-generation-tool/cardano-node && \
-    tar --extract --gzip --file=/tmp/cardano-node-${GENESIS_CARDANO_NODE_VERSION}-linux.tar.gz --directory=/usr/local/src/testnet-generation-tool/cardano-node ./bin/cardano-cli ./bin/cardano-node && \
-    rm -f /tmp/cardano-node-${GENESIS_CARDANO_NODE_VERSION}-linux.tar.gz /tmp/cardano-node-${GENESIS_CARDANO_NODE_VERSION}-sha256sums.txt && \
+    tar --extract --gzip --wildcards --file="${tarball}" --directory=/usr/local/src/testnet-generation-tool/cardano-node '*bin/cardano-cli' '*bin/cardano-node' && \
+    rm -f "${tarball}" "${sums}" && \
     strip --strip-unneeded /usr/local/src/testnet-generation-tool/cardano-node/bin/cardano-cli \
         /usr/local/src/testnet-generation-tool/cardano-node/bin/cardano-node
 

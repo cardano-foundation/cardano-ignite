@@ -474,6 +474,11 @@ assemble_command() {
         cmd+=(--shelley-operational-certificate ${KEY_PATH}/opcert.cert)
         cmd+=(--shelley-kes-key ${KEY_PATH}/kes.skey)
         cmd+=(--shelley-vrf-key ${KEY_PATH}/vrf.skey)
+        # Leios voting key; only the Leios testnet builder generates it. Without
+        # it the pool holds a keyless committee seat and casts no votes.
+        if [ -f "${KEY_PATH}/bls.skey" ]; then
+            cmd+=(--shelley-bls-key ${KEY_PATH}/bls.skey)
+        fi
     fi
 
     cmd+=(--config ${CONFIG_JSON})

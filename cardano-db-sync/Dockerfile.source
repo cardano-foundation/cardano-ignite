@@ -21,7 +21,13 @@ WORKDIR /usr/local/src/cardano-db-sync
 RUN git fetch --depth 1 ${CARDANO_DB_SYNC_REPO} ${CARDANO_DB_SYNC_REF} && \
     git checkout FETCH_HEAD && \
     git submodule update --init --recursive
-RUN printf "package *\n  ghc-options: +RTS -A128m -n2m -RTS\n\njobs: \$ncpus\nsemaphore: True\n" > /usr/local/src/cardano-db-sync/cabal.project.local
+# Demote db-sync's own -Werror: the Leios cardano-base deprecates API it still
+# uses. The stanzas must name each package; a 'package *' stanza loses to the
+# per-package -Werror in db-sync's cabal.project.
+RUN printf "package *\n  ghc-options: +RTS -A128m -n2m -RTS\n\njobs: \$ncpus\nsemaphore: True\n" > /usr/local/src/cardano-db-sync/cabal.project.local && \
+    for pkg in cardano-db-sync cardano-db cardano-db-tool cardano-chain-gen cardano-smash-server; do \
+        printf "\npackage %s\n  ghc-options: -Wwarn\n" "$pkg" >> /usr/local/src/cardano-db-sync/cabal.project.local ; \
+    done
 
 RUN cabal update && \
     cabal install exe:cardano-db-sync --disable-test --install-method=copy \
