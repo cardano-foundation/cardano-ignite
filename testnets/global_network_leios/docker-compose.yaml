@@ -1,5 +1,11 @@
 ---
 
+# Benchmarking knobs, passed to every node through env_{na,eu,as}.base:
+# - TX_SUBMISSION_LOGIC_VERSION selects the tx-submission logic (1 or 2, default 1)
+#
+# Example:
+#   TX_SUBMISSION_LOGIC_VERSION=2 make up-all testnet=global_network_leios
+
 x-base: &base
   restart: unless-stopped
   cap_add:

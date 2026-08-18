@@ -137,6 +137,9 @@ testnets/%/.env.tmp: TESTNET
 	fi \
 	&& if [ "$${SHUTDOWN_ON_BLOCK+set}" = "set" ]; then \
 		echo "SHUTDOWN_ON_BLOCK=$${SHUTDOWN_ON_BLOCK}" >> testnets/$*/.env.tmp; \
+	fi \
+	&& if [ "$${TX_SUBMISSION_LOGIC_VERSION+set}" = "set" ]; then \
+		echo "TX_SUBMISSION_LOGIC_VERSION=$${TX_SUBMISSION_LOGIC_VERSION}" >> testnets/$*/.env.tmp; \
 	fi
 
 build: TESTNET prerequisites testnets/${testnet}/graph_nodes.sql testnets/${testnet}/coredns/example.zone testnets/${testnet}/prometheus/prometheus.yml testnets/${testnet}/prometheus/rules.yml ## Build testnet

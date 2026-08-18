@@ -45,3 +45,15 @@ Run with:
 make build testnet=global_network_leios
 make up-all testnet=global_network_leios
 ```
+
+## Benchmarking Knobs
+
+`TX_SUBMISSION_LOGIC_VERSION` picks the tx-submission logic (`1` or `2`,
+default `1`) for every node, via `env_{na,eu,as}.base`:
+
+```
+TX_SUBMISSION_LOGIC_VERSION=2 make up-all testnet=global_network_leios
+```
+
+Like `PROFILING` and `SHUTDOWN_ON_BLOCK`, it is recorded in `.env.tmp` when set,
+so the whole run keeps the same version even if containers are recreated.
