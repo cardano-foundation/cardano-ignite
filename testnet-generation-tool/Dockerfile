@@ -2,7 +2,7 @@ ARG BASE_IMAGE=cardano-ignite-base
 FROM ${BASE_IMAGE} AS testnet_builder
 
 ARG UV_VERSION="0.12.3"
-ARG TESTNET_GENERATION_TOOL_VERSION="v0.2.0"
+ARG TESTNET_GENERATION_TOOL_VERSION="0.2.0"
 # Must match the cardano-node binary version pinned in the
 # testnet-generation-tool release (libs/mainnet_env.py)
 ARG GENESIS_CARDANO_NODE_VERSION="10.2.1"
@@ -23,7 +23,6 @@ RUN install --directory --owner=root --group=root --mode=0755 /usr/local/src/uv
 RUN curl --proto '=https' --tlsv1.3 \
         --location https://github.com/astral-sh/uv/releases/download/${UV_VERSION}/uv-x86_64-unknown-linux-gnu.tar.gz \
         --output /usr/local/src/uv/uv-x86_64-unknown-linux-gnu.tar.gz
-
 RUN curl --proto '=https' --tlsv1.3 \
         --location https://github.com/astral-sh/uv/releases/download/${UV_VERSION}/uv-x86_64-unknown-linux-gnu.tar.gz.sha256 \
         --output /usr/local/src/uv/uv-x86_64-unknown-linux-gnu.tar.gz.sha256
@@ -32,15 +31,13 @@ WORKDIR /usr/local/src/uv
 RUN sha256sum --ignore-missing --check uv-x86_64-unknown-linux-gnu.tar.gz.sha256
 
 RUN tar --extract --gzip --file=/usr/local/src/uv/uv-x86_64-unknown-linux-gnu.tar.gz --directory=/usr/local/src/uv
-
 RUN chmod 0755 /usr/local/src/uv/uv-x86_64-unknown-linux-gnu/uv
-
-RUN ln -s /usr/local/src/uv/uv-x86_64-unknown-linux-gnu/uv /usr/local/bin/uv
+RUN ln -snf /usr/local/src/uv/uv-x86_64-unknown-linux-gnu/uv /usr/local/bin/uv
 
 # testnet-generation-tool
 
 WORKDIR /usr/local/src
-RUN git clone --depth 1 --branch ${TESTNET_GENERATION_TOOL_VERSION} https://github.com/cardano-foundation/testnet-generation-tool.git
+RUN git clone --depth 1 --branch v${TESTNET_GENERATION_TOOL_VERSION} https://github.com/cardano-foundation/testnet-generation-tool.git
 
 WORKDIR /usr/local/src/testnet-generation-tool
 RUN uv sync

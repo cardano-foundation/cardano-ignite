@@ -1,40 +1,4 @@
 ARG BASE_IMAGE=cardano-ignite-base
-FROM ${BASE_IMAGE} AS build
-
-ARG NODE_EXPORTER_VERSION="1.12.1"
-
-ENV TZ="UTC"
-RUN ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime && \
-    echo ${TZ} > /etc/timezone
-
-RUN apt update && \
-    apt install -y --no-install-recommends \
-        git && \
-    rm -rf /var/lib/apt/lists/*
-
-# node_exporter
-
-RUN install --directory --owner=root --group=root --mode=0755 /usr/local/src/node_exporter
-
-RUN curl --proto '=https' --tlsv1.3 \
-        --location https://github.com/prometheus/node_exporter/releases/download/v${NODE_EXPORTER_VERSION}/node_exporter-${NODE_EXPORTER_VERSION}.linux-amd64.tar.gz \
-        --output /usr/local/src/node_exporter/node_exporter-${NODE_EXPORTER_VERSION}.linux-amd64.tar.gz
-
-RUN curl --proto '=https' --tlsv1.3 \
-        --location https://github.com/prometheus/node_exporter/releases/download/v${NODE_EXPORTER_VERSION}/sha256sums.txt \
-        --output /usr/local/src/node_exporter/sha256sums.txt
-
-WORKDIR /usr/local/src/node_exporter
-RUN sha256sum --ignore-missing --check sha256sums.txt
-
-RUN tar --extract --gzip --file=/usr/local/src/node_exporter/node_exporter-${NODE_EXPORTER_VERSION}.linux-amd64.tar.gz --directory=/usr/local/src/node_exporter
-
-RUN chmod 0755 /usr/local/src/node_exporter/node_exporter-${NODE_EXPORTER_VERSION}.linux-amd64
-
-RUN ln -s /usr/local/src/node_exporter/node_exporter-${NODE_EXPORTER_VERSION}.linux-amd64/node_exporter /usr/local/bin/node_exporter
-
-#---------------------------------------------------------------------
-
 FROM ${BASE_IMAGE} AS main
 
 ENV TZ="UTC"
@@ -46,7 +10,7 @@ RUN apt update && \
         iptables && \
     rm -rf /var/lib/apt/lists/*
 
-COPY --from=build --chown=root:root /usr/local/bin/node_exporter /usr/local/bin/node_exporter
+# user and group
 
 RUN groupadd --gid 10000 cardano && \
     useradd --comment 'cardano' --create-home --gid 10000 --password '!' --shell '/bin/bash' --uid 10000 cardano

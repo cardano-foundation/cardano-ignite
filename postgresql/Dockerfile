@@ -1,8 +1,6 @@
 ARG BASE_IMAGE=cardano-ignite-base
 FROM ${BASE_IMAGE} AS build
 
-ARG PROCESS_EXPORTER_VERSION="0.8.7"
-
 ENV PGDATA="/opt/postgresql/db" \
     PGHOST="/opt/postgresql/db" \
     PGPORT="5432" \
@@ -43,27 +41,6 @@ RUN rm --force --recursive /run/postgresql && \
 
 RUN install --directory --owner=root --group=root --mode=0755 /var/local/postgresql && \
     install --directory --owner=postgres --group=postgres --mode=0750 /var/local/postgresql/data/17/main
-
-# process_exporter
-
-RUN install --directory --owner=root --group=root --mode=0755 /usr/local/src/process_exporter
-
-RUN curl --proto '=https' --tlsv1.3 \
-        --location https://github.com/ncabatoff/process-exporter/releases/download/v${PROCESS_EXPORTER_VERSION}/process-exporter-${PROCESS_EXPORTER_VERSION}.linux-amd64.tar.gz \
-        --output /usr/local/src/process_exporter/process-exporter-${PROCESS_EXPORTER_VERSION}.linux-amd64.tar.gz
-
-RUN curl --proto '=https' --tlsv1.3 \
-        --location https://github.com/ncabatoff/process-exporter/releases/download/v${PROCESS_EXPORTER_VERSION}/checksums.txt \
-        --output /usr/local/src/process_exporter/checksums.txt
-
-WORKDIR /usr/local/src/process_exporter
-RUN sha256sum --ignore-missing --check checksums.txt
-
-RUN tar --extract --gzip --file=/usr/local/src/process_exporter/process-exporter-${PROCESS_EXPORTER_VERSION}.linux-amd64.tar.gz --directory=/usr/local/src/process_exporter
-
-RUN chmod 0755 /usr/local/src/process_exporter/process-exporter-${PROCESS_EXPORTER_VERSION}.linux-amd64/process-exporter
-
-RUN ln -s /usr/local/src/process_exporter/process-exporter-${PROCESS_EXPORTER_VERSION}.linux-amd64/process-exporter /usr/local/bin/process_exporter
 
 RUN install --directory --owner=root --group=root --mode=0755 /opt/postgresql && \
     install --directory --owner=postgres --group=postgres --mode=0750 /opt/postgresql/db
