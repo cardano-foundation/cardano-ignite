@@ -54,7 +54,6 @@ RUN install --directory --owner=root --group=root --mode=0755 /usr/local/src/car
 RUN curl --proto '=https' --tlsv1.3 \
         --location https://github.com/IntersectMBO/cardano-node/releases/download/${DB_SYNTHESIZER_VERSION}/cardano-node-${DB_SYNTHESIZER_VERSION}-linux-amd64.tar.gz \
         --output /usr/local/src/cardano-node/cardano-node-${DB_SYNTHESIZER_VERSION}-linux-amd64.tar.gz
-
 RUN curl --proto '=https' --tlsv1.3 \
         --location https://github.com/IntersectMBO/cardano-node/releases/download/${DB_SYNTHESIZER_VERSION}/cardano-node-${DB_SYNTHESIZER_VERSION}-sha256sums.txt \
         --output /usr/local/src/cardano-node/cardano-node-${DB_SYNTHESIZER_VERSION}-sha256sums.txt
@@ -76,8 +75,12 @@ ENV TZ="UTC"
 RUN ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime && \
     echo ${TZ} > /etc/timezone
 
+# user and group
+
 RUN groupadd --gid 10000 cardano && \
     useradd --comment 'cardano' --create-home --gid 10000 --password '!' --shell '/bin/bash' --uid 10000 cardano
+
+# cardano-node
 
 COPY --from=testnet_builder --chown=cardano:cardano /tmp/testnet/pools /opt/cardano-node/pools
 COPY --from=testnet_builder --chown=cardano:cardano /tmp/testnet/utxos /opt/cardano-node/utxos
@@ -95,6 +98,7 @@ USER cardano
 CMD ["/cmd.sh"]
 
 #---------------------------------------------------------------------
+
 # Stock binary from the release archive. For testnets without amaru nodes;
 # supports PRE_EPOCHS > 0 without any Haskell build.
 
@@ -103,6 +107,7 @@ FROM light AS binary
 COPY --from=tarball --chown=root:root /usr/local/src/cardano-node/bin/db-synthesizer /usr/local/bin/db-synthesizer
 
 #---------------------------------------------------------------------
+
 # Fork binary with the amaru snapshot support. Default target so that a
 # build without an explicit target keeps the previous behaviour.
 
@@ -110,12 +115,18 @@ FROM light AS full
 
 USER root
 
+# libsodium
+
 COPY --from=build --chown=root:root /usr/local/lib/libsodium.so /usr/local/lib
 RUN ln -snf /usr/local/lib/libsodium.so /usr/local/lib/libsodium.so.23 && \
     ln -snf /usr/local/lib/libsodium.so /usr/local/lib/libsodium.so.23.3.0
 
+# secp256k1
+
 COPY --from=build --chown=root:root /usr/lib/libsecp256k1.so* /usr/local/lib/
 RUN ldconfig
+
+# db-synthesizer
 
 COPY --from=build --chown=root:root /usr/local/bin/db-synthesizer /usr/local/bin/db-synthesizer
 

@@ -4,13 +4,12 @@ ARG HASKELL_BUILDER_IMAGE=scratch
 
 FROM ${TESTNET_BUILDER_IMAGE} AS testnet_builder
 
+#---------------------------------------------------------------------
+
 FROM ${HASKELL_BUILDER_IMAGE} AS build
 
-ARG NODE_EXPORTER_VERSION="1.12.1"
-ARG PROCESS_EXPORTER_VERSION="0.8.7"
-
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
+RUN apt update && \
+    apt install -y --no-install-recommends \
         libclang-dev && \
     rm -rf /var/lib/apt/lists/*
 
@@ -43,23 +42,21 @@ RUN cabal update && \
 
 RUN strip --strip-unneeded /usr/local/bin/db-server
 
-# Install rustup
+# rustup
+
 RUN curl --proto '=https' --tlsv1.3 -sSf https://sh.rustup.rs | sh -s -- -y
 
+RUN ln -snf /root/.cargo/bin/cargo /usr/local/bin/cargo && \
+    ln -snf /root/.cargo/bin/rustc /usr/local/bin/rustc
 
-RUN ln -s /root/.cargo/bin/cargo /usr/local/bin/cargo && \
-    ln -s /root/.cargo/bin/rustc /usr/local/bin/rustc
-
-# Amaru node
+# amaru
 
 ARG AMARU_REF="17020694ec00b39668dd0d9e87902f94e99590fa"
 ARG AMARU_REPO="https://github.com/pragma-org/amaru.git"
 
-# Clone amaru.git repository
 WORKDIR /usr/local/src
 RUN git init amaru
 
-# Checkout amaru version
 WORKDIR /usr/local/src/amaru
 RUN git fetch --depth 1 ${AMARU_REPO} ${AMARU_REF} && \
     git checkout FETCH_HEAD && \
@@ -67,73 +64,16 @@ RUN git fetch --depth 1 ${AMARU_REPO} ${AMARU_REF} && \
 
 RUN cargo build --release
 
-# Verify that the binary starts
 RUN /usr/local/src/amaru/target/release/amaru --help
-
-# Create node_exporter source directory
-RUN install --directory --owner=root --group=root --mode=0755 /usr/local/src/node_exporter
-
-# Download node_exporter archive
-RUN curl --proto '=https' --tlsv1.3 \
-        --location https://github.com/prometheus/node_exporter/releases/download/v${NODE_EXPORTER_VERSION}/node_exporter-${NODE_EXPORTER_VERSION}.linux-amd64.tar.gz \
-        --output /usr/local/src/node_exporter/node_exporter-${NODE_EXPORTER_VERSION}.linux-amd64.tar.gz
-
-# Download node_exporter checksum
-RUN curl --proto '=https' --tlsv1.3 \
-        --location https://github.com/prometheus/node_exporter/releases/download/v${NODE_EXPORTER_VERSION}/sha256sums.txt \
-        --output /usr/local/src/node_exporter/sha256sums.txt
-
-# Verify node_exporter checksum
-WORKDIR /usr/local/src/node_exporter
-RUN sha256sum --ignore-missing --check sha256sums.txt
-
-# Unarchive node_exporter tarball
-RUN tar --extract --gzip --file=/usr/local/src/node_exporter/node_exporter-${NODE_EXPORTER_VERSION}.linux-amd64.tar.gz --directory=/usr/local/src/node_exporter
-
-# Make node_exporter executable
-RUN chmod 0755 /usr/local/src/node_exporter/node_exporter-${NODE_EXPORTER_VERSION}.linux-amd64
-
-# Create node_exporter symlink
-RUN ln -s /usr/local/src/node_exporter/node_exporter-${NODE_EXPORTER_VERSION}.linux-amd64/node_exporter /usr/local/bin/node_exporter
-
-
-# Create process_exporter source directory
-RUN install --directory --owner=root --group=root --mode=0755 /usr/local/src/process_exporter
-
-# Download process_exporter archive
-RUN curl --proto '=https' --tlsv1.3 \
-        --location https://github.com/ncabatoff/process-exporter/releases/download/v${PROCESS_EXPORTER_VERSION}/process-exporter-${PROCESS_EXPORTER_VERSION}.linux-amd64.tar.gz \
-        --output /usr/local/src/process_exporter/process-exporter-${PROCESS_EXPORTER_VERSION}.linux-amd64.tar.gz
-
-# Download process_exporter checksum
-RUN curl --proto '=https' --tlsv1.3 \
-        --location https://github.com/ncabatoff/process-exporter/releases/download/v${PROCESS_EXPORTER_VERSION}/checksums.txt \
-        --output /usr/local/src/process_exporter/checksums.txt
-
-# Verify process_exporter checksum
-WORKDIR /usr/local/src/process_exporter
-RUN sha256sum --ignore-missing --check checksums.txt
-
-# Unarchive process_exporter tarball
-RUN tar --extract --gzip --file=/usr/local/src/process_exporter/process-exporter-${PROCESS_EXPORTER_VERSION}.linux-amd64.tar.gz --directory=/usr/local/src/process_exporter
-
-# Make process_exporter executable
-RUN chmod 0755 /usr/local/src/process_exporter/process-exporter-${PROCESS_EXPORTER_VERSION}.linux-amd64/process-exporter
-
-# Create process_exporter symlink
-RUN ln -s /usr/local/src/process_exporter/process-exporter-${PROCESS_EXPORTER_VERSION}.linux-amd64/process-exporter /usr/local/bin/process_exporter
-
 
 #---------------------------------------------------------------------
 
 FROM ${BASE_IMAGE} AS main
 
-# Set time zone
 ENV TZ="UTC"
 RUN ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime && \
     echo ${TZ} > /etc/timezone
 
-# Install packages required in main stage
 RUN apt update && \
     apt install -y --no-install-recommends \
         doas \
@@ -141,36 +81,41 @@ RUN apt update && \
         postgresql-client && \
     rm -rf /var/lib/apt/lists/*
 
-# Copy binaries from build stage
+# amaru
+
 COPY --from=build --chown=root:root /usr/local/src/amaru/target/release/amaru /usr/local/bin/amaru
-COPY --from=build --chown=root:root /usr/local/bin/node_exporter /usr/local/bin/node_exporter
-COPY --from=build --chown=root:root /usr/local/bin/process_exporter /usr/local/bin/process_exporter
+
+# libsodium
 
 COPY --from=build --chown=root:root /usr/local/lib/libsodium.so /usr/local/lib
 RUN ln -snf /usr/local/lib/libsodium.so /usr/local/lib/libsodium.so.23 && \
     ln -snf /usr/local/lib/libsodium.so /usr/local/lib/libsodium.so.23.3.0
 
+# secp256k1
+
 COPY --from=build --chown=root:root /usr/lib/libsecp256k1.so* /usr/local/lib/
 RUN ldconfig
 
+# db-server
+
 COPY --from=build --chown=root:root /usr/local/bin/db-server /usr/local/bin/db-server
 
-# Create cardano group and user
+# user and group
+
 RUN groupadd --gid 10000 cardano && \
     useradd --comment 'cardano' --create-home --gid 10000 --password '!' --shell '/bin/bash' --uid 10000 cardano
 
-# Create cardano-node directories
+# cardano-node
+
 RUN install --directory --owner=root --group=root --mode=0755 /opt/cardano-node && \
     install --directory --owner=cardano --group=cardano --mode=0750 /opt/cardano-node/data && \
     install --directory --owner=cardano --group=cardano --mode=0750 /opt/cardano-node/data/db && \
     install --directory --owner=cardano --group=cardano --mode=0750 /opt/cardano-node/pools && \
     install --directory --owner=cardano --group=cardano --mode=0750 /opt/amaru
 
-# Copy pool config and key material
 COPY --from=testnet_builder --chown=cardano:cardano /tmp/testnet/pools /opt/cardano-node/pools
 COPY --from=testnet_builder --chown=cardano:cardano /tmp/testnet/utxos /opt/cardano-node/utxos
 
-# Permit cardano user to run commands 'ip' and 'tc' as root
 RUN echo 'permit setenv { PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin } :cardano' >> /etc/doas.conf
 RUN echo 'permit nopass cardano as root cmd ip' >> /etc/doas.conf
 RUN echo 'permit nopass cardano as root cmd tc' >> /etc/doas.conf
@@ -179,7 +124,6 @@ COPY cardano-node/scripts/*.sh /
 COPY scripts/node_routes.sh /
 RUN chmod 0755 /*.sh
 
-# Copy cmd.sh
 COPY amaru/cmd.sh /
 RUN chmod 0755 /cmd.sh
 

@@ -1,27 +1,21 @@
-# -------------------------------------------------
-#  Shared build environment for Cardano binaries
-# -------------------------------------------------
 ARG BASE_IMAGE=cardano-ignite-base
 FROM ${BASE_IMAGE} AS haskell-builder
 
-# ── Common ARGs (keep the defaults from the originals) ──
 ARG BLST_VERSION=0.3.14
+ARG BOOTSTRAP_HASKELL_CABAL_VERSION=3.14.2.0
+ARG BOOTSTRAP_HASKELL_GHCUP_VERSION=0.1.50.2
+ARG BOOTSTRAP_HASKELL_GHC_VERSION=9.6.7
 ARG JOBS=8
-# Full commit hashes: git fetch of an exact commit requires the full id.
 ARG LIBSODIUM_VERSION=dbb48cce5429cb6585c9034f002568964f1ce567
 ARG SECP256K1_VERSION=ac83be33d0956faf6b7f61a60ab524ef7d6a473a
-ARG BOOTSTRAP_HASKELL_CABAL_VERSION=3.14.2.0
-ARG BOOTSTRAP_HASKELL_GHC_VERSION=9.6.7
-ARG BOOTSTRAP_HASKELL_GHCUP_VERSION=0.1.50.2
+
 ENV TZ="UTC"
 
-# ── Timezone ──
 RUN ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime && \
     echo ${TZ} > /etc/timezone
 
-# ── Packages needed for all builds ──
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
+RUN apt update && \
+    apt install -y --no-install-recommends \
         autoconf \
         automake \
         build-essential \
@@ -43,7 +37,8 @@ RUN apt-get update && \
         zlib1g-dev && \
     rm -rf /var/lib/apt/lists/*
 
-# ── libsodium ──
+# libsodium
+
 WORKDIR /usr/local/src
 RUN git init libsodium && \
     cd libsodium && \
@@ -54,7 +49,8 @@ RUN git init libsodium && \
     make && make check && make install -j${JOBS} && \
     cd .. && rm -rf libsodium
 
-# ── secp256k1 ──
+# secp256k1
+
 WORKDIR /usr/local/src
 RUN git init secp256k1 && \
     cd secp256k1 && \
@@ -65,7 +61,8 @@ RUN git init secp256k1 && \
     make && make check && make install -j${JOBS} && \
     cd .. && rm -rf secp256k1
 
-# ── blst ──
+# blst
+
 WORKDIR /usr/local/src
 RUN git init blst && \
     cd blst && \
@@ -81,7 +78,8 @@ RUN git init blst && \
 ENV LD_LIBRARY_PATH="/usr/local/lib" \
     PKG_CONFIG_PATH="/usr/local/lib/pkgconfig"
 
-# ── GHCup (bootstrap Haskell toolchain) ──
+# ghcup
+
 RUN curl -L https://downloads.haskell.org/~ghcup/${BOOTSTRAP_HASKELL_GHCUP_VERSION}/x86_64-linux-ghcup-${BOOTSTRAP_HASKELL_GHCUP_VERSION} \
         -o /tmp/x86_64-linux-ghcup-${BOOTSTRAP_HASKELL_GHCUP_VERSION} && \
     curl -L https://downloads.haskell.org/~ghcup/${BOOTSTRAP_HASKELL_GHCUP_VERSION}/SHA256SUMS \
