@@ -24,6 +24,9 @@ variant B.
 | pXr3          | pXbp (private relay, no inter-pool edges)                      |
 | c1 .. c6      | two ring neighbours, plus one relay per pool                   |
 
+Private relays take client connections but no inter-pool edges, so they are a
+low-fan-in node carrying the same class of work as a public relay.
+
 Relay N of a pool connects to both relays of the other pool on its own
 continent, and to relay N of every pool on the other continent:
 
@@ -37,12 +40,13 @@ p2r2: p4r1 p4r2 | p1r2 p3r2        p4r2: p2r1 p2r2 | p1r2 p3r2
 Every edge is declared on both endpoints so either side can re-establish it
 after a restart.
 
-Clients keep the c1-c2-...-c6-c1 ring and add one relay per pool, alternating
-so each public relay carries three clients:
+Clients keep the c1-c2-...-c6-c1 ring and add one relay per pool, spread over
+all three relays so each carries two clients, one from each continent:
 
 ```
-c1, c3, c5 -> p1r1 p2r1 p3r1 p4r1
-c2, c4, c6 -> p1r2 p2r2 p3r2 p4r2
+c1 (EU), c6 (NA) -> p1r1 p2r1 p3r1 p4r1
+c2 (NA), c3 (EU) -> p1r2 p2r2 p3r2 p4r2
+c4 (EU), c5 (NA) -> p1r3 p2r3 p3r3 p4r3
 ```
 
 The tx-generator (c2) submits to c1 .. c6 rather than to relays, so every

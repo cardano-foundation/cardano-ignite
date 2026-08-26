@@ -8,7 +8,8 @@
 #                    both relays of the other pool on the same continent, and
 #                    relay N of every pool on the other continent
 # - privaterelay  -> its own bp
-# - client        -> its two ring neighbours and one relay per pool
+# - client        -> its two ring neighbours and one relay per pool, spread
+#                    over r1/r2/r3 so every relay carries two clients
 #
 # Continents: p1 and p3 are NA, p2 and p4 are EU.
 #
@@ -711,7 +712,7 @@ services:
       POOL_ID: "1"
       TYPE: client
       REGION: EU
-      EXTRA_LOCALROOTS: "c2.example:3001,c4.example:3001,p1r1.example:3001,p2r1.example:3001,p3r1.example:3001,p4r1.example:3001"
+      EXTRA_LOCALROOTS: "c2.example:3001,c4.example:3001,p1r2.example:3001,p2r2.example:3001,p3r2.example:3001,p4r2.example:3001"
       LEDGER_DB_BACKEND: "V2LSM"
     networks:
       net_eu:
@@ -730,7 +731,7 @@ services:
       POOL_ID: "1"
       TYPE: client
       REGION: EU
-      EXTRA_LOCALROOTS: "c3.example:3001,c5.example:3001,p1r2.example:3001,p2r2.example:3001,p3r2.example:3001,p4r2.example:3001"
+      EXTRA_LOCALROOTS: "c3.example:3001,c5.example:3001,p1r3.example:3001,p2r3.example:3001,p3r3.example:3001,p4r3.example:3001"
       LEDGER_DB_BACKEND: "V2LSM"
     networks:
       net_eu:
@@ -749,7 +750,7 @@ services:
       POOL_ID: "1"
       TYPE: client
       REGION: NA
-      EXTRA_LOCALROOTS: "c4.example:3001,c6.example:3001,p1r1.example:3001,p2r1.example:3001,p3r1.example:3001,p4r1.example:3001"
+      EXTRA_LOCALROOTS: "c4.example:3001,c6.example:3001,p1r3.example:3001,p2r3.example:3001,p3r3.example:3001,p4r3.example:3001"
       LEDGER_DB_BACKEND: "V2LSM"
     networks:
       net_na:
@@ -768,7 +769,7 @@ services:
       POOL_ID: "1"
       TYPE: client
       REGION: NA
-      EXTRA_LOCALROOTS: "c5.example:3001,c1.example:3001,p1r2.example:3001,p2r2.example:3001,p3r2.example:3001,p4r2.example:3001"
+      EXTRA_LOCALROOTS: "c5.example:3001,c1.example:3001,p1r1.example:3001,p2r1.example:3001,p3r1.example:3001,p4r1.example:3001"
       LEDGER_DB_BACKEND: "V2LSM"
     networks:
       net_na:
