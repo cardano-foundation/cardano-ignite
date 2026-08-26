@@ -226,7 +226,7 @@ bprelay_config_topology_json() {
     }
   ],
     "publicRoots": [],
-    "useLedgerAfterSlot": 0
+    "useLedgerAfterSlot": ${USE_LEDGER_AFTER_SLOT}
 }
 EOF
 
@@ -284,7 +284,7 @@ relay_config_topology_json() {
     }
   ],
   "publicRoots": [],
-  "useLedgerAfterSlot": 0
+  "useLedgerAfterSlot": ${USE_LEDGER_AFTER_SLOT}
 }
 EOF
 
@@ -318,7 +318,7 @@ EOF
     }
   ],
   "publicRoots": [],
-  "useLedgerAfterSlot": 0
+  "useLedgerAfterSlot": ${USE_LEDGER_AFTER_SLOT}
 }
 EOF
 
@@ -342,7 +342,7 @@ privaterelay_config_topology_json() {
     }
   ],
   "publicRoots": [],
-  "useLedgerAfterSlot": 0
+  "useLedgerAfterSlot": ${USE_LEDGER_AFTER_SLOT}
 }
 EOF
 
@@ -356,7 +356,7 @@ client_config_topology_json() {
   "localRoots": [
   ],
     "publicRoots": [],
-    "useLedgerAfterSlot": 0
+    "useLedgerAfterSlot": ${USE_LEDGER_AFTER_SLOT}
 }
 EOF
 }

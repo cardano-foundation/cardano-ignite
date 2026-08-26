@@ -73,6 +73,7 @@ the cardano-node version in use.
 |[global_network](./testnets/global_network/)                        |6 pools, 24 nodes          |Source          |Block producers and relays spread across simulated regions, mixed node versions.   |
 |[global_network_mixed_nodes](./testnets/global_network_mixed_nodes/)|6 pools, 24 nodes + 2 Amaru|Source          |Global topology with both cardano-node and Amaru, starts with 4 epochs of blocks.  |
 |[global_network_2c](./testnets/global_network_2c/)                  |4 pools, 16 nodes          |Source          |Reduced two-continent variant of global_network for A/B benchmarking, needs 8 cores.|
+|[global_network_2c_static](./testnets/global_network_2c_static/)    |4 pools, 16 nodes          |Source          |global_network_2c with a fully static topology: no peer sharing, no ledger peers.  |
 
 ## Requirements
 
