@@ -1,0 +1,77 @@
+--- # Required Testnet Parameters
+poolCount: 4
+poolCost: 340000000
+poolMargin: 0.0
+poolPledge: 0
+delegatedSupply: 600000000000000
+systemStart: 'now'
+systemStartDelay: 5
+networkMagic: 42
+testnetDomain: example
+
+--- # Optional Byron Genesis Overide
+protocolConsts:
+  k: 90
+
+--- # Optional Shelley Genesis Overide
+slotLength: 1
+epochLength: 17280
+securityParam: 90
+maxLovelaceSupply: 45000000000000000
+protocolParams:
+  maxBlockBodySize: 90112
+  decentralisationParam: 0
+  protocolVersion:
+    major: 10
+    minor: 0
+
+--- # Optional Alonzo Genesis Overide
+
+--- # Optional Conway Genesis Overide
+
+--- # Optional Node Config Overide
+ExperimentalHardForksEnabled: false
+ExperimentalProtocolsEnabled: true
+LastKnownBlockVersion-Alt: 0
+LastKnownBlockVersion-Major: 6
+LastKnownBlockVersion-Minor: 0
+MaxConcurrencyBulkSync: 2
+MaxConcurrencyDeadline: 4
+MaxKnownMajorProtocolVersion: 2
+PeerSharing: false
+RequiresNetworkMagic: "RequiresMagic"
+# Every peer is a local root, so the targets have to cover all of them: 6 on a
+# public relay (own bp, sibling relay, four inter-pool relays) and 6 on a client
+# (two ring neighbours, one relay per pool). The big ledger peer targets are 0
+# because ledger peers are disabled (useLedgerAfterSlot -1).
+SyncTargetNumberOfActivePeers: 8
+SyncTargetNumberOfEstablishedPeers: 8
+SyncTargetNumberOfKnownPeers: 8
+SyncTargetNumberOfRootPeers: 8
+TargetNumberOfActiveBigLedgerPeers: 0
+TargetNumberOfActivePeers: 8
+TargetNumberOfEstablishedBigLedgerPeers: 0
+TargetNumberOfEstablishedPeers: 8
+TargetNumberOfKnownBigLedgerPeers: 0
+TargetNumberOfKnownPeers: 8
+TargetNumberOfRootPeers: 8
+TestAllegraHardForkAtEpoch: 0
+TestAlonzoHardForkAtEpoch: 0
+TestBabbageHardForkAtEpoch: 0
+TestConwayHardForkAtEpoch: 0
+TestMaryHardForkAtEpoch: 0
+TestShelleyHardForkAtEpoch: 0
+TurnOnLogMetrics: true
+TraceOptions:
+  Mempool:
+    severity: Info
+  BlockFetch.Client:
+    severity: Info
+  ChainSync.Client:
+    severity: Info
+  Net.InboundGovernor:
+    severity: Info
+  Net.PeerSelection.Actions:
+    severity: Info
+  Net.Server:
+    severity: Info
