@@ -20,18 +20,27 @@ x-cardano_node_leios: &cardano_node_leios
     context: "../../"
     dockerfile: "cardano-node/Dockerfile.source"
     args:
-      # Leios node: IntersectMBO/cardano-node @ origin/leios-prototype (== local 11.0.1.164)
-      CARDANO_NODE_REF: "db5373ea6a6f79b398b468d2e04ce43eafcf90d0"
+      # Leios node: IntersectMBO/cardano-node @ leios-prototype (commit 8c44d1454 ==
+      # 11.1.0.164), the rev pinned by ouroboros-leios tag prototype-2026w38a.
+      CARDANO_NODE_REF: "8c44d14542f41e96b657d013c6e183bcee9dfd85"
       # Leios CLI pinned by this node's cabal.project (IntersectMBO/cardano-cli leios-prototype)
       CARDANO_CLI_REPO: "https://github.com/IntersectMBO/cardano-cli.git"
-      CARDANO_CLI_REF: "a90a9637235a8f0e14a133bc03d87d8ee2b8a957"
-      # tx-centrifuge is built from a SEPARATE checkout of the leios tx-generator branch
-      # bench/leios (the only branch shipping bench/tx-centrifuge; the ouroboros-leios flake
-      # tracks "latest bench/leios"). The node stays on CARDANO_NODE_REF above.
-      TX_CENTRIFUGE_REF: "bench/leios"
+      CARDANO_CLI_REF: "b8c7166c14504faa72b9162c1d23e1ab2b1aec25"
+      # tx-centrifuge no longer exists (upstream replaced it with
+      # bench/tx-firehose); this testnet runs the legacy tx-generator.
+      TX_CENTRIFUGE_REF: ""
       TESTNET_BUILDER_IMAGE: ${TESTNET_BUILDER_IMAGE}
       HASKELL_BUILDER_IMAGE: ${HASKELL_BUILDER_IMAGE}
       PROFILING: ${PROFILING:-}
+
+# Build args for this testnet's testnet_builder image ('make build' passes them
+# to testnet-generation-tool/Dockerfile). Genesis is generated with the Leios
+# cardano-cli so every pool gets a BLS voting key registered as blsKey.
+x-testnet_builder:
+  args:
+    TESTNET_GENERATION_TOOL_VERSION: "karknu/leios"
+    GENESIS_CARDANO_NODE_URL: "https://github.com/input-output-hk/ouroboros-leios/releases/download/prototype-2026w38a/cardano-node-leios-x86_64-linux.tar.gz"
+    GENESIS_CARDANO_NODE_SHA256_URL: "https://github.com/input-output-hk/ouroboros-leios/releases/download/prototype-2026w38a/cardano-node-leios-x86_64-linux.sha256"
 
 x-env: &env
   POOL_ID: "0" # Placeholder required for override
@@ -135,13 +144,9 @@ services:
     environment:
       POOL_ID: "1"
       TYPE: "txg"
-      # Use tx-centrifuge (Leios load generator) instead of the legacy tx-generator.
-      TX_GEN_MODE: "centrifuge"
+      TX_GEN_MODE: "plain"
       TPS: "50"
-      TX_GENERATOR_TARGETS: "p1.example,p2.example,p3.example"
       NETWORK_MAGIC: "42"
-      # 2 outputs/tx so on_pull recycle grows the UTxO pool -> parallelism -> reaches TPS.
-      CENTRIFUGE_OUTPUTS_PER_TX: "2"
       LEDGER_DB_BACKEND: "V2LSM"
       SYSTEM_START: ${SYSTEM_START:-}
     profiles: [build, optional]
@@ -161,8 +166,8 @@ services:
       - "${PSQL_HOST:-127.0.0.1}:${PSQL_PORT:-5432}:5432"
     profiles: [build, core]
 
-  # Leios/Dijkstra-aware cardano-db-sync, built from source (leios-prototype-2026w26,
-  # the tag whose consensus/ledger pins match the Leios node).
+  # Leios/Dijkstra-aware cardano-db-sync, built from source (leios-w36 head, built
+  # against the prototype-2026w36 node; w38a has no wire-format change since w36).
   # Distinct image tag so it does not clobber the shared binary `cardano-db-sync:latest`
   # other testnets use.
   dbsync:
@@ -179,7 +184,7 @@ services:
       context: "../../"
       dockerfile: "cardano-db-sync/Dockerfile.source"
       args:
-        CARDANO_DB_SYNC_REF: "leios-prototype-2026w26"
+        CARDANO_DB_SYNC_REF: "e48dcb6befa30cc2991fe78916b214a38e3a98b8"
         HASKELL_BUILDER_IMAGE: ${HASKELL_BUILDER_IMAGE}
     depends_on:
       db:

@@ -43,13 +43,9 @@ LastKnownBlockVersion-Minor: 1
 MaxConcurrencyBulkSync: 2
 MaxConcurrencyDeadline: 4
 MaxKnownMajorProtocolVersion: 2
-# Official Leios testnet mempool override (~512 kB).
-MempoolCapacityBytesOverride: 500000
-# SQLite store for Leios IBs/EBs/votes. Official config uses relative "leios.db";
-# absolute path here so it lands in the writable data dir under the container.
+# SQLite store for Leios IBs/EBs/votes.
 LeiosDbConfig:
   Backend: SQLite
-  Filepath: /opt/cardano-node/data/db/leios.db
 PeerSharing: true
 RequiresNetworkMagic: "RequiresMagic"
 TargetNumberOfActiveBigLedgerPeers: 2

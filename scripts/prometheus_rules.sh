@@ -5,9 +5,11 @@
 # Currently emits:
 #   mempool_capacity_bytes
 #     - MempoolCapacityBytesOverride if set in testnet.yaml
-#     - else 2 * (maxBlockBodySize - fixedBlockBodyOverhead)
+#     - else 2 * (maxBlockBodySize - fixedBlockBodyOverhead + maxEndorserBlockTxsSize)
 #       where fixedBlockBodyOverhead = 1024 (see
-#       ouroboros-consensus-cardano/.../Shelley/Ledger/Mempool.hs)
+#       ouroboros-consensus-cardano/.../Shelley/Ledger/Mempool.hs) and
+#       maxEndorserBlockTxsSize only counts for testnets that fork to Dijkstra
+#       (see ouroboros-consensus/.../Mempool/Capacity.hs)
 
 set -o errexit
 set -o pipefail
@@ -25,12 +27,16 @@ if [ ! -f "$TESTNET_YAML" ]; then
 fi
 
 FIXED_BLOCK_BODY_OVERHEAD=1024
+# Dijkstra genesis default of the testnet-generation-tool
+DEFAULT_MAX_EB_TXS_SIZE=1000000
 
 # testnet.yaml is a multi-document YAML; the protocolParams and the
 # node-config-override doc each live in their own document. Walk all docs
 # and pick the first non-null value for each field.
 MAX_BLOCK_BODY_SIZE="$(yq ea -N '[.. | .maxBlockBodySize? | select(. != null)] | .[0]' "$TESTNET_YAML")"
 MEMPOOL_OVERRIDE="$(yq ea -N '[.. | .MempoolCapacityBytesOverride? | select(. != null)] | .[0]' "$TESTNET_YAML")"
+DIJKSTRA_FORK="$(yq ea -N '[.. | .TestDijkstraHardForkAtEpoch? | select(. != null)] | .[0]' "$TESTNET_YAML")"
+MAX_EB_TXS_SIZE="$(yq ea -N '[.. | .maxEndorserBlockTxsSize? | select(. != null)] | .[0]' "$TESTNET_YAML")"
 
 if [ -z "$MAX_BLOCK_BODY_SIZE" ] || [ "$MAX_BLOCK_BODY_SIZE" = "null" ]; then
     echo "Error: maxBlockBodySize not found in $TESTNET_YAML" >&2
@@ -40,6 +46,12 @@ fi
 if [ -n "$MEMPOOL_OVERRIDE" ] && [ "$MEMPOOL_OVERRIDE" != "null" ]; then
     MEMPOOL_CAPACITY_BYTES="$MEMPOOL_OVERRIDE"
     SOURCE="MempoolCapacityBytesOverride"
+elif [ -n "$DIJKSTRA_FORK" ] && [ "$DIJKSTRA_FORK" != "null" ]; then
+    if [ -z "$MAX_EB_TXS_SIZE" ] || [ "$MAX_EB_TXS_SIZE" = "null" ]; then
+        MAX_EB_TXS_SIZE="$DEFAULT_MAX_EB_TXS_SIZE"
+    fi
+    MEMPOOL_CAPACITY_BYTES=$(( 2 * (MAX_BLOCK_BODY_SIZE - FIXED_BLOCK_BODY_OVERHEAD + MAX_EB_TXS_SIZE) ))
+    SOURCE="2 * (${MAX_BLOCK_BODY_SIZE} - ${FIXED_BLOCK_BODY_OVERHEAD} + ${MAX_EB_TXS_SIZE})"
 else
     MEMPOOL_CAPACITY_BYTES=$(( 2 * (MAX_BLOCK_BODY_SIZE - FIXED_BLOCK_BODY_OVERHEAD) ))
     SOURCE="2 * (${MAX_BLOCK_BODY_SIZE} - ${FIXED_BLOCK_BODY_OVERHEAD})"
