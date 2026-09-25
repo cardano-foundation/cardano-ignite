@@ -12,7 +12,7 @@ All components track the revisions pinned by the `prototype-2026w38a` tag of
 ## Cardano-Node
 
 - **Version**: 11.1.0.164 (Leios)
-- **Branch**: leios-prototype (8c44d1454)
+- **Branch**: karknu/cdf_leios (325d075a6): leios-prototype 8c44d1454 plus the block fetch CDF fix
 - **Binary/Source**: Source
 
 ## Cardano-CLI

@@ -28,10 +28,10 @@ x-cardano_node_leios: &cardano_node_leios
     context: "../../"
     dockerfile: "cardano-node/Dockerfile.source"
     args:
-      # All nodes run the Leios node: IntersectMBO/cardano-node @ leios-prototype
-      # (commit 8c44d1454 == 11.1.0.164), the rev pinned by ouroboros-leios
-      # tag prototype-2026w38a.
-      CARDANO_NODE_REF: "8c44d14542f41e96b657d013c6e183bcee9dfd85"
+      # All nodes run the Leios node: IntersectMBO/cardano-node @ karknu/cdf_leios
+      # (commit 325d075a6 == 11.1.0.164): the rev pinned by ouroboros-leios tag
+      # prototype-2026w38a (8c44d1454) plus the block fetch CDF fix.
+      CARDANO_NODE_REF: "325d075a62bb3667e3134638e68a5fd1b3f62bd7"
       # Leios CLI pinned by this node's cabal.project.
       CARDANO_CLI_REPO: "https://github.com/IntersectMBO/cardano-cli.git"
       CARDANO_CLI_REF: "b8c7166c14504faa72b9162c1d23e1ab2b1aec25"

@@ -27,7 +27,12 @@ protocolParams:
 
 --- # Optional Alonzo Genesis Overide
 
---- # Optional Conway Genesis Overide
+--- # Optional Conway / Dijkstra Genesis Overide
+# genesis-cli.py merges this document into BOTH conway-genesis.json and
+# dijkstra-genesis.json. The Leios EB tx budget lives in the Dijkstra genesis;
+# the tool's 1 MB default is too large to handle, so cap EBs at 256 KiB.
+# ConwayGenesis ignores the extra key.
+maxEndorserBlockTxsSize: 262144
 
 --- # Optional Node Config Overide
 # Leios runs in the Dijkstra era. This doc mirrors the Leios node config from
@@ -74,6 +79,19 @@ TurnOnLogMetrics: true
 TraceOptions:
   Mempool:
     severity: Info
+  # Silence drops only the log lines; these namespaces' metrics are still exported.
+  Mempool.AddedTx:
+    severity: Silence
+  Forge.Loop.StartLeadershipCheck:
+    severity: Silence
+  Forge.Loop.NodeNotLeader:
+    severity: Silence
+  Forge.StateInfo:
+    severity: Silence
+  LeiosNotify.Remote.Send.RequestNext:
+    severity: Silence
+  LeiosNotify.Remote.Receive.RequestNext:
+    severity: Silence
   BlockFetch.Client:
     severity: Info
   ChainSync.Client:
