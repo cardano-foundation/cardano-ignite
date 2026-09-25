@@ -35,7 +35,10 @@ All components track the revisions pinned by the `prototype-2026w38a` tag of
 
 - **Pools**: 6 (each: 1 block producer + 2 relays + 1 private relay)
 - **Regions**: NA, EU, AS (macvlan VLANs + per-region gateways)
-- **Load**: tx-generator (`c2`, `optional` profile) -> each pool's private relay (`pNr3`)
+- **Load**: one tx generator per region (`c2` NA, `c3` EU, `c4` AS, `optional` profile),
+  each sending a third of the load. In `plain` mode each submits directly to its
+  region's private relays (`pNr3`); in `firehose` mode it submits to its own node
+  and reaches the relays via `EXTRA_LOCALROOTS`.
 - **Voting**: each pool gets a BLS key registered as `blsKey` in the Shelley
   genesis; block producers run with `--shelley-bls-key`
 
@@ -47,6 +50,18 @@ make up-all testnet=global_network_leios
 ```
 
 ## Benchmarking Knobs
+
+`TX_GEN_MODE` picks the load generator for `c2`–`c4`: `plain` (default, legacy
+tx-generator at a fixed rate) or `firehose` (tx-firehose cycling through
+`FIREHOSE_PHASES`: three 20 min phases at 3/10/20 tps per generator, the last sized
+to overload the EBs with half of them discarded, so the mempools fill). EBs are capped at 256 KiB by
+`maxEndorserBlockTxsSize` in `testnet.yaml` (the tool's 1 MB default is too large
+to handle). tx-firehose tags each generator's txs with a metadata colour:
+`c2` `ff0000`, `c3` `00c000`, `c4` `0060ff`:
+
+```
+TX_GEN_MODE=firehose make up-all testnet=global_network_leios
+```
 
 `TX_SUBMISSION_LOGIC_VERSION` picks the tx-submission logic (`1` or `2`,
 default `1`) for every node, via `env_{na,eu,as}.base`:

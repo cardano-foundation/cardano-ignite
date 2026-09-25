@@ -428,10 +428,13 @@ canary_tx() {
 
 tx_generator() {
     # TX_GEN_MODE selects the load generator: "centrifuge" -> tx-centrifuge,
-    # anything else (default) -> the legacy tx-generator.
+    # "firehose" -> tx-firehose, anything else (default) -> the legacy tx-generator.
     case "${TX_GEN_MODE,,}" in
         centrifuge)
             /tx-centrifuge.sh
+            ;;
+        firehose)
+            /tx-firehose.sh
             ;;
         *)
             /tx-generator.sh >/dev/null 2>&1

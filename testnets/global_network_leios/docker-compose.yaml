@@ -51,6 +51,19 @@ x-testnet_builder:
     GENESIS_CARDANO_NODE_URL: "https://github.com/input-output-hk/ouroboros-leios/releases/download/prototype-2026w38a/cardano-node-leios-x86_64-linux.tar.gz"
     GENESIS_CARDANO_NODE_SHA256_URL: "https://github.com/input-output-hk/ouroboros-leios/releases/download/prototype-2026w38a/cardano-node-leios-x86_64-linux.sha256"
 
+# Shared by the tx generators c2/c3/c4; rates are per generator (a third of the total).
+# TX_GEN_MODE=firehose runs tx-firehose through FIREHOSE_PHASES ("seconds:tps"):
+# three 20 min phases at 3/10/20 tps per generator; the last overloads the EBs,
+# half discarded, so the mempools fill (EBs are capped at 256 KiB via testnet.yaml).
+x-txg_env: &txg_env
+  TYPE: "txg"
+  TX_GEN_MODE: ${TX_GEN_MODE:-plain}
+  TPS: "16.7"
+  FIREHOSE_PHASES: "1200:3 1200:10 1200:20"
+  NETWORK_MAGIC: "42"
+  LEDGER_DB_BACKEND: "V2LSM"
+  SYSTEM_START: ${SYSTEM_START:-}
+
 x-base_eu: &base_eu
   <<: *base
   env_file:
@@ -852,7 +865,8 @@ services:
         ipv4_address: 172.16.3.4
     profiles: [build, core, eu]
 
-  # TX generator 1
+  # TX generators, one per region. Each spends its own pool's genesis fund and
+  # sends a third of the total load into its region's private relays.
   c2:
     <<: [*base_na, *cardano_node_leios]
     container_name: c2
@@ -861,22 +875,53 @@ services:
       - c2:/opt/cardano-node
       - synth:/opt/synth:ro
     environment:
+      <<: *txg_env
       POOL_ID: "1"
-      TYPE: "txg"
-      TX_GEN_MODE: "plain"
-      TPS: "50"
-      # Submit to each pool's PRIVATE relay (r3) across all regions, so every pool sees
-      # load and forges endorser blocks; cross-region targets route via the gateways.
-      # NOTE: the legacy tx-generator parses targetNodes.addr as a literal IPv4 (no DNS),
-      # so these must be the private relays' STATIC IPs (tx-centrifuge took pNr3.example names).
-      TX_GENERATOR_TARGETS: "172.16.1.104,172.16.3.104,172.16.4.104,172.16.3.114,172.16.1.124,172.16.3.124"
-      NETWORK_MAGIC: "42"
-      LEDGER_DB_BACKEND: "V2LSM"
-      SYSTEM_START: ${SYSTEM_START:-}
+      FIREHOSE_COLOR: "ff0000"
+      # The legacy tx-generator parses targetNodes.addr as a literal IPv4 (no DNS),
+      # so these must be the private relays' STATIC IPs.
+      TX_GENERATOR_TARGETS: "172.16.1.104,172.16.1.124"
+      EXTRA_LOCALROOTS: "p1r3.example:3001,p5r3.example:3001"
     networks:
       net_na:
         ipv4_address: 172.16.1.12
     profiles: [build, na, optional, tx-generators]
+
+  c3:
+    <<: [*base_eu, *cardano_node_leios]
+    container_name: c3
+    hostname: c3.example
+    volumes:
+      - c3:/opt/cardano-node
+      - synth:/opt/synth:ro
+    environment:
+      <<: *txg_env
+      POOL_ID: "2"
+      FIREHOSE_COLOR: "00c000"
+      TX_GENERATOR_TARGETS: "172.16.3.104,172.16.3.114,172.16.3.124"
+      EXTRA_LOCALROOTS: "p2r3.example:3001,p4r3.example:3001,p6r3.example:3001"
+    networks:
+      net_eu:
+        ipv4_address: 172.16.3.14
+    profiles: [build, eu, optional, tx-generators]
+
+  c4:
+    <<: [*base_as, *cardano_node_leios]
+    container_name: c4
+    hostname: c4.example
+    volumes:
+      - c4:/opt/cardano-node
+      - synth:/opt/synth:ro
+    environment:
+      <<: *txg_env
+      POOL_ID: "3"
+      FIREHOSE_COLOR: "0060ff"
+      TX_GENERATOR_TARGETS: "172.16.4.104"
+      EXTRA_LOCALROOTS: "p3r3.example:3001"
+    networks:
+      net_as:
+        ipv4_address: 172.16.4.14
+    profiles: [build, as, optional, tx-generators]
 
   # PostgreSQL Database
   db:
@@ -1054,6 +1099,8 @@ volumes:
   p6r3:
   c1:
   c2:
+  c3:
+  c4:
   db:
   dbsync:
   prometheus:

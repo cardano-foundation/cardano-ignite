@@ -140,6 +140,9 @@ testnets/%/.env.tmp: TESTNET
 	fi \
 	&& if [ "$${TX_SUBMISSION_LOGIC_VERSION+set}" = "set" ]; then \
 		echo "TX_SUBMISSION_LOGIC_VERSION=$${TX_SUBMISSION_LOGIC_VERSION}" >> testnets/$*/.env.tmp; \
+	fi \
+	&& if [ "$${TX_GEN_MODE+set}" = "set" ]; then \
+		echo "TX_GEN_MODE=$${TX_GEN_MODE}" >> testnets/$*/.env.tmp; \
 	fi
 
 build: TESTNET prerequisites testnets/${testnet}/graph_nodes.sql testnets/${testnet}/coredns/example.zone testnets/${testnet}/prometheus/prometheus.yml testnets/${testnet}/prometheus/rules.yml ## Build testnet
