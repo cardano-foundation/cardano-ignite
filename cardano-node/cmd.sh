@@ -26,6 +26,7 @@ SYSTEM_START="${SYSTEM_START:-$(date -d "@$(( ( $(date +%s) / 180 ) * 180 ))" +%
 TYPE="${TYPE:-bprelay}"
 USE_LEDGER_AFTER_SLOT="${USE_LEDGER_AFTER_SLOT:-0}"
 TX_SUBMISSION_LOGIC_VERSION="${TX_SUBMISSION_LOGIC_VERSION:-1}"
+MEMPOOL_MONITOR_INTERVAL="${MEMPOOL_MONITOR_INTERVAL:-}"
 
 # Configuration files
 BYRON_GENESIS_JSON="${BYRON_GENESIS_JSON:-/opt/cardano-node/pools/${POOL_ID}/configs/byron-genesis.json}"
@@ -453,6 +454,10 @@ EOF
     chmod 0600 "${PGPASS}"
 }
 
+mempool_monitor() {
+    /mempool-monitor.sh
+}
+
 start_node_exporter() {
     node_exporter >/dev/null 2>&1
 }
@@ -538,6 +543,9 @@ main() {
     fi
     if [ "${TYPE,,}" = "txg" ]; then
 	tx_generator &
+    fi
+    if [ -n "${MEMPOOL_MONITOR_INTERVAL}" ] && [ "${MEMPOOL_MONITOR_INTERVAL}" != "0" ]; then
+        mempool_monitor &
     fi
     /node_routes.sh
     start_node_exporter &

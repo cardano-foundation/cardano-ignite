@@ -122,6 +122,16 @@ RUN if [ -d ../bench/tx-firehose ]; then \
         > /usr/local/bin/tx-firehose && chmod 0755 /usr/local/bin/tx-firehose ; \
     fi
 
+# mempool-monitor (tallies a node's mempool by tx-firehose colour). Only shipped
+# by Leios cardano-node revs; other revs get a stub.
+RUN if [ -d ../bench/mempool-monitor ]; then \
+      cabal install exe:mempool-monitor --disable-test --install-method=copy \
+        --installdir=/usr/local/bin --overwrite-policy=always ; \
+    else \
+      printf '#!/bin/sh\necho "mempool-monitor not built (not in this cardano-node rev)" >&2\nexit 127\n' \
+        > /usr/local/bin/mempool-monitor && chmod 0755 /usr/local/bin/mempool-monitor ; \
+    fi
+
 # tx-centrifuge (Leios load generator). Not shipped by every cardano-node rev, so build it
 # from a SEPARATE checkout when TX_CENTRIFUGE_REF is set (a rev that has bench/tx-centrifuge);
 # otherwise install a stub. Default empty => other source testnets get the stub (no extra build).
@@ -203,6 +213,7 @@ COPY --from=build --chown=root:root /usr/local/bin/cardano-node /usr/local/bin/c
 COPY --from=build --chown=root:root /usr/local/bin/tx-generator /usr/local/bin/tx-generator
 COPY --from=build --chown=root:root /usr/local/bin/tx-centrifuge /usr/local/bin/tx-centrifuge
 COPY --from=build --chown=root:root /usr/local/bin/tx-firehose /usr/local/bin/tx-firehose
+COPY --from=build --chown=root:root /usr/local/bin/mempool-monitor /usr/local/bin/mempool-monitor
 COPY --from=build --chown=root:root /usr/local/bin/node_exporter /usr/local/bin/node_exporter
 COPY --from=build --chown=root:root /usr/local/bin/process_exporter /usr/local/bin/process_exporter
 

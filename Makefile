@@ -1,5 +1,5 @@
-.PHONY: all block blockperf build canary check clean dbsync down ebperf example_zone help node_graph pools prerequisites prometheus_target query TESTNET up up-all validate yaci
-.SILENT: all block blockperf build canary check dbsync down ebperf pools prerequisites query up up-all validate yaci
+.PHONY: all block blockperf build canary check clean dbsync down ebperf example_zone help mempool node_graph pools prerequisites prometheus_target query TESTNET up up-all validate yaci
+.SILENT: all block blockperf build canary check dbsync down ebperf mempool pools prerequisites query up up-all validate yaci
 
 # Required for builds on OSX ARM
 export DOCKER_DEFAULT_PLATFORM?=linux/amd64
@@ -51,6 +51,8 @@ help:
 	@printf "  \033[34m%-30s\033[0m %s\n" GRAFANA_HOST/GRAFANA_PORT "Grafana bind address and port (Example: GRAFANA_PORT=3001)"
 	@printf "  \033[34m%-30s\033[0m %s\n" HOST_INTERFACE "Parent network interface for the testnet networks (Example: HOST_INTERFACE=dummy0)"
 	@printf "  \033[34m%-30s\033[0m %s\n" LOKI_HOST/LOKI_PORT "Loki bind address and port (Example: LOKI_PORT=3101)"
+	@printf "  \033[34m%-30s\033[0m %s\n" MEMPOOL_REFRESH "Repaint 'make mempool' every N seconds (Example: MEMPOOL_REFRESH=2)"
+	@printf "  \033[34m%-30s\033[0m %s\n" MEMPOOL_WINDOW "Seconds of snapshots 'make mempool' considers; default twice the snapshot interval (Example: MEMPOOL_WINDOW=300)"
 	@printf "  \033[34m%-30s\033[0m %s\n" NO_INTERPOOL_LOCALROOTS "Do not add other pools to localRoots, rely on P2P discovery (Example: NO_INTERPOOL_LOCALROOTS=true)"
 	@printf "  \033[34m%-30s\033[0m %s\n" PRE_EPOCHS "Number of epochs of blocks to synthesize before the nodes start (Example: PRE_EPOCHS=4)"
 	@printf "  \033[34m%-30s\033[0m %s\n" PROFILING "Set to enable GHC profiling when building cardano-node (Example: PROFILING=1)"
@@ -69,6 +71,7 @@ help:
 	@echo "    make check"
 	@echo "    make dbsync"
 	@echo "    make ebperf"
+	@echo "    make mempool"
 	@echo "    make pools"
 	@echo "    make query testnet=simple_network_binary"
 	@echo "    make status"
@@ -143,6 +146,9 @@ testnets/%/.env.tmp: TESTNET
 	fi \
 	&& if [ "$${TX_GEN_MODE+set}" = "set" ]; then \
 		echo "TX_GEN_MODE=$${TX_GEN_MODE}" >> testnets/$*/.env.tmp; \
+	fi \
+	&& if [ "$${MEMPOOL_MONITOR_INTERVAL+set}" = "set" ]; then \
+		echo "MEMPOOL_MONITOR_INTERVAL=$${MEMPOOL_MONITOR_INTERVAL}" >> testnets/$*/.env.tmp; \
 	fi
 
 build: TESTNET prerequisites testnets/${testnet}/graph_nodes.sql testnets/${testnet}/coredns/example.zone testnets/${testnet}/prometheus/prometheus.yml testnets/${testnet}/prometheus/rules.yml ## Build testnet
@@ -337,6 +343,9 @@ ebperf: ## Show endorser block statistics, overall and per region (Leios testnet
 	echo
 	docker exec -ti sidecar /usr/bin/psql --host db.example --dbname sidecar --user sidecar --command="SELECT COUNT(DISTINCT eb_hash) AS ebs, COUNT(*) AS adoptions, ROUND(AVG(delay)::numeric,3) AS mean, ROUND(MIN(delay)::numeric,3) AS min, ROUND((PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY delay))::numeric,3) AS p25, ROUND((PERCENTILE_CONT(0.50) WITHIN GROUP (ORDER BY delay))::numeric,3) AS p50, ROUND((PERCENTILE_CONT(0.90) WITHIN GROUP (ORDER BY delay))::numeric,3) AS p90, ROUND((PERCENTILE_CONT(0.99) WITHIN GROUP (ORDER BY delay))::numeric,3) AS p99, ROUND(MAX(delay)::numeric,3) AS max FROM eb_adoption;" --command="SELECT region, COUNT(DISTINCT eb_hash) AS ebs, COUNT(*) AS adoptions, ROUND(AVG(delay)::numeric,3) AS mean, ROUND(MIN(delay)::numeric,3) AS min, ROUND((PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY delay))::numeric,3) AS p25, ROUND((PERCENTILE_CONT(0.50) WITHIN GROUP (ORDER BY delay))::numeric,3) AS p50, ROUND((PERCENTILE_CONT(0.90) WITHIN GROUP (ORDER BY delay))::numeric,3) AS p90, ROUND((PERCENTILE_CONT(0.99) WITHIN GROUP (ORDER BY delay))::numeric,3) AS p99, ROUND(MAX(delay)::numeric,3) AS max FROM eb_adoption GROUP BY region ORDER BY region;" --command="SELECT COUNT(DISTINCT eb_hash) AS ebs, COUNT(*) AS certifications, ROUND(AVG(latency_slots)::numeric,1) AS mean, MIN(latency_slots) AS min, ROUND((PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY latency_slots))::numeric,1) AS p25, ROUND((PERCENTILE_CONT(0.50) WITHIN GROUP (ORDER BY latency_slots))::numeric,1) AS p50, ROUND((PERCENTILE_CONT(0.90) WITHIN GROUP (ORDER BY latency_slots))::numeric,1) AS p90, ROUND((PERCENTILE_CONT(0.99) WITHIN GROUP (ORDER BY latency_slots))::numeric,1) AS p99, MAX(latency_slots) AS max FROM eb_certification;"
 
+
+mempool: ## Show mempool colour composition per node (global_network_leios)
+	./scripts/mempool.sh
 
 block: ## Run Blockfrost query on '/blocks/latest'
 	docker exec -ti blockfrost curl http://127.0.0.1:3000/blocks/latest | jq

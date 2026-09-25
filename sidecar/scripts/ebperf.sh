@@ -2,7 +2,7 @@
 # ----------------------------------------------------------------------
 # Endorser-block (Leios EB) performance collector - the EB analogue of
 # blockperf.sh. Reads node traces from Loki
-# (ns=Consensus.LeiosKernel.TraceLeiosKernel) and stores two metrics:
+# (ns=Consensus.LeiosKernel.TraceLeiosKernel) and stores three metrics:
 #
 #   eb_adoption      per-node EB propagation delay.
 #                    LeiosBlockForged on the producer, LeiosBlockAcquired on
@@ -12,6 +12,11 @@
 #
 #   eb_certification forge->quorum latency, from LeiosBlockCertified:
 #                    latency_slots = atSlot - ebSlot. Self-contained (no join).
+#
+#   eb_body_hits     per-node EB tx availability, from LeiosBodyHits: of the
+#                    EB's txs, how many were already in the local mempool and
+#                    how many had to be fetched. The forger logs one too
+#                    (always a full hit); join eb_adoption to exclude it.
 #
 # On non-Leios testnets no LeiosBlock* traces exist, so this idles harmlessly.
 # ----------------------------------------------------------------------
@@ -47,9 +52,9 @@ DB_SIDECAR_USERNAME="${DB_SIDECAR_USERNAME:-sidecar}"
 LOKI_URL="${LOKI_URL:-http://loki.example:3100/loki/api/v1/query_range}"
 # bp + relays + clients. `| json` exposes nested data.kind as label data_kind
 # (same mechanism blockperf.sh relies on).
-# The `|= "LeiosBlock"` line filter lets Loki drop non-matching lines before
-# the expensive `| json` parse stage.
-LOKI_QUERY='{container_name=~"p[0-9]+(bp|r[0-9])?|(c[0-9]+)"} |= "LeiosBlock" | json | data_kind=~"LeiosBlock(Forged|Acquired|Certified)"'
+# The `|~` line filter lets Loki drop non-matching lines before the expensive
+# `| json` parse stage.
+LOKI_QUERY='{container_name=~"p[0-9]+(bp|r[0-9])?|(c[0-9]+)"} |~ "LeiosBlock|LeiosBodyHits" | json | data_kind=~"LeiosBlock(Forged|Acquired|Certified)|LeiosBodyHits"'
 LOKI_LIMIT=5000
 
 log() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*" >&2; }
@@ -116,6 +121,17 @@ until psql -h "$DB_HOST" -U "$DB_SIDECAR_USERNAME" -d "$DB_SIDECAR_DATABASE" -c 
         at_slot       BIGINT NOT NULL,
         eb_hash       TEXT NOT NULL,
         latency_slots BIGINT NOT NULL,
+        PRIMARY KEY (host, eb_hash)
+    );
+    CREATE TABLE IF NOT EXISTS eb_body_hits (
+        host         TEXT NOT NULL,
+        region       TEXT NOT NULL,
+        ts           TIMESTAMP NOT NULL,
+        eb_slot      BIGINT NOT NULL,
+        eb_hash      TEXT NOT NULL,
+        txs_in_eb    INTEGER NOT NULL,
+        mempool_hits INTEGER NOT NULL,
+        missed_both  INTEGER NOT NULL,
         PRIMARY KEY (host, eb_hash)
     );
 " >/dev/null 2>&1; do
@@ -222,7 +238,40 @@ while true; do
         " >/dev/null 2>&1 || log "WARN: eb_certification batch insert failed (${#CERT_ROWS[@]} rows)"
     fi
 
-    rm -f "$RAW" "$ADOPT" "$CERT"
+    # ---- eb_body_hits : LeiosBodyHits (mempool hits / fetched txs per EB) ----
+    HITS=$(mktemp)
+    jq -r '
+        .data.result[]?.values[]? | .[1] | fromjson as $log |
+        select(
+            ($log.data.kind) == "LeiosBodyHits" and
+            ($log.host != null) and ($log.at != null) and
+            ($log.data.ebHash != null) and ($log.data.ebSlot != null) and
+            ($log.data.txsInEb != null) and ($log.data.mempoolHits != null) and
+            ($log.data.missedBoth != null)
+        ) |
+        [ $log.host, $log.at, ($log.data.ebSlot|tostring), $log.data.ebHash,
+          ($log.data.txsInEb|tostring), ($log.data.mempoolHits|tostring),
+          ($log.data.missedBoth|tostring) ] | @tsv
+    ' "$RAW" 2>/dev/null > "$HITS" || true
+
+    HITS_ROWS=()
+    while IFS=$'\t' read -r host at eb_slot eb_hash txs_in_eb mempool_hits missed_both; do
+        [[ -z "${host:-}" || -z "${eb_hash:-}" || -z "${eb_slot:-}" || -z "${missed_both:-}" ]] && continue
+        region_for "$host"
+        ts_norm="${at%Z}+00"
+        HITS_ROWS+=("('$host', '$REGION', '$ts_norm', $eb_slot, '$eb_hash', $txs_in_eb, $mempool_hits, $missed_both)")
+    done < "$HITS"
+
+    if [[ ${#HITS_ROWS[@]} -gt 0 ]]; then
+        printf -v HITS_SQL '%s,' "${HITS_ROWS[@]}"
+        psql -h "$DB_HOST" -U "$DB_SIDECAR_USERNAME" -d "$DB_SIDECAR_DATABASE" -c "
+            INSERT INTO eb_body_hits (host, region, ts, eb_slot, eb_hash, txs_in_eb, mempool_hits, missed_both)
+            VALUES ${HITS_SQL%,}
+            ON CONFLICT (host, eb_hash) DO NOTHING;
+        " >/dev/null 2>&1 || log "WARN: eb_body_hits batch insert failed (${#HITS_ROWS[@]} rows)"
+    fi
+
+    rm -f "$RAW" "$ADOPT" "$CERT" "$HITS"
     log "EB perf cycle done; sleeping 60s..."
     sleep 60
 done

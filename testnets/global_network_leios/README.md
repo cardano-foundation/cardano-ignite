@@ -72,3 +72,22 @@ TX_SUBMISSION_LOGIC_VERSION=2 make up-all testnet=global_network_leios
 
 Like `PROFILING` and `SHUTDOWN_ON_BLOCK`, it is recorded in `.env.tmp` when set,
 so the whole run keeps the same version even if containers are recreated.
+
+## Mempool Composition
+
+Every node runs `mempool-monitor` (`MEMPOOL_MONITOR_INTERVAL`, default 15s, `0` disables),
+draining its mempool and recording tx counts per tx-firehose colour in the
+sidecar database. With `TX_GEN_MODE=firehose` this makes the origin mix visible:
+each region's load is tagged `ff0000` (NA), `00c000` (EU) or `0060ff` (AS).
+
+```
+make mempool
+```
+
+renders the latest snapshot per node: a region rollup bar at the top, then one
+composition bar per node. Bars are scaled to mempool capacity: the coloured part
+shows how full the mempool is and whose txs it holds. It reads the sidecar
+database, so the testnet must be running. `MEMPOOL_REFRESH=2` repaints every 2 seconds; `NO_COLOR=1` (or piping)
+prints a plain table; `MEMPOOL_WINDOW` (default twice the snapshot interval) sets
+how far back to look. The same data backs the "Mempool composition (tx-firehose
+colours)" Grafana row.
