@@ -91,3 +91,9 @@ database, so the testnet must be running. `MEMPOOL_REFRESH=2` repaints every 2 s
 prints a plain table; `MEMPOOL_WINDOW` (default twice the snapshot interval) sets
 how far back to look. The same data backs the "Mempool composition (tx-firehose
 colours)" Grafana row.
+
+The "EB transaction availability (fragmentation)" row shows how much of each EB
+pool nodes already held in their mempools (`LeiosBodyHits` traces, collected by
+the sidecar into `eb_body_hits`) and how many EB tx bytes nodes had to fetch (the
+`leiosFetchTxs*Bytes` node counters). `c1`–`c4` are kept out of the pool-node
+panels: they receive no txs into their mempools, so they fetch every EB's txs.
