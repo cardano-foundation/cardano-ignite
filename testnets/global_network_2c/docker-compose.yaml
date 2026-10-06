@@ -45,13 +45,13 @@ x-cardano_node_variant_a: &cardano_node_variant_a
       PROFILING: ${PROFILING:-}
 
 x-cardano_node_variant_b: &cardano_node_variant_b
-  image: ${testnet}-${CARDANO_NODE_IMAGE_TAG_B:-10.6.4}-prof${PROFILING:-0}:latest
+  image: ${testnet}-${CARDANO_NODE_IMAGE_TAG_B:-11.1.3}-prof${PROFILING:-0}:latest
   cpus: "${CARDANO_NODE_CPUS:-2.0}"
   build:
     context: "../../"
     dockerfile: "cardano-node/Dockerfile.source"
     args:
-      CARDANO_NODE_REF: "${CARDANO_NODE_REF_B:-10.6.4}"
+      CARDANO_NODE_REF: "${CARDANO_NODE_REF_B:-11.1.3}"
       TESTNET_BUILDER_IMAGE: ${TESTNET_BUILDER_IMAGE}
       HASKELL_BUILDER_IMAGE: ${HASKELL_BUILDER_IMAGE}
       PROFILING: ${PROFILING:-}
@@ -86,7 +86,7 @@ x-node-env-variant-a: &node_env_variant_a
 x-node-env-variant-b: &node_env_variant_b
   <<: *node_env_common
   AB_TEST_VARIANT: "B"
-  TX_SUBMISSION_LOGIC_VERSION: ${TX_SUBMISSION_LOGIC_VERSION_B:-1}
+  TX_SUBMISSION_LOGIC_VERSION: ${TX_SUBMISSION_LOGIC_VERSION_B:-2}
 
 x-node-env: &node_env
   <<: *node_env_common
