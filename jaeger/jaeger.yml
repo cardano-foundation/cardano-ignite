@@ -48,6 +48,5 @@ service:
       service.name: amaru
     metrics:
       level: detailed
-      address: "0.0.0.0:8888"
     logs:
       level: DEBUG
