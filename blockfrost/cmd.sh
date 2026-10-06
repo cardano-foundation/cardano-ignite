@@ -95,7 +95,22 @@ wait_for_postgresql() {
 }
 
 create_indices() {
-    psql ${DB_OPTIONS} -v 'ON_ERROR_STOP=1' -f '/usr/local/src/blockfrost-backend-ryo/indices.sql'
+    # Retry until 'cardano-db-sync' has created the indexed tables
+    cmd=(psql ${DB_OPTIONS} -v 'ON_ERROR_STOP=1' -f '/usr/local/src/blockfrost-backend-ryo/indices.sql')
+    i=0
+    wait=90
+    until out=$("${cmd[@]}" 2>&1); do
+        if [ ${i} -lt ${wait} ]; then
+            echo "* Waiting for 'cardano-db-sync' tables before creating indices..."
+        else
+            echo "${out}"
+            echo "* Unable to create indices, giving up..."
+            exit 1
+        fi
+        i=$((i + 1))
+        sleep 3
+    done
+    echo "* Indices created."
 }
 
 start_process_exporter() {
