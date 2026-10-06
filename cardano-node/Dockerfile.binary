@@ -3,7 +3,7 @@ ARG TESTNET_BUILDER_IMAGE=scratch
 
 FROM ${BASE_IMAGE} AS build
 
-ARG CARDANO_NODE_VERSION="11.0.1"
+ARG CARDANO_NODE_VERSION="11.1.3"
 
 ENV TZ="UTC"
 RUN ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime && \

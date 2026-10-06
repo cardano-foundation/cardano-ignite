@@ -1,5 +1,18 @@
 ---
 
+# Static-topology variant of global_network_2c. Peer sharing and ledger peers
+# are disabled everywhere, so every connection comes from a local root entry:
+#
+# - bp            -> its own three relays
+# - relay         -> its own bp, its sibling relay (NO_INTERPOOL_LOCALROOTS),
+#                    both relays of the other pool on the same continent, and
+#                    relay N of every pool on the other continent
+# - privaterelay  -> its own bp
+# - client        -> its two ring neighbours and one relay per pool, spread
+#                    over r1/r2/r3 so every relay carries two clients
+#
+# Continents: p1 and p3 are NA, p2 and p4 are EU.
+#
 # A/B benchmarking knobs:
 # - pools p1* and p2* use variant A
 # - pools p3* and p4* use variant B
@@ -68,13 +81,16 @@ x-cardano_node: &cardano_node
       HASKELL_BUILDER_IMAGE: ${HASKELL_BUILDER_IMAGE}
       PROFILING: ${PROFILING:-}
 
+# The topology is fixed, so NO_INTERPOOL_LOCALROOTS, PEER_SHARING and
+# USE_LEDGER_AFTER_SLOT are literals rather than passthroughs.
 x-node-env-common: &node_env_common
   SYSTEM_START: ${SYSTEM_START:-}
-  NO_INTERPOOL_LOCALROOTS: ${NO_INTERPOOL_LOCALROOTS:-false}
+  NO_INTERPOOL_LOCALROOTS: "true"
   PROFILING: ${PROFILING:-}
   SHUTDOWN_ON_BLOCK: ${SHUTDOWN_ON_BLOCK:-}
   SHUTDOWN_ON_SLOT: ${SHUTDOWN_ON_SLOT:-}
-  PEER_SHARING: "true"
+  PEER_SHARING: "false"
+  USE_LEDGER_AFTER_SLOT: "-1"
   OUROBOROS_GENESIS: "false"
   EGRESS_POLL_INTERVAL: ${EGRESS_POLL_INTERVAL:-0.001}
 
@@ -245,7 +261,6 @@ services:
       POOL_ID: "1"
       TYPE: bp
       REGION: NA
-      PEER_SHARING: "false"
     networks:
       net_na:
         ipv4_address: 172.16.1.101
@@ -264,6 +279,7 @@ services:
       RELAY_ID: "1"
       TYPE: relay
       REGION: NA
+      EXTRA_LOCALROOTS: "p3r1.example:3001,p3r2.example:3001,p2r1.example:3001,p4r1.example:3001"
     networks:
       net_na:
         ipv4_address: 172.16.1.102
@@ -282,6 +298,7 @@ services:
       RELAY_ID: "2"
       TYPE: relay
       REGION: NA
+      EXTRA_LOCALROOTS: "p3r1.example:3001,p3r2.example:3001,p2r2.example:3001,p4r2.example:3001"
     networks:
       net_na:
         ipv4_address: 172.16.1.103
@@ -317,7 +334,6 @@ services:
       POOL_ID: "2"
       TYPE: bp
       REGION: EU
-      PEER_SHARING: "false"
     networks:
       net_eu:
         ipv4_address: 172.16.3.101
@@ -336,6 +352,7 @@ services:
       RELAY_ID: "1"
       TYPE: relay
       REGION: EU
+      EXTRA_LOCALROOTS: "p4r1.example:3001,p4r2.example:3001,p1r1.example:3001,p3r1.example:3001"
     networks:
       net_eu:
         ipv4_address: 172.16.3.102
@@ -354,6 +371,7 @@ services:
       RELAY_ID: "2"
       TYPE: relay
       REGION: EU
+      EXTRA_LOCALROOTS: "p4r1.example:3001,p4r2.example:3001,p1r2.example:3001,p3r2.example:3001"
     networks:
       net_eu:
         ipv4_address: 172.16.3.103
@@ -389,7 +407,6 @@ services:
       POOL_ID: "3"
       TYPE: bp
       REGION: NA
-      PEER_SHARING: "false"
     networks:
       net_na:
         ipv4_address: 172.16.1.111
@@ -408,6 +425,7 @@ services:
       RELAY_ID: "1"
       TYPE: relay
       REGION: NA
+      EXTRA_LOCALROOTS: "p1r1.example:3001,p1r2.example:3001,p2r1.example:3001,p4r1.example:3001"
     networks:
       net_na:
         ipv4_address: 172.16.1.112
@@ -426,6 +444,7 @@ services:
       RELAY_ID: "2"
       TYPE: relay
       REGION: NA
+      EXTRA_LOCALROOTS: "p1r1.example:3001,p1r2.example:3001,p2r2.example:3001,p4r2.example:3001"
     networks:
       net_na:
         ipv4_address: 172.16.1.113
@@ -461,7 +480,6 @@ services:
       POOL_ID: "4"
       TYPE: bp
       REGION: EU
-      PEER_SHARING: "false"
     networks:
       net_eu:
         ipv4_address: 172.16.3.111
@@ -480,6 +498,7 @@ services:
       RELAY_ID: "1"
       TYPE: relay
       REGION: EU
+      EXTRA_LOCALROOTS: "p2r1.example:3001,p2r2.example:3001,p1r1.example:3001,p3r1.example:3001"
     networks:
       net_eu:
         ipv4_address: 172.16.3.112
@@ -498,6 +517,7 @@ services:
       RELAY_ID: "2"
       TYPE: relay
       REGION: EU
+      EXTRA_LOCALROOTS: "p2r1.example:3001,p2r2.example:3001,p1r2.example:3001,p3r2.example:3001"
     networks:
       net_eu:
         ipv4_address: 172.16.3.113
@@ -650,6 +670,7 @@ services:
       POOL_ID: "1"
       TYPE: client
       REGION: EU
+      EXTRA_LOCALROOTS: "c6.example:3001,c2.example:3001,p1r1.example:3001,p2r1.example:3001,p3r1.example:3001,p4r1.example:3001"
       LEDGER_DB_BACKEND: "V2LSM"
     networks:
       net_eu:
@@ -668,14 +689,92 @@ services:
       POOL_ID: "1"
       TYPE: txg
       REGION: NA
+      EXTRA_LOCALROOTS: "c1.example:3001,c3.example:3001,p1r2.example:3001,p2r2.example:3001,p3r2.example:3001,p4r2.example:3001"
       TPS: ${TPS:-12}
       TX_GEN_MODE: ${TX_GEN_MODE:-plain}
-      TX_GENERATOR_TARGETS: "172.16.1.104,172.16.3.104,172.16.1.114,172.16.3.114"
+      # c1, c2, c3, c4, c5, c6
+      TX_GENERATOR_TARGETS: "172.16.3.4,172.16.1.12,172.16.3.41,172.16.3.42,172.16.1.43,172.16.1.44"
       LEDGER_DB_BACKEND: "V2LSM"
     networks:
       net_na:
         ipv4_address: 172.16.1.12
     profiles: [build, na, optional, tx-generators]
+
+  c3:
+    <<: [*base_eu, *cardano_node, *client_cpu]
+    container_name: c3
+    hostname: c3.example
+    volumes:
+      - c3:/opt/cardano-node
+      - synth:/opt/synth:ro
+    environment:
+      <<: *node_env
+      POOL_ID: "1"
+      TYPE: client
+      REGION: EU
+      EXTRA_LOCALROOTS: "c2.example:3001,c4.example:3001,p1r2.example:3001,p2r2.example:3001,p3r2.example:3001,p4r2.example:3001"
+      LEDGER_DB_BACKEND: "V2LSM"
+    networks:
+      net_eu:
+        ipv4_address: 172.16.3.41
+    profiles: [build, core, eu]
+
+  c4:
+    <<: [*base_eu, *cardano_node, *client_cpu]
+    container_name: c4
+    hostname: c4.example
+    volumes:
+      - c4:/opt/cardano-node
+      - synth:/opt/synth:ro
+    environment:
+      <<: *node_env
+      POOL_ID: "1"
+      TYPE: client
+      REGION: EU
+      EXTRA_LOCALROOTS: "c3.example:3001,c5.example:3001,p1r3.example:3001,p2r3.example:3001,p3r3.example:3001,p4r3.example:3001"
+      LEDGER_DB_BACKEND: "V2LSM"
+    networks:
+      net_eu:
+        ipv4_address: 172.16.3.42
+    profiles: [build, core, eu]
+
+  c5:
+    <<: [*base_na, *cardano_node, *client_cpu]
+    container_name: c5
+    hostname: c5.example
+    volumes:
+      - c5:/opt/cardano-node
+      - synth:/opt/synth:ro
+    environment:
+      <<: *node_env
+      POOL_ID: "1"
+      TYPE: client
+      REGION: NA
+      EXTRA_LOCALROOTS: "c4.example:3001,c6.example:3001,p1r3.example:3001,p2r3.example:3001,p3r3.example:3001,p4r3.example:3001"
+      LEDGER_DB_BACKEND: "V2LSM"
+    networks:
+      net_na:
+        ipv4_address: 172.16.1.43
+    profiles: [build, core, na]
+
+  c6:
+    <<: [*base_na, *cardano_node, *client_cpu]
+    container_name: c6
+    hostname: c6.example
+    volumes:
+      - c6:/opt/cardano-node
+      - synth:/opt/synth:ro
+    environment:
+      <<: *node_env
+      POOL_ID: "1"
+      TYPE: client
+      REGION: NA
+      EXTRA_LOCALROOTS: "c5.example:3001,c1.example:3001,p1r1.example:3001,p2r1.example:3001,p3r1.example:3001,p4r1.example:3001"
+      LEDGER_DB_BACKEND: "V2LSM"
+    networks:
+      net_na:
+        ipv4_address: 172.16.1.44
+    profiles: [build, core, na]
 
   db:
     <<: *mgmt_cpu
@@ -836,6 +935,10 @@ volumes:
   p4r3:
   c1:
   c2:
+  c3:
+  c4:
+  c5:
+  c6:
   db:
   dbsync:
   prometheus:

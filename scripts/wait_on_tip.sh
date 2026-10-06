@@ -17,11 +17,11 @@ TARGET_BLOCK="$3"
 echo -n "Waiting for tip >= ${TARGET_BLOCK} on ${HOST}:${PORT}..."
 
 while true; do
-    output=$(cardano-cli ping -h "${HOST}" -p "${PORT}" -m 42 -j -q -t 2>&1)
+    output=$(cardano-cli ping -m 42 -j -q --mode tip "${HOST}:${PORT}" 2>&1)
     ping_status=$?
 
     if [ ${ping_status} -eq 0 ]; then
-        blockNo=$(echo "$output" | jq -r '.tip[0].blockNo' 2>/dev/null)
+        blockNo=$(echo "$output" | jq -r '.blockNo' 2>/dev/null)
         jq_status=$?
 
         if [ ${jq_status} -eq 0 ] && [ -n "${blockNo}" ] && [[ "${blockNo}" =~ ^[0-9]+$ ]]; then
