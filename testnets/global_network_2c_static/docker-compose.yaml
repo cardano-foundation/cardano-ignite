@@ -823,6 +823,8 @@ services:
     depends_on:
       db:
         condition: service_started
+      synth:
+        condition: service_completed_successfully
     profiles: [build, core, mgmt]
 
   prometheus:

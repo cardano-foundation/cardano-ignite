@@ -113,6 +113,8 @@ services:
     depends_on:
       db:
         condition: service_started
+      synth:
+        condition: service_completed_successfully
     profiles: [build, core]
 
   blockfrost:
@@ -120,6 +122,10 @@ services:
     container_name: blockfrost
     hostname: blockfrost.example
     restart: unless-stopped
+    depends_on:
+      synth:
+        condition: service_completed_successfully
+        required: false
     volumes:
       - c1:/opt/cardano-node
     environment:
