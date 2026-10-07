@@ -5,7 +5,7 @@
 # instead of each image installing its own copy. Built by 'make build' as
 # cardano-ignite-base and passed to the other Dockerfiles via the
 # BASE_IMAGE build argument.
-FROM docker.io/debian:stable-20260803-slim AS base-builder
+FROM docker.io/debian:stable-20261005-slim AS base-builder
 
 ARG NODE_EXPORTER_VERSION="1.12.1"
 ARG PROCESS_EXPORTER_VERSION="0.8.7"
@@ -59,7 +59,7 @@ WORKDIR /
 
 #---------------------------------------------------------------------
 
-FROM docker.io/debian:stable-20260803-slim AS cardano-ignite-base
+FROM docker.io/debian:stable-20261005-slim AS cardano-ignite-base
 
 # connect-timeout/retry guard the connection phase; speed-limit/speed-time
 # abort a transfer that stalls after connecting (below 1 kB/s for 30s),
