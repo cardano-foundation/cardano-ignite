@@ -8,12 +8,11 @@
 # - set TX_SUBMISSION_LOGIC_VERSION_A/B to compare tx-submission logic
 # - set both A and B vars to the same values for a homogeneous run
 #
-# Example:
-#   CARDANO_NODE_REF_A=11.1.3
+# Defaults: A = 11.1.3, B = 11.2.3, both on TxSubmissionLogicV1.
+#
+# Example, B on a branch with TxSubmissionLogicV2:
 #   CARDANO_NODE_REF_B=my-branch
-#   CARDANO_NODE_IMAGE_TAG_A=11.1.3_txg_a
-#   CARDANO_NODE_IMAGE_TAG_B=my_branch_txg_b
-#   TX_SUBMISSION_LOGIC_VERSION_A=1
+#   CARDANO_NODE_IMAGE_TAG_B=my_branch_b
 #   TX_SUBMISSION_LOGIC_VERSION_B=2
 
 x-base: &base
@@ -45,13 +44,13 @@ x-cardano_node_variant_a: &cardano_node_variant_a
       PROFILING: ${PROFILING:-}
 
 x-cardano_node_variant_b: &cardano_node_variant_b
-  image: ${testnet}-${CARDANO_NODE_IMAGE_TAG_B:-11.1.3}-prof${PROFILING:-0}:latest
+  image: ${testnet}-${CARDANO_NODE_IMAGE_TAG_B:-11.2.3}-prof${PROFILING:-0}-dbg${DEBUG_INFO:-0}:latest
   cpus: "${CARDANO_NODE_CPUS:-2.0}"
   build:
     context: "../../"
     dockerfile: "cardano-node/Dockerfile.source"
     args:
-      CARDANO_NODE_REF: "${CARDANO_NODE_REF_B:-11.1.3}"
+      CARDANO_NODE_REF: "${CARDANO_NODE_REF_B:-11.2.3}"
       TESTNET_BUILDER_IMAGE: ${TESTNET_BUILDER_IMAGE}
       HASKELL_BUILDER_IMAGE: ${HASKELL_BUILDER_IMAGE}
       PROFILING: ${PROFILING:-}
@@ -87,7 +86,7 @@ x-node-env-variant-a: &node_env_variant_a
 x-node-env-variant-b: &node_env_variant_b
   <<: *node_env_common
   AB_TEST_VARIANT: "B"
-  TX_SUBMISSION_LOGIC_VERSION: ${TX_SUBMISSION_LOGIC_VERSION_B:-2}
+  TX_SUBMISSION_LOGIC_VERSION: ${TX_SUBMISSION_LOGIC_VERSION_B:-1}
 
 x-node-env: &node_env
   <<: *node_env_common
