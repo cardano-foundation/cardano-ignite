@@ -46,7 +46,7 @@ x-base: &base
       loki-retries: "5"
 
 x-cardano_node_variant_a: &cardano_node_variant_a
-  image: ${testnet}-${CARDANO_NODE_IMAGE_TAG_A:-11.1.3}-prof${PROFILING:-0}:latest
+  image: ${testnet}-${CARDANO_NODE_IMAGE_TAG_A:-11.1.3}-prof${PROFILING:-0}-dbg${DEBUG_INFO:-0}:latest
   cpus: "${CARDANO_NODE_CPUS:-2.0}"
   build:
     context: "../../"
@@ -70,7 +70,7 @@ x-cardano_node_variant_b: &cardano_node_variant_b
       PROFILING: ${PROFILING:-}
 
 x-cardano_node: &cardano_node
-  image: ${testnet}-${CARDANO_NODE_IMAGE_TAG:-11.1.3_txg}-prof${PROFILING:-0}:latest
+  image: ${testnet}-${CARDANO_NODE_IMAGE_TAG:-11.1.3_txg}-prof${PROFILING:-0}-dbg${DEBUG_INFO:-0}:latest
   cpus: "${CARDANO_NODE_CPUS:-2.0}"
   build:
     context: "../../"
