@@ -15,6 +15,8 @@ DB_SIDECAR_USERNAME="${DB_SIDECAR_USERNAME:-sidecar}"
 EGRESS_POLL_INTERVAL="${EGRESS_POLL_INTERVAL:-0}"
 EXTRA_LOCALROOTS="${EXTRA_LOCALROOTS:-}"
 LEDGER_DB_BACKEND="${LEDGER_DB_BACKEND:-V2InMemory}"
+LEDGER_SNAPSHOT_MIN_DELAY="${LEDGER_SNAPSHOT_MIN_DELAY:-300}"
+LEDGER_SNAPSHOT_MAX_DELAY="${LEDGER_SNAPSHOT_MAX_DELAY:-600}"
 NO_INTERPOOL_LOCALROOTS="${NO_INTERPOOL_LOCALROOTS:-false}"
 OUROBOROS_GENESIS="${OUROBOROS_GENESIS:-false}"
 PEER_SHARING="${PEER_SHARING:-true}"
@@ -105,6 +107,14 @@ config_config_json() {
             ;;
     esac
     jq ".LedgerDB = ${ledger_db_json}" "${CONFIG_JSON}" | write_file "${CONFIG_JSON}"
+    # Random delay range (seconds) before a requested ledger snapshot is written
+    if ! [[ "${LEDGER_SNAPSHOT_MIN_DELAY}" =~ ^[0-9]+$ && "${LEDGER_SNAPSHOT_MAX_DELAY}" =~ ^[0-9]+$ ]] ||
+       [ "${LEDGER_SNAPSHOT_MIN_DELAY}" -gt "${LEDGER_SNAPSHOT_MAX_DELAY}" ]; then
+        echo "Invalid LEDGER_SNAPSHOT_MIN_DELAY/MAX_DELAY: ${LEDGER_SNAPSHOT_MIN_DELAY}/${LEDGER_SNAPSHOT_MAX_DELAY}" >&2
+        echo "Expected non-negative integer seconds with MIN <= MAX" >&2
+        exit 1
+    fi
+    jq ".LedgerDB.Snapshots = {\"MinDelay\": ${LEDGER_SNAPSHOT_MIN_DELAY}, \"MaxDelay\": ${LEDGER_SNAPSHOT_MAX_DELAY}}" "${CONFIG_JSON}" | write_file "${CONFIG_JSON}"
 
     jq ".EgressPollInterval = ${EGRESS_POLL_INTERVAL}" "${CONFIG_JSON}" | write_file "${CONFIG_JSON}"
 
