@@ -40,7 +40,7 @@ mapfile -t containers < <(docker ps --format '{{.Names}}')
 
 copied=0
 for c in "${containers[@]:-}"; do
-    files="$(docker exec "${c}" sh -c 'for f in /opt/cardano-node/log/cardano-node-*.prof; do [ -e "$f" ] && echo "$f"; done' 2>&1)" || {
+    files="$(docker exec "${c}" sh -c 'for f in /opt/cardano-node/log/cardano-node-*.prof /opt/cardano-node/log/cardano-node-*.hp /opt/cardano-node/log/cardano-node-*.eventlog; do if [ -e "$f" ]; then echo "$f"; fi; done' 2>&1)" || {
         if printf '%s' "${files}" | grep -qi 'exec: "sh": executable file not found'; then
             echo "Skipping ${c}: no sh in container."
         else

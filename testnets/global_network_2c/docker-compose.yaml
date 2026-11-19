@@ -77,6 +77,7 @@ x-node-env-common: &node_env_common
   PEER_SHARING: "true"
   OUROBOROS_GENESIS: "false"
   EGRESS_POLL_INTERVAL: ${EGRESS_POLL_INTERVAL:-0.001}
+  CARDANO_NODE_RTS_OPTS: ${CARDANO_NODE_RTS_OPTS:-}
 
 x-node-env-variant-a: &node_env_variant_a
   <<: *node_env_common
