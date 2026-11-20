@@ -31,7 +31,7 @@ protocolParams:
 
 --- # Optional Node Config Overide
 ExperimentalHardForksEnabled: false
-ExperimentalProtocolsEnabled: true
+ExperimentalProtocolsEnabled: false
 LastKnownBlockVersion-Alt: 0
 LastKnownBlockVersion-Major: 6
 LastKnownBlockVersion-Minor: 0

@@ -15,12 +15,15 @@ DB_SIDECAR_USERNAME="${DB_SIDECAR_USERNAME:-sidecar}"
 EGRESS_POLL_INTERVAL="${EGRESS_POLL_INTERVAL:-0}"
 EXTRA_LOCALROOTS="${EXTRA_LOCALROOTS:-}"
 LEDGER_DB_BACKEND="${LEDGER_DB_BACKEND:-V2InMemory}"
+LEDGER_SNAPSHOT_MIN_DELAY="${LEDGER_SNAPSHOT_MIN_DELAY:-300}"
+LEDGER_SNAPSHOT_MAX_DELAY="${LEDGER_SNAPSHOT_MAX_DELAY:-600}"
 NO_INTERPOOL_LOCALROOTS="${NO_INTERPOOL_LOCALROOTS:-false}"
 OUROBOROS_GENESIS="${OUROBOROS_GENESIS:-false}"
 PEER_SHARING="${PEER_SHARING:-true}"
 POOL_ID="${POOL_ID:-}"
 PORT="${PORT:-3001}"
 PROFILING="${PROFILING:-}"
+CARDANO_NODE_RTS_OPTS="${CARDANO_NODE_RTS_OPTS:-}"
 SHUTDOWN_ON_BLOCK="${SHUTDOWN_ON_BLOCK:-}"
 SYSTEM_START="${SYSTEM_START:-$(date -d "@$(( ( $(date +%s) / 180 ) * 180 ))" +%Y-%m-%dT%H:%M:00Z)}"
 TYPE="${TYPE:-bprelay}"
@@ -104,6 +107,14 @@ config_config_json() {
             ;;
     esac
     jq ".LedgerDB = ${ledger_db_json}" "${CONFIG_JSON}" | write_file "${CONFIG_JSON}"
+    # Random delay range (seconds) before a requested ledger snapshot is written
+    if ! [[ "${LEDGER_SNAPSHOT_MIN_DELAY}" =~ ^[0-9]+$ && "${LEDGER_SNAPSHOT_MAX_DELAY}" =~ ^[0-9]+$ ]] ||
+       [ "${LEDGER_SNAPSHOT_MIN_DELAY}" -gt "${LEDGER_SNAPSHOT_MAX_DELAY}" ]; then
+        echo "Invalid LEDGER_SNAPSHOT_MIN_DELAY/MAX_DELAY: ${LEDGER_SNAPSHOT_MIN_DELAY}/${LEDGER_SNAPSHOT_MAX_DELAY}" >&2
+        echo "Expected non-negative integer seconds with MIN <= MAX" >&2
+        exit 1
+    fi
+    jq ".LedgerDB.Snapshots = {\"MinDelay\": ${LEDGER_SNAPSHOT_MIN_DELAY}, \"MaxDelay\": ${LEDGER_SNAPSHOT_MAX_DELAY}}" "${CONFIG_JSON}" | write_file "${CONFIG_JSON}"
 
     jq ".EgressPollInterval = ${EGRESS_POLL_INTERVAL}" "${CONFIG_JSON}" | write_file "${CONFIG_JSON}"
 
@@ -474,12 +485,32 @@ assemble_command() {
     local rts_args=()
     if [ -n "${PROFILING}" ]; then
         if /usr/local/bin/cardano-node +RTS -p -RTS --help >/dev/null 2>&1; then
-            local profile_tag
-            profile_tag="$(uname -n | cut -d. -f1)"
-            rts_args+=("-p" "-po/opt/cardano-node/log/cardano-node-${profile_tag}")
+            rts_args+=("-p")
         else
             echo "PROFILING set but cardano-node was not built with profiling; ignoring RTS profiling flags." >&2
         fi
+    fi
+    # Extra RTS options, e.g. "-hT -i60" for a closure-type heap census
+    local extra_rts=()
+    read -ra extra_rts <<< "${CARDANO_NODE_RTS_OPTS}"
+    rts_args+=("${extra_rts[@]}")
+    # Name .prof/.hp and .eventlog after the host unless given -po/-ol
+    local want_po=false want_ol=false has_po=false has_ol=false arg
+    for arg in "${rts_args[@]}"; do
+        case "${arg}" in
+            -po*) has_po=true ;;
+            -ol*) has_ol=true ;;
+            -p*|-P*|-h*) want_po=true ;;
+            -l*) want_ol=true ;;
+        esac
+    done
+    local out_stem
+    out_stem="/opt/cardano-node/log/cardano-node-$(uname -n | cut -d. -f1)"
+    if [ "${want_po}" = true ] && [ "${has_po}" = false ]; then
+        rts_args+=("-po${out_stem}")
+    fi
+    if [ "${want_ol}" = true ] && [ "${has_ol}" = false ]; then
+        rts_args+=("-ol${out_stem}.eventlog")
     fi
     if [ ${#rts_args[@]} -gt 0 ]; then
         cmd+=(+RTS "${rts_args[@]}" -RTS)

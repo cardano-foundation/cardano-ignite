@@ -37,7 +37,12 @@ RUN ln -snf /usr/local/src/uv/uv-x86_64-unknown-linux-gnu/uv /usr/local/bin/uv
 # testnet-generation-tool
 
 WORKDIR /usr/local/src
-RUN git clone --depth 1 --branch v${TESTNET_GENERATION_TOOL_VERSION} https://github.com/cardano-foundation/testnet-generation-tool.git
+# git has no retry; a failed clone removes its directory
+RUN for i in 1 2 3 4 5; do \
+      git clone --depth 1 --branch v${TESTNET_GENERATION_TOOL_VERSION} https://github.com/cardano-foundation/testnet-generation-tool.git && break; \
+      sleep $((i * 10)); \
+    done && \
+    test -d testnet-generation-tool
 
 WORKDIR /usr/local/src/testnet-generation-tool
 RUN uv sync
