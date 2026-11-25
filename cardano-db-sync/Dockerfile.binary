@@ -2,7 +2,7 @@ ARG BASE_IMAGE=cardano-ignite-base
 FROM ${BASE_IMAGE} AS build
 
 ARG CARDANO_CLI_VERSION="11.2.3.0"
-ARG CARDANO_DB_SYNC_VERSION="13.7.2.1"
+ARG CARDANO_DB_SYNC_VERSION="13.8.0.0"
 
 ENV TZ="UTC"
 RUN ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime && \
@@ -20,10 +20,10 @@ RUN install --directory --owner=root --group=root --mode=0755 /usr/local/src/car
     install --directory --owner=root --group=root --mode=0755 /usr/local/src/cardano-db-sync/tar
 
 RUN curl --proto '=https' --tlsv1.3 \
-        --location https://github.com/IntersectMBO/cardano-db-sync/releases/download/${CARDANO_DB_SYNC_VERSION}/cardano-db-sync-${CARDANO_DB_SYNC_VERSION}-linux.tar.gz \
-        --output /usr/local/src/cardano-db-sync/cardano-db-sync-${CARDANO_DB_SYNC_VERSION}-linux.tar.gz
+        --location https://github.com/IntersectMBO/cardano-db-sync/releases/download/${CARDANO_DB_SYNC_VERSION}/cardano-db-sync-${CARDANO_DB_SYNC_VERSION}-linux-amd64.tar.gz \
+        --output /usr/local/src/cardano-db-sync/cardano-db-sync-${CARDANO_DB_SYNC_VERSION}-linux-amd64.tar.gz
 
-RUN tar --extract --gzip --file=/usr/local/src/cardano-db-sync/cardano-db-sync-${CARDANO_DB_SYNC_VERSION}-linux.tar.gz --directory=/usr/local/src/cardano-db-sync/tar
+RUN tar --extract --gzip --file=/usr/local/src/cardano-db-sync/cardano-db-sync-${CARDANO_DB_SYNC_VERSION}-linux-amd64.tar.gz --directory=/usr/local/src/cardano-db-sync/tar
 RUN chmod 0755 /usr/local/src/cardano-db-sync/tar/bin/cardano-db-sync
 RUN ln -snf /usr/local/src/cardano-db-sync/tar/bin/cardano-db-sync /usr/local/bin/cardano-db-sync
 

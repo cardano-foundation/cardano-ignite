@@ -1,8 +1,8 @@
 ARG BASE_IMAGE=cardano-ignite-base
 FROM ${BASE_IMAGE} AS testnet_builder
 
-ARG UV_VERSION="0.12.23"
-ARG TESTNET_GENERATION_TOOL_VERSION="0.2.0"
+ARG UV_VERSION="0.13.9"
+ARG TESTNET_GENERATION_TOOL_VERSION="0.3.0"
 # Must match the cardano-node binary version pinned in the
 # testnet-generation-tool release (libs/mainnet_env.py)
 ARG GENESIS_CARDANO_NODE_VERSION="10.2.1"
